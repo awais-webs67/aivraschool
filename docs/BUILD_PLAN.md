@@ -153,9 +153,11 @@ Detailed principal portal plan: [`PRINCIPAL_PORTAL.md`](PRINCIPAL_PORTAL.md).
 
 1. ✅ **School setup:** school profile and logo, academic sessions, classes and sections, subjects
 2. ✅ **Staff & roles:** staff records, portal logins with roles, class teachers
-3. **Students & admissions** ← next
-4. **Attendance**
-5. **Fees & challans**
+3. ✅ **Students & admissions**
+4. ✅ **Attendance & staff leave**
+5. ✅ **Fees & vouchers**
+6. ✅ **Timetable, homework, notices, exams, discipline, certificates, front office, dashboard, reports, parent portal**
+   (details in [`PRINCIPAL_PORTAL.md`](PRINCIPAL_PORTAL.md))
 
 ## Part D — Definition of Done (every feature)
 - Permission checked (policy) + module/plan check

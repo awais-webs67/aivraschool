@@ -30,7 +30,7 @@
             <ul class="divide-y divide-line">
                 @foreach ($results as [$exam, $res])
                     <li class="flex flex-wrap items-center gap-x-4 gap-y-1 px-5 py-3 text-sm">
-                        <span class="min-w-0 flex-1 font-medium text-ink">{{ $exam->name }}</span>
+                        <span class="min-w-0 basis-full font-medium text-ink sm:basis-auto sm:flex-1">{{ $exam->name }}</span>
                         @if ($res['row'] && $res['row']['percent'] !== null)
                             <span class="tabular">{{ $res['row']['percent'] }}%</span>
                             <span class="badge badge-brand">{{ $res['row']['grade'] }}</span>

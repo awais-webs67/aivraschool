@@ -18,7 +18,7 @@
 
     <form method="POST" action="{{ route('school.login.store') }}" class="mt-8 space-y-5">
         @csrf
-        <x-form.input name="email" type="email" label="Email address" required autofocus autocomplete="username" />
+        <x-form.input name="email" label="Email or phone" required autofocus autocomplete="username" hint="Parents can use the phone number the school has." />
         <x-form.input name="password" type="password" label="Password" required autocomplete="current-password" />
         <div class="flex items-center justify-between gap-3">
             <label class="flex items-center gap-2 text-sm text-body">

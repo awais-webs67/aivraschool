@@ -15,7 +15,7 @@
     </span>
     <div class="min-w-0">
         <p class="text-sm text-muted">{{ $label }}</p>
-        <p class="font-display tabular mt-1 truncate text-2xl leading-tight text-ink">{{ $value }}</p>
+        <p class="font-display tabular mt-1 text-xl leading-tight break-words text-ink sm:text-2xl">{{ $value }}</p>
         @if ($hint)
             <p class="mt-1.5 text-xs text-muted">{{ $hint }}</p>
         @endif

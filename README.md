@@ -30,7 +30,10 @@ Installs on **cPanel / hPanel** like any PHP script: upload, import `database/sk
 | **Self-registration:** "Register your school" with principal profile (CNIC, photo, bio), plan or free trial, Stripe payment, admin approval or auto-approve, emails | ✅ |
 | **Integrations:** SMTP email with test, Stripe with test, secrets in `.env` shown masked (PIN to reveal) | ✅ |
 | **AI:** 23 providers + custom (OpenAI-compatible / Anthropic), test & error help, failover order, AI quota per plan/school, school AI assistant (principal: analysis; admin: confirmed actions) — see [`docs/AI.md`](docs/AI.md) | ✅ |
-| Step 2 — Students & admissions | Next |
+| **Account security & billing:** forgot password, two-factor sign-in, devices and sign-in history; tax, discount codes, invoice emails, online pay and renewals, reminders | ✅ |
+| **Website & system:** editable website content, privacy & terms pages, database / files backup, maintenance mode | ✅ |
+| **School portal (principal):** staff & roles, students & admissions (online form, Excel import, promote), attendance & staff leave, fees & vouchers, timetable & substitution, homework & notices, exams & report cards, discipline, observations, certificates & ID cards, front office, dashboard, approvals, reports — see [`docs/PRINCIPAL_PORTAL.md`](docs/PRINCIPAL_PORTAL.md) | ✅ |
+| **Parent portal:** parents sign in with their phone to see attendance, fees (print voucher), results, homework, timetable and notices | ✅ |
 
 ## Tech stack
 

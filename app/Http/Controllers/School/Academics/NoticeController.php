@@ -65,8 +65,14 @@ class NoticeController extends Controller
         return back()->with('success', 'Notice deleted.');
     }
 
-    public function attachment(Notice $notice): Response
+    public function attachment(Request $request, Notice $notice): Response
     {
+        $user = $request->user('school');
+        if ($user->isParent()) {
+            $sections = $user->children()->pluck('section_id')->filter()->all();
+            abort_unless(Notice::query()->live()->forParents($sections)->whereKey($notice->id)->exists(), 404);
+        }
+
         abort_unless($notice->attachment_path && Storage::exists($notice->attachment_path), 404);
 
         return Storage::download($notice->attachment_path, $notice->attachment_name ?? 'attachment');

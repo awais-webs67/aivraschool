@@ -10,6 +10,7 @@ use App\Models\SchoolClass;
 use App\Models\Section;
 use App\Models\Student;
 use App\Models\StudentAttendance;
+use App\Models\User;
 use App\Support\Activity;
 use App\Support\Uploads;
 use Illuminate\Database\Eloquent\Builder;
@@ -105,6 +106,7 @@ class StudentController extends Controller
         return view('school.students.show', [
             'student' => $student->load('schoolClass', 'section.classTeacher'),
             'siblings' => $student->siblings(),
+            'parents' => User::query()->where('role', 'parent')->whereHas('children', fn ($q) => $q->whereKey($student->id))->get(),
             'attendance' => AttendanceController::summarise($attendance) + [
                 'since' => $since,
                 'recentAbsences' => $attendance->where('status', 'absent')->sortByDesc('date')->take(5),

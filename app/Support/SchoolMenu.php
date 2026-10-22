@@ -16,7 +16,8 @@ class SchoolMenu
     /** section => [route, active pattern, icon, label, ability (null = everyone), module] */
     public const ITEMS = [
         'Overview' => [
-            ['school.dashboard', 'school.dashboard', 'home', 'Dashboard', null, null],
+            ['school.dashboard', 'school.dashboard', 'home', 'Dashboard', 'staff.self', null],
+            ['school.parent.home', 'school.parent.*', 'home', 'My children', 'parent', null],
             ['school.approvals', 'school.approvals*', 'check-circle', 'Approvals', 'approvals', null],
             ['school.ai.index', 'school.ai.*', 'sparkles', 'AI assistant', 'setup', 'ai'],
         ],
@@ -27,10 +28,10 @@ class SchoolMenu
         ],
         'Daily' => [
             ['school.attendance.index', 'school.attendance.*', 'check-circle', 'Attendance', 'attendance.take', 'attendance'],
-            ['school.leave.index', 'school.leave.*', 'calendar', 'Leave', null, null],
+            ['school.leave.index', 'school.leave.*', 'calendar', 'Leave', 'staff.self', null],
             ['school.timetable.index', 'school.timetable.*', 'calendar', 'Timetable', 'timetable.view', 'timetable'],
             ['school.homework.index', 'school.homework.*', 'book-open', 'Homework & diary', 'homework', 'homework'],
-            ['school.notices.index', 'school.notices.*', 'chat', 'Notices', null, 'communication'],
+            ['school.notices.index', 'school.notices.*', 'chat', 'Notices', 'notices.read', 'communication'],
         ],
         'Results & money' => [
             ['school.exams.index', 'school.exams.*', 'academic-cap', 'Exams & results', 'marks.enter', 'exams'],

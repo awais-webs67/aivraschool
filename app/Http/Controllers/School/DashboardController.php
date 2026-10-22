@@ -24,6 +24,7 @@ use App\Models\Substitution;
 use App\Models\TimetableEntry;
 use App\Models\User;
 use App\Models\Visitor;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -35,12 +36,16 @@ use Illuminate\View\View;
  */
 class DashboardController extends Controller
 {
-    public function __invoke(): View
+    public function __invoke(): View|RedirectResponse
     {
         /** @var School $school */
         $school = current_school();
         /** @var User $user */
         $user = auth('school')->user();
+
+        if ($user->isParent()) {
+            return redirect()->route('school.parent.home');
+        }
 
         return view('school.dashboard', [
             'school' => $school,

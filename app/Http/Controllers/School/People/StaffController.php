@@ -171,7 +171,9 @@ class StaffController extends Controller
     /** Only a School Admin can make another School Admin. */
     protected function assignableRoles(): array
     {
-        return request()->user('school')->role === 'admin' ? User::ROLES : array_diff_key(User::ROLES, ['admin' => true]);
+        $roles = array_diff_key(User::ROLES, ['parent' => true]);
+
+        return request()->user('school')->role === 'admin' ? $roles : array_diff_key($roles, ['admin' => true]);
     }
 
     /** @return array{staff: array<string, mixed>, login: array<string, mixed>} */

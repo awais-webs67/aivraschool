@@ -131,7 +131,7 @@ CREATE TABLE `cache` (
 
 /*!40000 ALTER TABLE `cache` DISABLE KEYS */;
 INSERT INTO `cache` VALUES
-('skooline-cache-platform-settings','a:0:{}',2108060395);
+('skooline-cache-platform-settings','a:0:{}',2108060937);
 /*!40000 ALTER TABLE `cache` ENABLE KEYS */;
 DROP TABLE IF EXISTS `cache_locks`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -550,6 +550,25 @@ CREATE TABLE `fee_structures` (
 
 /*!40000 ALTER TABLE `fee_structures` DISABLE KEYS */;
 /*!40000 ALTER TABLE `fee_structures` ENABLE KEYS */;
+DROP TABLE IF EXISTS `guardian_student`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `guardian_student` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` bigint(20) unsigned NOT NULL,
+  `student_id` bigint(20) unsigned NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `guardian_student_user_id_student_id_unique` (`user_id`,`student_id`),
+  KEY `guardian_student_student_id_foreign` (`student_id`),
+  CONSTRAINT `guardian_student_student_id_foreign` FOREIGN KEY (`student_id`) REFERENCES `students` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `guardian_student_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+/*!40000 ALTER TABLE `guardian_student` DISABLE KEYS */;
+/*!40000 ALTER TABLE `guardian_student` ENABLE KEYS */;
 DROP TABLE IF EXISTS `homework`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8mb4 */;
@@ -688,7 +707,7 @@ CREATE TABLE `migrations` (
   `migration` varchar(255) NOT NULL,
   `batch` int(11) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=26 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=27 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 /*!40000 ALTER TABLE `migrations` DISABLE KEYS */;
@@ -717,7 +736,8 @@ INSERT INTO `migrations` VALUES
 (22,'2026_09_05_000001_create_timetable_tables',1),
 (23,'2026_09_06_000001_create_homework_and_notices',1),
 (24,'2026_09_07_000001_create_exam_tables',1),
-(25,'2026_09_08_000001_create_office_tables',1);
+(25,'2026_09_08_000001_create_office_tables',1),
+(26,'2026_09_09_000001_add_parent_accounts',1);
 /*!40000 ALTER TABLE `migrations` ENABLE KEYS */;
 DROP TABLE IF EXISTS `notices`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -853,10 +873,10 @@ CREATE TABLE `plans` (
 
 /*!40000 ALTER TABLE `plans` DISABLE KEYS */;
 INSERT INTO `plans` VALUES
-(1,'Starter','starter','For small schools getting started',NULL,'monthly',4000.00,0.00,NULL,0.00,14,'trial',NULL,200,25,1,5,500,0,'[\"students\",\"admissions\",\"attendance\",\"fees\",\"exams\",\"communication\",\"certificates\",\"reports\"]',1,1,0,1,'2026-10-22 20:19:55','2026-10-22 20:19:55'),
-(2,'Standard','standard','Pay only for active students',NULL,'per_student',0.00,50.00,NULL,0.00,14,'trial',NULL,NULL,150,1,20,2000,0,'[\"students\",\"admissions\",\"attendance\",\"fees\",\"exams\",\"communication\",\"certificates\",\"reports\",\"timetable\",\"homework\",\"hr_payroll\",\"accounts\",\"library\",\"mobile_apps\"]',1,1,1,2,'2026-10-22 20:19:55','2026-10-22 20:19:55'),
-(3,'Premium','premium','Everything, for multi-campus schools',NULL,'yearly',150000.00,0.00,NULL,0.00,14,'trial',NULL,NULL,NULL,5,100,10000,0,'[\"students\",\"admissions\",\"attendance\",\"fees\",\"exams\",\"timetable\",\"homework\",\"lms\",\"communication\",\"hr_payroll\",\"accounts\",\"library\",\"transport\",\"hostel\",\"inventory\",\"certificates\",\"reports\",\"multi_branch\",\"mobile_apps\",\"ai\"]',1,1,0,3,'2026-10-22 20:19:55','2026-10-22 20:19:55'),
-(4,'Lifetime','lifetime','One-time license with yearly support',NULL,'lifetime',450000.00,0.00,NULL,0.00,14,'trial',NULL,NULL,NULL,3,50,0,0,'[\"students\",\"admissions\",\"attendance\",\"fees\",\"exams\",\"timetable\",\"homework\",\"lms\",\"communication\",\"hr_payroll\",\"accounts\",\"library\",\"transport\",\"hostel\",\"inventory\",\"certificates\",\"reports\",\"multi_branch\",\"mobile_apps\",\"ai\"]',1,0,0,4,'2026-10-22 20:19:55','2026-10-22 20:19:55');
+(1,'Starter','starter','For small schools getting started',NULL,'monthly',4000.00,0.00,NULL,0.00,14,'trial',NULL,200,25,1,5,500,0,'[\"students\",\"admissions\",\"attendance\",\"fees\",\"exams\",\"communication\",\"certificates\",\"reports\"]',1,1,0,1,'2026-10-22 20:28:57','2026-10-22 20:28:57'),
+(2,'Standard','standard','Pay only for active students',NULL,'per_student',0.00,50.00,NULL,0.00,14,'trial',NULL,NULL,150,1,20,2000,0,'[\"students\",\"admissions\",\"attendance\",\"fees\",\"exams\",\"communication\",\"certificates\",\"reports\",\"timetable\",\"homework\",\"hr_payroll\",\"accounts\",\"library\",\"mobile_apps\"]',1,1,1,2,'2026-10-22 20:28:57','2026-10-22 20:28:57'),
+(3,'Premium','premium','Everything, for multi-campus schools',NULL,'yearly',150000.00,0.00,NULL,0.00,14,'trial',NULL,NULL,NULL,5,100,10000,0,'[\"students\",\"admissions\",\"attendance\",\"fees\",\"exams\",\"timetable\",\"homework\",\"lms\",\"communication\",\"hr_payroll\",\"accounts\",\"library\",\"transport\",\"hostel\",\"inventory\",\"certificates\",\"reports\",\"multi_branch\",\"mobile_apps\",\"ai\"]',1,1,0,3,'2026-10-22 20:28:57','2026-10-22 20:28:57'),
+(4,'Lifetime','lifetime','One-time license with yearly support',NULL,'lifetime',450000.00,0.00,NULL,0.00,14,'trial',NULL,NULL,NULL,3,50,0,0,'[\"students\",\"admissions\",\"attendance\",\"fees\",\"exams\",\"timetable\",\"homework\",\"lms\",\"communication\",\"hr_payroll\",\"accounts\",\"library\",\"transport\",\"hostel\",\"inventory\",\"certificates\",\"reports\",\"multi_branch\",\"mobile_apps\",\"ai\"]',1,0,0,4,'2026-10-22 20:28:57','2026-10-22 20:28:57');
 /*!40000 ALTER TABLE `plans` ENABLE KEYS */;
 DROP TABLE IF EXISTS `platform_users`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -1386,7 +1406,7 @@ CREATE TABLE `users` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `school_id` bigint(20) unsigned NOT NULL,
   `name` varchar(255) NOT NULL,
-  `email` varchar(255) NOT NULL,
+  `email` varchar(255) DEFAULT NULL,
   `phone` varchar(30) DEFAULT NULL,
   `password` varchar(255) NOT NULL,
   `role` varchar(30) NOT NULL DEFAULT 'admin',
@@ -1398,6 +1418,7 @@ CREATE TABLE `users` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `users_school_id_email_unique` (`school_id`,`email`),
   KEY `users_school_id_role_index` (`school_id`,`role`),
+  KEY `users_school_id_phone_index` (`school_id`,`phone`),
   CONSTRAINT `users_school_id_foreign` FOREIGN KEY (`school_id`) REFERENCES `schools` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;

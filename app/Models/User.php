@@ -8,6 +8,7 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
@@ -29,6 +30,7 @@ class User extends Authenticatable
         'accountant' => 'Accountant',
         'receptionist' => 'Receptionist',
         'staff' => 'Staff',
+        'parent' => 'Parent',
     ];
 
     /** What each role can do, shown when giving someone a login. */
@@ -40,6 +42,7 @@ class User extends Authenticatable
         'accountant' => 'Fees, expenses and payroll.',
         'receptionist' => 'Admissions enquiries, visitors and student lookup.',
         'staff' => 'Dashboard and notices only.',
+        'parent' => 'Their own children: attendance, fees, results and homework.',
     ];
 
     protected function casts(): array
@@ -54,6 +57,25 @@ class User extends Authenticatable
     public function staff(): HasOne
     {
         return $this->hasOne(Staff::class);
+    }
+
+    /** Phone numbers are stored as their last 10 digits so "0300-1234567" and "+92 300 1234567" match. */
+    public static function normalizePhone(?string $phone): ?string
+    {
+        $digits = preg_replace('/\D/', '', (string) $phone);
+
+        return strlen($digits) >= 7 ? substr($digits, -10) : null;
+    }
+
+    /** Children a parent login can see. */
+    public function children(): BelongsToMany
+    {
+        return $this->belongsToMany(Student::class, 'guardian_student')->withTimestamps();
+    }
+
+    public function isParent(): bool
+    {
+        return $this->role === 'parent';
     }
 
     /** Role and plan check, see App\Support\SchoolAccess. */

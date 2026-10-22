@@ -72,6 +72,18 @@ Route::prefix('{school}')
                 Route::post('support/{ticket}/reply', [School\SupportController::class, 'reply'])->name('support.reply');
             });
 
+            // Step 11: parent portal
+            Route::prefix('my')->name('parent.')->middleware('school.can:parent')->group(function () {
+                Route::get('/', [School\ParentPortalController::class, 'home'])->name('home');
+                Route::get('children/{student}', [School\ParentPortalController::class, 'child'])->name('child');
+                Route::get('children/{student}/vouchers', [School\ParentPortalController::class, 'vouchers'])->name('vouchers');
+                Route::get('children/{student}/report-card/{exam}', [School\ParentPortalController::class, 'reportCard'])->name('report-card');
+            });
+            Route::middleware('school.can:students.manage')->group(function () {
+                Route::post('students/{student}/parent-login', [People\ParentLoginController::class, 'store'])->name('students.parent.store');
+                Route::delete('students/{student}/parent-login/{parent}', [People\ParentLoginController::class, 'destroy'])->name('students.parent.destroy');
+            });
+
             // Step 10: approvals inbox and reports
             Route::get('approvals', School\ApprovalController::class)->middleware('school.can:approvals')->name('approvals');
             Route::middleware('school.can:reports')->group(function () {
@@ -132,7 +144,7 @@ Route::prefix('{school}')
                 Route::delete('homework/{homework}', [Academics\HomeworkController::class, 'destroy'])->name('homework.destroy');
                 Route::get('homework/{homework}/file', [Academics\HomeworkController::class, 'attachment'])->name('homework.file');
             });
-            Route::get('notices', [Academics\NoticeController::class, 'index'])->name('notices.index');
+            Route::get('notices', [Academics\NoticeController::class, 'index'])->middleware('school.can:notices.read')->name('notices.index');
             Route::get('notices/{notice}/file', [Academics\NoticeController::class, 'attachment'])->name('notices.file');
             Route::middleware('school.can:notices')->group(function () {
                 Route::post('notices', [Academics\NoticeController::class, 'store'])->name('notices.store');
@@ -184,9 +196,11 @@ Route::prefix('{school}')
                 Route::get('attendance/staff', [Daily\StaffAttendanceController::class, 'index'])->name('attendance.staff');
                 Route::post('attendance/staff', [Daily\StaffAttendanceController::class, 'save'])->name('attendance.staff.save');
             });
-            Route::get('leave', [Daily\LeaveController::class, 'index'])->name('leave.index');
-            Route::post('leave', [Daily\LeaveController::class, 'store'])->name('leave.store');
-            Route::delete('leave/{leave}', [Daily\LeaveController::class, 'destroy'])->name('leave.destroy');
+            Route::middleware('school.can:staff.self')->group(function () {
+                Route::get('leave', [Daily\LeaveController::class, 'index'])->name('leave.index');
+                Route::post('leave', [Daily\LeaveController::class, 'store'])->name('leave.store');
+                Route::delete('leave/{leave}', [Daily\LeaveController::class, 'destroy'])->name('leave.destroy');
+            });
             Route::post('leave/{leave}/review', [Daily\LeaveController::class, 'review'])->middleware('school.can:approvals')->name('leave.review');
 
             // Step 3: students and admissions

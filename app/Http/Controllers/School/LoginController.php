@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\School;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use App\Support\Activity;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -21,13 +22,18 @@ class LoginController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
-        $credentials = $request->validate([
-            'email' => ['required', 'email'],
+        $data = $request->validate([
+            'email' => ['required', 'string', 'max:150'],
             'password' => ['required', 'string'],
-        ]);
-        $credentials['email'] = Str::lower($credentials['email']);
+        ], [], ['email' => 'email or phone']);
 
-        $key = 'school-login:'.current_school()->id.'|'.$credentials['email'].'|'.$request->ip();
+        // Staff sign in with their email; parents may use their phone number instead.
+        $login = trim($data['email']);
+        $credentials = str_contains($login, '@')
+            ? ['email' => Str::lower($login), 'password' => $data['password']]
+            : ['phone' => User::normalizePhone($login) ?? $login, 'password' => $data['password']];
+
+        $key = 'school-login:'.current_school()->id.'|'.Str::lower($login).'|'.$request->ip();
 
         if (RateLimiter::tooManyAttempts($key, 5)) {
             throw ValidationException::withMessages([

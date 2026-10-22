@@ -50,7 +50,7 @@
             </section>
         </div>
 
-        <div class="space-y-6">
+        <div class="order-first space-y-6 xl:order-last">
             <form method="POST" action="{{ route('school.fees.collect', $student) }}" class="card">
                 @csrf
                 <div class="card-header">

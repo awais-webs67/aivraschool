@@ -107,6 +107,29 @@
             </section>
 
             @if ($canManage)
+                <section class="card">
+                    <div class="card-header"><div><h2 class="card-title">Parent login</h2><p class="mt-0.5 text-sm text-muted">Parents sign in with their phone to see attendance, fees, results and homework.</p></div></div>
+                    @if ($parents->isNotEmpty())
+                        <ul class="divide-y divide-line border-b border-line">
+                            @foreach ($parents as $p)
+                                <li class="flex flex-wrap items-center gap-3 px-5 py-3 text-sm">
+                                    <span class="min-w-0 flex-1"><span class="font-medium text-ink">{{ $p->name }}</span> <span class="text-muted">· phone {{ $p->phone }}{{ $p->email ? ' · '.$p->email : '' }}</span></span>
+                                    <span class="text-xs text-muted">last sign-in {{ $p->last_login_at?->diffForHumans() ?? 'never' }}</span>
+                                    <form method="POST" action="{{ route('school.students.parent.destroy', [$student, $p]) }}" data-confirm="Remove {{ $p->name }}'s access to {{ $student->name }}?">@csrf @method('DELETE')<button class="btn btn-ghost btn-sm text-danger">Remove</button></form>
+                                </li>
+                            @endforeach
+                        </ul>
+                    @endif
+                    <form method="POST" action="{{ route('school.students.parent.store', $student) }}" class="card-body grid gap-4 sm:grid-cols-2">
+                        @csrf
+                        <x-form.input name="name" id="parent-name" label="Parent's name" :value="$student->father_name ?: $student->guardian_name" required maxlength="120" />
+                        <x-form.input name="phone" id="parent-phone" type="tel" label="Phone (used to sign in)" :value="$student->parentPhone()" required maxlength="30" />
+                        <x-form.input name="email" id="parent-email" type="email" label="Email (optional)" :value="$student->email" />
+                        <x-form.input name="password" id="parent-password" type="password" label="Password" autocomplete="new-password" :hint="$parents->isEmpty() ? 'At least 6 characters. Share it with the parent.' : 'Leave blank to keep the current password.'" />
+                        <div class="sm:col-span-2"><button class="btn btn-secondary">{{ $parents->isEmpty() ? 'Create parent login' : 'Update / add parent' }}</button> <span class="text-xs text-muted">Brothers and sisters are linked too.</span></div>
+                    </form>
+                </section>
+
                 <form method="POST" action="{{ route('school.students.destroy', $student) }}" data-confirm="Delete {{ $student->name }} for good? To keep the record, set the status to 'Left' instead." class="flex justify-end">
                     @csrf
                     @method('DELETE')

@@ -16,7 +16,13 @@ class SchoolAccess
 
     private const ACADEMIC = ['admin', 'principal', 'vice_principal'];
 
+    /** Everyone who works at the school (not parents). */
+    private const STAFF = ['admin', 'principal', 'vice_principal', 'teacher', 'accountant', 'receptionist', 'staff'];
+
     public const ABILITIES = [
+        'staff.self' => ['roles' => self::STAFF, 'module' => null],
+        'notices.read' => ['roles' => self::STAFF, 'module' => null],
+        'parent' => ['roles' => ['parent'], 'module' => null],
         'setup' => ['roles' => self::LEADERS, 'module' => null],
         'staff.manage' => ['roles' => self::LEADERS, 'module' => null],
         'approvals' => ['roles' => self::LEADERS, 'module' => null],

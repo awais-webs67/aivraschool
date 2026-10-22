@@ -94,15 +94,38 @@ Each area is a module; schools see only the modules in their plan.
 |---|---|---|
 | 1 | School setup: profile, sessions, classes & sections, subjects | ✅ done |
 | 2 | Staff & roles: staff profiles, login accounts, roles, class teachers | ✅ done |
-| 3 | **Students & admissions**: profiles, guardians, admission numbers, enquiries, import, promote | ← next |
-| 4 | Attendance: students + staff, staff leave with approval | |
-| 5 | Principal dashboard v2 + approvals inbox | |
-| 6 | Fees: structure, vouchers, collection, defaulters | |
-| 7 | Timetable + substitution | |
-| 8 | Homework / diary, notices & messages | |
-| 9 | Exams & report cards | |
-| 10 | Discipline, observations, certificates & ID cards, front office | |
-| 11 | Parent & student portal | |
+| 3 | Students & admissions: profiles, guardians, siblings, enquiries, online form, import, promote | ✅ done |
+| 4 | Attendance: students + staff, staff leave with approval, monthly register | ✅ done |
+| 5 | Fees: structure, vouchers, collection, receipts, defaulters | ✅ done |
+| 6 | Timetable + substitution | ✅ done |
+| 7 | Homework / diary, notices | ✅ done |
+| 8 | Exams, marks, results, report cards, result analysis | ✅ done |
+| 9 | Discipline, observations, certificates & ID cards, front office | ✅ done |
+| 10 | Principal dashboard, approvals inbox, reports | ✅ done |
+| 11 | Parent portal (sign in with phone) | ✅ done |
+
+**Next ideas:** SMS / WhatsApp alerts to parents (absence, fees, results), online fee payment for parents,
+student portal, HR payroll, library, transport and hostel modules.
+
+## 5. Who can open what
+
+Defined in `app/Support/SchoolAccess.php` (role + plan module). The sidebar (`app/Support/SchoolMenu.php`)
+only shows pages a person can open.
+
+| Area | Admin | Principal | Vice principal | Teacher | Accountant | Receptionist | Parent |
+|---|---|---|---|---|---|---|---|
+| Setup, staff, approvals | ✔ | ✔ | | | | | |
+| Students (view) | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | own children |
+| Students (add / edit), admissions | ✔ | ✔ | | | | ✔ | |
+| Attendance | all | all | all | own classes | | | own children |
+| Fees | ✔ | ✔ | | | ✔ | | own children |
+| Timetable (edit) | ✔ | ✔ | ✔ | view own | | | own child's class |
+| Homework / diary | ✔ | ✔ | ✔ | own classes | | | own children |
+| Exams (setup / marks) | ✔ | ✔ | ✔ | marks for own classes | | | published results |
+| Discipline | ✔ | ✔ | ✔ | add | | | |
+| Observations | ✔ | ✔ | ✔ | | | | |
+| Certificates, ID cards, front office | ✔ | ✔ | | | | ✔ | |
+| Reports | ✔ | ✔ | ✔ | | ✔ | | |
 
 Every step follows the Definition of Done in [`BUILD_PLAN.md`](BUILD_PLAN.md): role checks, school
 isolation, tests, mobile layout and audit logging.
