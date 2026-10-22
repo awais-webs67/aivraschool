@@ -47,11 +47,11 @@ class Stripe
     }
 
     /**
-     * One-time payment page hosted by Stripe.
+     * One-time payment page hosted by Stripe. $metadata comes back on the finished session.
      *
      * @return array{id: string, url: string}
      */
-    public function createCheckout(string $name, float $amount, string $currency, string $email, string $reference, string $successUrl, string $cancelUrl): array
+    public function createCheckout(string $name, float $amount, string $currency, string $email, string $reference, string $successUrl, string $cancelUrl, array $metadata = []): array
     {
         $currency = strtoupper($currency);
         $unitAmount = in_array($currency, self::ZERO_DECIMAL, true) ? (int) round($amount) : (int) round($amount * 100);
@@ -67,7 +67,7 @@ class Stripe
             'line_items[0][price_data][unit_amount]' => $unitAmount,
             'line_items[0][price_data][product_data][name]' => $name,
             'metadata[reference]' => $reference,
-        ]);
+        ] + collect($metadata)->mapWithKeys(fn ($v, $k) => ["metadata[{$k}]" => (string) $v])->all());
 
         if (! $response->successful()) {
             throw new RuntimeException(self::explain($response));

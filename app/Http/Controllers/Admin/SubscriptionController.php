@@ -8,6 +8,7 @@ use App\Models\Plan;
 use App\Models\School;
 use App\Models\Subscription;
 use App\Services\SubscriptionManager;
+use App\Services\SubscriptionPayments;
 use App\Support\Activity;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
@@ -97,6 +98,22 @@ class SubscriptionController extends Controller
         Activity::log('payment.updated', "Invoice {$subscription->invoice_number} marked ".$data['payment_status'], $subscription);
 
         return back()->with('success', "Invoice {$subscription->invoice_number} updated.");
+    }
+
+    /** Emails the invoice (with its view / pay link) to the school. */
+    public function send(Subscription $subscription, SubscriptionPayments $payments): RedirectResponse
+    {
+        if (! $subscription->school) {
+            return back()->with('error', 'This school was deleted.');
+        }
+
+        if (! $payments->sendInvoice($subscription, $subscription->isOpen() ? 'new' : 'receipt')) {
+            return back()->with('error', 'The invoice could not be emailed. Check that the school has an email address and that email is set up (Settings → Email).');
+        }
+
+        Activity::log('invoice.sent', "Emailed invoice {$subscription->invoice_number} to {$subscription->school->name}", $subscription, school: $subscription->school);
+
+        return back()->with('success', "Invoice {$subscription->invoice_number} emailed to ".implode(', ', $subscription->school->billingEmails()).'.');
     }
 
     /** Printable invoice; the browser's "Save as PDF" makes the PDF. */

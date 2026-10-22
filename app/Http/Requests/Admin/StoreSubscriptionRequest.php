@@ -21,6 +21,7 @@ class StoreSubscriptionRequest extends FormRequest
             'ends_at' => ['nullable', 'date', 'after_or_equal:starts_at'],
             'student_count' => ['nullable', 'integer', 'min:0', 'max:100000'],
             'amount' => ['nullable', 'numeric', 'min:0'],
+            'coupon_code' => ['nullable', 'string', 'max:40'],
             'payment_status' => ['required', Rule::in(Subscription::PAYMENT_STATUSES)],
             'payment_method' => ['nullable', Rule::in(Subscription::PAYMENT_METHODS)],
             'payment_reference' => ['nullable', 'string', 'max:120'],

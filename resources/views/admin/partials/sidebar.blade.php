@@ -8,6 +8,7 @@
             ['admin.schools.index', 'admin.schools.*', 'building', 'Schools', 'schools.view'],
             ['admin.registrations.index', 'admin.registrations.*', 'clipboard', 'Registrations', 'schools.manage'],
             ['admin.subscriptions.index', 'admin.subscriptions.*', 'credit-card', 'Billing & invoices', 'billing'],
+            ['admin.coupons.index', 'admin.coupons.*', 'tag', 'Discount codes', 'billing'],
             ['admin.plans.index', 'admin.plans.*', 'layers', 'Plans & pricing', 'plans'],
         ],
         'Customers' => [

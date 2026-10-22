@@ -28,7 +28,7 @@ use Illuminate\Support\Carbon;
     'name', 'slug', 'email', 'phone', 'city', 'country', 'currency', 'address', 'logo_path', 'photo_path', 'status', 'student_count',
     'principal_name', 'principal_email', 'principal_phone', 'principal_national_id', 'principal_qualification',
     'principal_address', 'principal_bio', 'principal_photo_path', 'ai_requests_limit',
-    'plan_id', 'trial_ends_at', 'subscription_ends_at', 'suspended_at', 'suspension_reason', 'notes',
+    'plan_id', 'trial_ends_at', 'subscription_ends_at', 'suspended_at', 'suspension_reason', 'notes', 'expiry_reminded_for',
 ])]
 class School extends Model
 {
@@ -149,5 +149,13 @@ class School extends Model
         $ends = $this->accessEndsAt();
 
         return $ends ? (int) now()->startOfDay()->diffInDays($ends->copy()->startOfDay(), false) : null;
+    }
+
+    /** Where invoices and reminders go: principal, school email, else the first portal admin. */
+    public function billingEmails(): array
+    {
+        $emails = array_values(array_unique(array_filter([$this->principal_email, $this->email])));
+
+        return $emails ?: array_filter([User::withoutGlobalScopes()->where('school_id', $this->id)->where('role', 'admin')->value('email')]);
     }
 }

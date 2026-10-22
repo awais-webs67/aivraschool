@@ -101,7 +101,15 @@ class RegistrationService
                     'mode' => $mode === 'trial' ? 'trial' : 'paid',
                     'trial_days' => $trialDays,
                     'student_count' => $registration->students,
-                    'amount' => $mode === 'paid' && $registration->amount_currency === Setting::currency() ? (float) $registration->amount : null,
+                    // Paid online in the billing currency: keep exactly what was charged.
+                    'breakdown' => $mode === 'paid' && $registration->isPaid() && $registration->amount_currency === Setting::currency() && $registration->subtotal !== null ? [
+                        'subtotal' => (float) $registration->subtotal, 'discount' => (float) $registration->discount, 'coupon_code' => $registration->coupon_code,
+                        'tax_name' => (float) $registration->tax_rate > 0 ? InvoiceCalculator::taxName() : null,
+                        'tax_rate' => (float) $registration->tax_rate, 'tax_amount' => (float) $registration->tax_amount, 'total' => (float) $registration->amount,
+                    ] : null,
+                    'amount' => $mode === 'paid' && $registration->amount_currency === Setting::currency() && $registration->subtotal === null ? (float) $registration->amount : null,
+                    'coupon_code' => $registration->coupon_code,
+                    'strict_coupon' => false,
                     'payment_status' => $mode === 'paid' ? 'paid' : 'unpaid',
                     'payment_method' => $mode === 'paid' && $registration->isPaid() ? 'card' : null,
                     'payment_reference' => $registration->stripe_session_id,

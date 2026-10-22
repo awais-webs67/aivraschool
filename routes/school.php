@@ -26,6 +26,11 @@ Route::prefix('{school}')
         Route::get('/', fn () => redirect()->route('school.dashboard'))->name('home');
         Route::get('logo', [Setup\ProfileController::class, 'logo'])->name('logo');
 
+        // Renew online (opens without signing in, also when the subscription has expired)
+        Route::get('renew', [School\BillingController::class, 'renew'])->name('renew');
+        Route::post('renew', [School\BillingController::class, 'checkout'])->middleware('throttle:10,1')->name('renew.checkout');
+        Route::get('renew/done', [School\BillingController::class, 'done'])->name('renew.done');
+
         Route::middleware('guest:school')->group(function () {
             Route::get('login', [School\LoginController::class, 'create'])->name('login');
             Route::post('login', [School\LoginController::class, 'store'])->name('login.store');
@@ -46,6 +51,9 @@ Route::prefix('{school}')
                 Route::post('ai/ask', [School\AiAssistantController::class, 'ask'])->middleware('throttle:20,1')->name('ai.ask');
                 Route::post('ai/actions/{action}', [School\AiAssistantController::class, 'confirm'])->name('ai.confirm');
             });
+
+            // Invoices from AivraSol
+            Route::get('billing', [School\BillingController::class, 'index'])->middleware('school.role:admin,principal')->name('billing');
 
             // Help desk with AivraSol
             Route::middleware('school.role:admin,principal')->group(function () {

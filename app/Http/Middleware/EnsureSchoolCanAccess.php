@@ -18,7 +18,8 @@ class EnsureSchoolCanAccess
     {
         $school = app(CurrentSchool::class)->get();
 
-        if ($school->canAccess()) {
+        // An expired school may still open the renew page to pay and come back.
+        if ($school->canAccess() || ($request->routeIs('school.renew*', 'school.logo') && $school->status !== SchoolStatus::Suspended)) {
             return $next($request);
         }
 

@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Coupon;
 use App\Models\Plan;
 use App\Models\School;
 use App\Models\SchoolRegistration;
 use App\Models\Setting;
+use App\Services\InvoiceCalculator;
 use App\Services\RegistrationService;
 use App\Services\Stripe;
 use App\Support\Activity;
@@ -17,6 +19,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use Throwable;
 
@@ -73,8 +76,6 @@ class RegistrationController extends Controller
             return back()->withInput()->withErrors(['slug' => 'This address is already taken. Please choose another.']);
         }
 
-        RateLimiter::hit($key, 3600);
-
         $plan = $this->plans()->firstWhere('id', (int) $data['plan_id']) ?? abort(422);
         // The plan decides what happens next, never the browser.
         $choice = match ($plan->cta_mode) {
@@ -84,6 +85,8 @@ class RegistrationController extends Controller
         };
 
         [$amount, $currency] = $choice === 'trial' ? [null, null] : self::chargeFor($plan);
+        $bill = self::billFor($plan, $amount, $currency, $data['coupon_code'] ?? null);
+        RateLimiter::hit($key, 3600);
 
         $registration = SchoolRegistration::create([
             'status' => 'pending',
@@ -108,8 +111,13 @@ class RegistrationController extends Controller
             'admin_password' => Hash::make($data['password']),
             'plan_id' => $plan->id,
             'billing_choice' => $choice,
-            'amount' => $amount,
+            'amount' => $bill ? $bill['total'] : null,
             'amount_currency' => $currency,
+            'subtotal' => $bill['subtotal'] ?? null,
+            'discount' => $bill['discount'] ?? 0,
+            'coupon_code' => $bill['coupon_code'] ?? (filled($data['coupon_code'] ?? null) ? strtoupper(trim($data['coupon_code'])) : null),
+            'tax_rate' => $bill['tax_rate'] ?? 0,
+            'tax_amount' => $bill['tax_amount'] ?? 0,
             'payment_status' => $choice === 'pay' ? 'pending' : 'none',
             'ip_address' => $request->ip(),
         ]);
@@ -120,7 +128,7 @@ class RegistrationController extends Controller
             try {
                 $checkout = $stripe->createCheckout(
                     name: "Skooline {$plan->name} plan · {$registration->school_name}",
-                    amount: (float) $amount,
+                    amount: (float) $bill['total'],
                     currency: $currency,
                     email: $registration->principal_email,
                     reference: (string) $registration->id,
@@ -225,6 +233,30 @@ class RegistrationController extends Controller
         return $rate ? [round($plan->headlinePrice() * $rate, 2), $currency] : [$plan->headlinePrice(), Setting::currency()];
     }
 
+    /**
+     * Price after the discount code and tax, or null for a free trial. A wrong code is reported
+     * on the form; for trials the code is kept and used on the first invoice.
+     *
+     * @return array<string, mixed>|null
+     */
+    protected static function billFor(Plan $plan, ?float $amount, ?string $currency, ?string $code): ?array
+    {
+        if ($amount === null) {
+            if (filled($code)) {
+                InvoiceCalculator::calculate(0, $code, $plan); // only checks the code
+            }
+
+            return null;
+        }
+
+        $coupon = Coupon::findByCode($code);
+        if ($coupon?->type === 'fixed' && $currency !== Setting::currency()) {
+            throw ValidationException::withMessages(['coupon_code' => 'This discount code works only for payments in '.Setting::currency().'.']);
+        }
+
+        return InvoiceCalculator::calculate($amount, $code, $plan);
+    }
+
     /** Plans a school can sign up for on the website. */
     protected function plans()
     {
@@ -255,6 +287,7 @@ class RegistrationController extends Controller
             'password' => ['required', 'string', 'min:8', 'max:100', 'confirmed'],
             'plan_id' => ['required', 'integer'],
             'terms' => ['accepted'],
+            'coupon_code' => ['nullable', 'string', 'max:40'],
         ];
     }
 }

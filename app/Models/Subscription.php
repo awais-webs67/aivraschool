@@ -5,10 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\URL;
 
 #[Fillable([
     'invoice_number', 'school_id', 'plan_id', 'plan_name', 'billing_model', 'starts_at', 'ends_at', 'student_count',
-    'amount', 'payment_status', 'payment_method', 'payment_reference', 'paid_at', 'notes', 'created_by',
+    'subtotal', 'discount', 'coupon_code', 'tax_name', 'tax_rate', 'tax_amount',
+    'amount', 'payment_status', 'payment_method', 'payment_reference', 'paid_at', 'sent_at', 'reminded_at', 'notes', 'created_by',
 ])]
 class Subscription extends Model
 {
@@ -28,6 +30,17 @@ class Subscription extends Model
         });
     }
 
+    /** Link the school can open without signing in (signed, so it can't be guessed). */
+    public function publicUrl(): string
+    {
+        return URL::signedRoute('invoice.show', $this);
+    }
+
+    public function isOpen(): bool
+    {
+        return in_array($this->payment_status, ['unpaid', 'partial'], true);
+    }
+
     public function paymentBadge(): string
     {
         return match ($this->payment_status) {
@@ -44,7 +57,13 @@ class Subscription extends Model
             'starts_at' => 'date',
             'ends_at' => 'date',
             'paid_at' => 'datetime',
+            'sent_at' => 'datetime',
+            'reminded_at' => 'datetime',
             'amount' => 'decimal:2',
+            'subtotal' => 'decimal:2',
+            'discount' => 'decimal:2',
+            'tax_rate' => 'decimal:2',
+            'tax_amount' => 'decimal:2',
         ];
     }
 

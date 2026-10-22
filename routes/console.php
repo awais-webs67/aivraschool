@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\PlatformUser;
+use App\Services\BillingReminders;
 use App\Services\SubscriptionManager;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule;
@@ -38,10 +39,20 @@ Artisan::command('skooline:expire-subscriptions', function (SubscriptionManager 
     $this->info("{$count} school(s) moved to expired.");
 })->purpose('Expire schools whose trial or subscription (plus grace period) has ended');
 
+Artisan::command('skooline:send-reminders', function (BillingReminders $reminders) {
+    $sent = $reminders->send();
+
+    $this->info("{$sent['expiry']} expiry reminder(s) and {$sent['unpaid']} unpaid-invoice reminder(s) sent.");
+})->purpose('Email schools about trials/subscriptions ending soon and unpaid invoices');
+
 // Runs from the single cron entry: * * * * * php artisan schedule:run
 Schedule::call(fn (SubscriptionManager $manager) => $manager->expireOverdue())
     ->name('skooline:expire-subscriptions')
     ->dailyAt('00:10');
+
+Schedule::call(fn (BillingReminders $reminders) => $reminders->send())
+    ->name('skooline:send-reminders')
+    ->dailyAt('08:00');
 
 // Shared hosting has no long-running queue worker: drain the database queue every minute.
 Schedule::command('queue:work --stop-when-empty --max-time=50 --tries=3')

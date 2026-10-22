@@ -1,4 +1,9 @@
-@php $school = $subscription->school; @endphp
+@php
+    $school = $subscription->school;
+    $public ??= false;
+    $payUrl ??= null;
+    $subtotal = $subscription->subtotal ?? $subscription->amount;
+@endphp
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,9 +12,17 @@
 </head>
 <body class="bg-canvas py-6 sm:py-10">
     <div class="no-print mx-auto mb-4 flex max-w-3xl flex-wrap items-center justify-between gap-2 px-4">
-        <a href="{{ url()->previous() }}" class="btn btn-ghost"><x-icon name="arrow-left" size="4" /> Back</a>
-        <button type="button" onclick="window.print()" class="btn btn-primary"><x-icon name="printer" size="4" /> Print / Save as PDF</button>
+        @if ($public)
+            <x-logo />
+        @else
+            <a href="{{ url()->previous() }}" class="btn btn-ghost"><x-icon name="arrow-left" size="4" /> Back</a>
+        @endif
+        <div class="flex flex-wrap gap-2">
+            <button type="button" onclick="window.print()" class="btn {{ $payUrl ? 'btn-secondary' : 'btn-primary' }}"><x-icon name="printer" size="4" /> Print / Save as PDF</button>
+            @if ($payUrl)<a href="{{ $payUrl }}" class="btn btn-primary"><x-icon name="credit-card" size="4" /> Pay {{ money($subscription->amount, true) }} by card</a>@endif
+        </div>
     </div>
+    <div class="no-print mx-auto max-w-3xl px-4"><x-flash /></div>
 
     <main class="sheet relative mx-auto max-w-3xl overflow-hidden rounded-lg border border-line bg-white p-6 shadow-card sm:p-10">
         <header class="flex flex-wrap items-start justify-between gap-6 border-b border-line pb-6">
@@ -73,10 +86,19 @@
                             <p class="text-xs text-muted">{{ config('skooline.billing_models.'.$subscription->billing_model.'.label', $subscription->billing_model) }} subscription{{ $subscription->student_count ? ' · '.$subscription->student_count.' students' : '' }}</p>
                         </td>
                         <td class="tabular px-3 py-4 text-right">1</td>
-                        <td class="tabular px-3 py-4 text-right font-medium text-ink">{{ money($subscription->amount, true) }}</td>
+                        <td class="tabular px-3 py-4 text-right font-medium text-ink">{{ money($subtotal, true) }}</td>
                     </tr>
                 </tbody>
                 <tfoot>
+                    @if ((float) $subscription->discount > 0 || (float) $subscription->tax_amount > 0)
+                        <tr><td colspan="2" class="px-3 pt-4 text-right text-muted">Subtotal</td><td class="tabular px-3 pt-4 text-right text-ink">{{ money($subtotal, true) }}</td></tr>
+                    @endif
+                    @if ((float) $subscription->discount > 0)
+                        <tr><td colspan="2" class="px-3 pt-1 text-right text-muted">Discount{{ $subscription->coupon_code ? ' ('.$subscription->coupon_code.')' : '' }}</td><td class="tabular px-3 pt-1 text-right text-success">−{{ money($subscription->discount, true) }}</td></tr>
+                    @endif
+                    @if ((float) $subscription->tax_amount > 0)
+                        <tr><td colspan="2" class="px-3 pt-1 text-right text-muted">{{ $subscription->tax_name ?: 'Tax' }} ({{ rtrim(rtrim(number_format((float) $subscription->tax_rate, 2), '0'), '.') }}%)</td><td class="tabular px-3 pt-1 text-right text-ink">{{ money($subscription->tax_amount, true) }}</td></tr>
+                    @endif
                     <tr><td colspan="2" class="px-3 pt-4 text-right font-semibold text-ink">Total</td><td class="tabular font-display px-3 pt-4 text-right text-xl text-ink">{{ money($subscription->amount, true) }}</td></tr>
                     <tr><td colspan="2" class="px-3 pt-1 text-right text-muted">Amount due</td><td class="tabular px-3 pt-1 text-right font-semibold {{ $subscription->payment_status === 'unpaid' ? 'text-danger' : 'text-success' }}">{{ money(in_array($subscription->payment_status, ['paid', 'waived'], true) ? 0 : $subscription->amount, true) }}</td></tr>
                 </tfoot>

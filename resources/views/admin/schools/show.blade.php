@@ -73,13 +73,14 @@
                 </div>
 
                 <form id="subscription-form" method="POST" action="{{ route('admin.schools.subscriptions.store', $school) }}"
-                    class="grid gap-4 border-b border-line bg-canvas/60 p-5 sm:grid-cols-2" @unless ($errors->hasAny(['plan_id', 'starts_at', 'ends_at', 'amount', 'payment_status'])) hidden @endunless>
+                    class="grid gap-4 border-b border-line bg-canvas/60 p-5 sm:grid-cols-2" @unless ($errors->hasAny(['plan_id', 'starts_at', 'ends_at', 'amount', 'coupon_code', 'payment_status'])) hidden @endunless>
                     @csrf
                     <x-form.select name="plan_id" label="Plan" required :value="$school->plan_id" :options="$plans->mapWithKeys(fn ($p) => [$p->id => $p->name.' — '.$p->billingLabel().' ('.money($p->price).($p->isPerStudent() ? ' + '.money($p->price_per_student).'/student' : '').')'])" class="sm:col-span-2" />
                     <x-form.input name="starts_at" type="date" label="Start date" required :value="($school->subscription_ends_at && $school->subscription_ends_at->isFuture() ? $school->subscription_ends_at->copy()->addDay() : now())->toDateString()" />
                     <x-form.input name="ends_at" type="date" label="End date" hint="Blank = calculated from the plan (lifetime has no end)." />
                     <x-form.input name="student_count" type="number" min="0" label="Students" :value="$latest?->student_count" hint="For per-student pricing." />
-                    <x-form.input name="amount" type="number" min="0" step="0.01" label="Amount ({{ \App\Models\Setting::currency() }})" hint="Blank = plan price." />
+                    <x-form.input name="amount" type="number" min="0" step="0.01" label="Price ({{ \App\Models\Setting::currency() }})" hint="Blank = plan price. {{ \App\Services\InvoiceCalculator::taxRate() > 0 ? \App\Services\InvoiceCalculator::taxName().' '.\App\Services\InvoiceCalculator::taxRate().'% is added.' : '' }}" />
+                    <x-form.input name="coupon_code" label="Discount code" hint="Optional." maxlength="40" />
                     <x-form.select name="payment_status" label="Payment status" required :options="['unpaid' => 'Unpaid', 'paid' => 'Paid', 'partial' => 'Partially paid', 'waived' => 'Waived']" value="unpaid" />
                     <x-form.select name="payment_method" label="Payment method" :options="$methods" placeholder="—" />
                     <x-form.input name="payment_reference" label="Reference / transaction ID" class="sm:col-span-2" />

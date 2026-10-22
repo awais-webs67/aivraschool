@@ -14,7 +14,10 @@ class SubscriptionManager
     /**
      * Start a subscription period for a school and make it active on that plan.
      *
-     * @param  array{starts_at?:string, ends_at?:?string, student_count?:?int, amount?:?float, payment_status?:?string, payment_method?:?string, payment_reference?:?string, notes?:?string}  $data
+     * "amount" is the price before discount and tax; "coupon_code" applies a discount code and tax is
+     * added from the settings. "breakdown" (already worked out, e.g. paid at registration) skips that.
+     *
+     * @param  array{starts_at?:string, ends_at?:?string, student_count?:?int, amount?:?float, coupon_code?:?string, breakdown?:?array, payment_status?:?string, payment_method?:?string, payment_reference?:?string, notes?:?string}  $data
      */
     public function assign(School $school, Plan $plan, array $data = [], ?int $createdBy = null): Subscription
     {
@@ -24,11 +27,12 @@ class SubscriptionManager
             : $this->endDateFor($plan, $starts);
 
         $students = isset($data['student_count']) ? (int) $data['student_count'] : null;
-        $amount = isset($data['amount']) && $data['amount'] !== '' ? (float) $data['amount'] : $plan->priceFor($students ?? 0);
+        $price = isset($data['amount']) && $data['amount'] !== '' ? (float) $data['amount'] : $plan->priceFor($students ?? 0);
+        $bill = $data['breakdown'] ?? InvoiceCalculator::calculate($price, $data['coupon_code'] ?? null, $plan, strict: (bool) ($data['strict_coupon'] ?? true));
         $paymentStatus = $data['payment_status'] ?? 'unpaid';
 
         return DB::transaction(function () use (
-            $school, $plan, $data, $createdBy, $starts, $ends, $students, $amount, $paymentStatus
+            $school, $plan, $data, $createdBy, $starts, $ends, $students, $bill, $paymentStatus
         ) {
             $subscription = $school->subscriptions()->create([
                 'plan_id' => $plan->id,
@@ -37,7 +41,13 @@ class SubscriptionManager
                 'starts_at' => $starts,
                 'ends_at' => $ends,
                 'student_count' => $students,
-                'amount' => $amount,
+                'subtotal' => $bill['subtotal'],
+                'discount' => $bill['discount'],
+                'coupon_code' => $bill['coupon_code'],
+                'tax_name' => $bill['tax_name'] ?? null,
+                'tax_rate' => $bill['tax_rate'],
+                'tax_amount' => $bill['tax_amount'],
+                'amount' => $bill['total'],
                 'payment_status' => $paymentStatus,
                 'payment_method' => $data['payment_method'] ?? null,
                 'payment_reference' => $data['payment_reference'] ?? null,
@@ -53,7 +63,10 @@ class SubscriptionManager
                 'trial_ends_at' => null,
                 'suspended_at' => null,
                 'suspension_reason' => null,
+                'expiry_reminded_for' => null,
             ]);
+
+            InvoiceCalculator::redeem($bill['coupon_code']);
 
             return $subscription;
         });

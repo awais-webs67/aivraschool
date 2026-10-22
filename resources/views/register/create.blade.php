@@ -113,6 +113,7 @@
                         </section>
 
                         <section class="card p-5">
+                            <x-form.input name="coupon_code" label="Discount code (optional)" maxlength="40" autocomplete="off" class="mb-4" />
                             <label class="flex items-start gap-2 text-sm text-body">
                                 <input type="checkbox" name="terms" value="1" class="checkbox mt-0.5" @checked(old('terms'))>
                                 <span>I confirm these details are correct and agree to be contacted about Skooline.</span>

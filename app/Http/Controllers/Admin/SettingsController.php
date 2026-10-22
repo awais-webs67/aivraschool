@@ -12,7 +12,7 @@ use Illuminate\View\View;
 
 class SettingsController extends Controller
 {
-    public const GENERAL = ['company_name', 'company_email', 'company_phone', 'company_website', 'company_address', 'tax_id', 'invoice_note', 'trial_days', 'grace_days'];
+    public const GENERAL = ['company_name', 'company_email', 'company_phone', 'company_website', 'company_address', 'tax_id', 'invoice_note', 'tax_name', 'tax_rate', 'reminders_enabled', 'trial_days', 'grace_days'];
 
     /** @return array<string, mixed> */
     public static function values(): array
@@ -25,6 +25,9 @@ class SettingsController extends Controller
             'company_address' => Setting::get('company_address'),
             'tax_id' => Setting::get('tax_id'),
             'invoice_note' => Setting::get('invoice_note'),
+            'tax_name' => Setting::get('tax_name'),
+            'tax_rate' => (float) Setting::get('tax_rate', 0),
+            'reminders_enabled' => (bool) Setting::get('reminders_enabled', true),
             'trial_days' => config('skooline.default_trial_days'),
             'grace_days' => config('skooline.grace_days'),
         ];
@@ -45,11 +48,14 @@ class SettingsController extends Controller
             'company_address' => ['nullable', 'string', 'max:255'],
             'tax_id' => ['nullable', 'string', 'max:60'],
             'invoice_note' => ['nullable', 'string', 'max:500'],
+            'tax_name' => ['nullable', 'string', 'max:20'],
+            'tax_rate' => ['nullable', 'numeric', 'min:0', 'max:100'],
             'trial_days' => ['required', 'integer', 'min:1', 'max:365'],
             'grace_days' => ['required', 'integer', 'min:0', 'max:90'],
         ]);
 
-        Setting::put($data);
+        $data['tax_rate'] = (float) ($data['tax_rate'] ?? 0);
+        Setting::put($data + ['reminders_enabled' => $request->boolean('reminders_enabled')]);
         Activity::log('settings.updated', 'Updated general settings');
 
         return back()->with('success', 'Settings saved.');

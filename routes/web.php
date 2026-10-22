@@ -6,6 +6,7 @@ use App\Http\Controllers\Auth\AdminPasswordResetController;
 use App\Http\Controllers\Auth\SetupController;
 use App\Http\Controllers\Auth\TwoFactorChallengeController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\RegistrationController;
 use App\Http\Controllers\StripeWebhookController;
 use App\Http\Middleware\EnsureDatabaseIsUpToDate;
@@ -34,6 +35,11 @@ Route::get('register/check-address', [RegistrationController::class, 'checkAddre
 Route::get('register/status/{registration}', [RegistrationController::class, 'thanks'])->name('register.thanks');
 Route::get('register/pay/{registration}', [RegistrationController::class, 'pay'])->middleware('signed')->name('register.pay');
 Route::post('stripe/webhook', StripeWebhookController::class)->name('stripe.webhook');
+
+// Invoice links sent to schools by email (signed, no sign-in needed)
+Route::get('invoice/{subscription}', [InvoiceController::class, 'show'])->middleware('signed')->name('invoice.show');
+Route::get('invoice/{subscription}/pay', [InvoiceController::class, 'pay'])->middleware(['signed', 'throttle:10,1'])->name('invoice.pay');
+Route::get('invoice/{subscription}/paid', [InvoiceController::class, 'paid'])->name('invoice.paid');
 
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::middleware('guest:web')->group(function () {
@@ -96,6 +102,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('subscriptions/{subscription}/invoice', [Admin\SubscriptionController::class, 'invoice'])->name('subscriptions.invoice');
             Route::post('subscriptions/{subscription}/paid', [Admin\SubscriptionController::class, 'markPaid'])->name('subscriptions.paid');
             Route::patch('subscriptions/{subscription}', [Admin\SubscriptionController::class, 'update'])->name('subscriptions.update');
+            Route::post('subscriptions/{subscription}/send', [Admin\SubscriptionController::class, 'send'])->middleware('throttle:10,1')->name('subscriptions.send');
+            Route::get('coupons', [Admin\CouponController::class, 'index'])->name('coupons.index');
+            Route::post('coupons', [Admin\CouponController::class, 'store'])->name('coupons.store');
+            Route::put('coupons/{coupon}', [Admin\CouponController::class, 'update'])->name('coupons.update');
+            Route::delete('coupons/{coupon}', [Admin\CouponController::class, 'destroy'])->name('coupons.destroy');
         });
 
         Route::resource('plans', Admin\PlanController::class)->except('show')->middleware('can:plans');

@@ -56,6 +56,10 @@
                                 <td>
                                     <div class="flex justify-end gap-1">
                                         <a href="{{ route('admin.subscriptions.invoice', $subscription) }}" target="_blank" class="btn btn-ghost btn-sm" title="Print invoice"><x-icon name="printer" size="4" /><span class="sr-only">Print invoice</span></a>
+                                        <form method="POST" action="{{ route('admin.subscriptions.send', $subscription) }}">
+                                            @csrf
+                                            <button class="btn btn-ghost btn-sm" title="{{ $subscription->sent_at ? 'Sent '.$subscription->sent_at->format('d M Y').' — send again' : 'Email invoice to the school' }}"><x-icon name="send" size="4" /><span class="sr-only">Email invoice</span></button>
+                                        </form>
                                         <button type="button" class="btn btn-secondary btn-sm" data-toggle="#pay-{{ $subscription->id }}">Update</button>
                                     </div>
                                 </td>

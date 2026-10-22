@@ -16,7 +16,10 @@
                 {{ $suspended ? 'has been temporarily suspended.' : 'is unavailable because its subscription has ended.' }}
                 Your data is safe and will be available again once the account is restored.
             </p>
-            <a href="mailto:{{ config('skooline.support_email') }}" class="btn btn-primary mt-6 w-full"><x-icon name="mail" size="4" /> Contact AivraSol support</a>
+            @unless ($suspended)
+                <a href="{{ route('school.renew', $school->slug) }}" class="btn btn-primary mt-6 w-full"><x-icon name="credit-card" size="4" /> Renew subscription</a>
+            @endunless
+            <a href="mailto:{{ config('skooline.support_email') }}" class="btn {{ $suspended ? 'btn-primary mt-6' : 'btn-secondary mt-3' }} w-full"><x-icon name="mail" size="4" /> Contact AivraSol support</a>
         </div>
     </div>
 </body>
