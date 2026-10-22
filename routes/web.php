@@ -26,6 +26,8 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('robots.txt', [HomeController::class, 'robots']);
 Route::get('sitemap.xml', [HomeController::class, 'sitemap']);
+Route::get('privacy', [HomeController::class, 'legal'])->defaults('page', 'privacy')->name('privacy');
+Route::get('terms', [HomeController::class, 'legal'])->defaults('page', 'terms')->name('terms');
 Route::post('/demo-request', [HomeController::class, 'requestDemo'])->name('demo-request');
 
 // "Register your school" (can be switched off in Super Admin → Settings → Registration)
@@ -146,6 +148,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::middleware('can:settings')->group(function () {
             Route::get('settings', [Admin\SettingsController::class, 'general'])->name('settings');
             Route::put('settings', [Admin\SettingsController::class, 'updateGeneral'])->name('settings.update');
+            Route::get('settings/website', [Admin\WebsiteController::class, 'edit'])->name('settings.website');
+            Route::put('settings/website', [Admin\WebsiteController::class, 'update'])->name('settings.website.update');
             Route::get('settings/registration', [Admin\SettingsController::class, 'registration'])->name('settings.registration');
             Route::put('settings/registration', [Admin\SettingsController::class, 'updateRegistration'])->name('settings.registration.update');
             Route::get('settings/currencies', [Admin\SettingsController::class, 'edit'])->name('settings.currencies');
@@ -173,6 +177,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::middleware('can:system')->group(function () {
             Route::get('system', [Admin\SystemController::class, 'index'])->name('system');
             Route::post('system/migrate', [Admin\SystemController::class, 'migrate'])->name('system.migrate');
+            Route::post('system/backup', [Admin\SystemController::class, 'backup'])->middleware('throttle:5,1')->name('system.backup');
+            Route::post('system/files', [Admin\SystemController::class, 'files'])->middleware('throttle:5,1')->name('system.files');
+            Route::post('system/maintenance', [Admin\SystemController::class, 'maintenance'])->name('system.maintenance');
         });
 
         Route::get('account', [Admin\AccountController::class, 'edit'])->name('account');

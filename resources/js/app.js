@@ -120,7 +120,7 @@ document.addEventListener('submit', (event) => {
 
 /* ------------------------------------------------------------------ Page loading feedback
  * A thin bar at the top as soon as a link is clicked or a form is sent, and a spinner on the
- * button that sent it (also stops double submits). Links that download a file: data-no-progress.
+ * button that sent it (also stops double submits). Links and forms that download a file: data-no-progress.
  */
 const progress = document.createElement('div');
 progress.className = 'page-progress';
@@ -152,7 +152,7 @@ document.addEventListener('click', (event) => {
 });
 
 document.addEventListener('submit', (event) => {
-    if (event.defaultPrevented || event.target.target === '_blank') return;
+    if (event.defaultPrevented || event.target.target === '_blank' || 'noProgress' in event.target.dataset) return;
     startProgress();
     const button = event.submitter;
     if (button?.classList.contains('btn')) {

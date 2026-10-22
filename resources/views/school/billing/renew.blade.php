@@ -17,7 +17,7 @@
                 <div class="flex min-w-0 items-center gap-3">
                     <x-school-badge :school="$school" />
                     <div class="min-w-0">
-                        <h1 class="card-title truncate">Renew {{ $school->name }}</h1>
+                        <h1 class="card-title break-words">Renew {{ $school->name }}</h1>
                         <p class="text-xs text-muted">New period starts {{ $starts->format('d M Y') }}</p>
                     </div>
                 </div>

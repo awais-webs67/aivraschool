@@ -34,7 +34,7 @@
                         <li class="flex flex-wrap items-center gap-x-4 gap-y-2 px-5 py-4">
                             <div class="min-w-[11rem] flex-1">
                                 <p class="font-mono text-xs font-semibold text-ink">{{ $invoice->invoice_number }}</p>
-                                <p class="truncate text-sm text-body">{{ $invoice->plan_name }} · {{ $invoice->starts_at->format('d M Y') }} – {{ $invoice->ends_at?->format('d M Y') ?? 'Lifetime' }}</p>
+                                <p class="text-sm break-words text-body">{{ $invoice->plan_name }} · {{ $invoice->starts_at->format('d M Y') }} – {{ $invoice->ends_at?->format('d M Y') ?? 'Lifetime' }}</p>
                             </div>
                             <p class="tabular font-semibold text-ink">{{ money($invoice->amount, true) }}</p>
                             <span class="badge {{ $invoice->paymentBadge() }}">{{ ucfirst($invoice->payment_status) }}</span>

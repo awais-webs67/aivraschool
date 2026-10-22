@@ -227,6 +227,17 @@
     @keyframes btn-spin { to { transform: rotate(360deg); } }
 
     /* AI answers (server-rendered Markdown) */
+    /* Privacy policy and terms pages (Markdown from Settings → Website) */
+    .legal-prose { @apply leading-relaxed text-body; overflow-wrap: anywhere; }
+    .legal-prose > * + * { @apply mt-4; }
+    .legal-prose h2 { @apply mt-10 text-xl font-bold text-ink; }
+    .legal-prose h3 { @apply mt-6 font-semibold text-ink; }
+    .legal-prose ul { @apply list-disc space-y-1.5 pl-5; }
+    .legal-prose ol { @apply list-decimal space-y-1.5 pl-5; }
+    .legal-prose a { @apply font-semibold text-brand-text underline underline-offset-2; }
+    .legal-prose strong { @apply text-ink; }
+    .legal-prose em { @apply text-muted; }
+
     .ai-prose { @apply leading-relaxed text-ink; overflow-wrap: anywhere; }
     .ai-prose > * + * { @apply mt-2; }
     .ai-prose h1, .ai-prose h2, .ai-prose h3 { @apply text-sm font-semibold text-ink; }

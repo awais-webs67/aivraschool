@@ -2,6 +2,7 @@
 
 use App\Http\Middleware\EnsureSchoolRole;
 use App\Http\Middleware\IdentifySchool;
+use App\Http\Middleware\PlatformMaintenance;
 use Illuminate\Contracts\Auth\Middleware\AuthenticatesRequests;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -25,6 +26,9 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->prependToPriorityList(AuthenticatesRequests::class, IdentifySchool::class);
 
         $middleware->alias(['school.role' => EnsureSchoolRole::class]);
+
+        // "Back soon" page for visitors and schools while maintenance mode is on (Admin → System).
+        $middleware->web(append: [PlatformMaintenance::class]);
 
         $isPlatform = fn (Request $request) => $request->is('admin', 'admin/*');
 

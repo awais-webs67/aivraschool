@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\DemoRequest;
 use App\Models\Plan;
 use App\Models\Setting;
+use App\Services\RegistrationService;
+use App\Support\WebsiteContent;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -19,14 +21,8 @@ class HomeController extends Controller
         $plans = Plan::query()->active()->where('show_on_website', true)->ordered()->get();
         $currency = Setting::currency();
 
-        $faqs = [
-            ['Do we need to install anything?', 'No. Skooline runs in the browser on computers, tablets and phones. Your school gets its own web address to sign in.'],
-            ['Does each school get its own link?', 'Yes. Every school gets a private portal at its own address with its name and logo on the login page.'],
-            ['Is our data separate from other schools?', 'Yes. Every record belongs to one school only, and other schools can never access your data.'],
-            ['Which currencies and payment plans are available?', 'Fees can be managed in your own currency. Plans are available monthly, quarterly, yearly, lifetime or per student, and we can make a custom plan for your school.'],
-            ['Can you import our existing data?', 'Yes. Our team helps import students, staff and fee balances from Excel during setup.'],
-            ['Is there a free trial?', 'Yes. Every plan starts with a free trial so your staff can try Skooline before you pay.'],
-        ];
+        $content = WebsiteContent::all();
+        $faqs = array_map(fn ($f) => [$f['q'], $f['a']], $content['faqs']);
 
         // Structured data for search engines (organization, product with prices, FAQ).
         $schema = ['@context' => 'https://schema.org', '@graph' => [
@@ -59,8 +55,19 @@ class HomeController extends Controller
             'modules' => config('skooline.modules'),
             'currencies' => Setting::websiteCurrencies(),
             'faqs' => $faqs,
+            'content' => $content,
             'schema' => $schema,
             'appHost' => preg_replace('#^https?://#', '', rtrim((string) config('app.url'), '/')),
+        ]);
+    }
+
+    /** Privacy policy and terms of service (Settings → Website). */
+    public function legal(string $page): View
+    {
+        return view('legal', [
+            'page' => $page,
+            'title' => $page === 'privacy' ? 'Privacy Policy' : 'Terms of Service',
+            'html' => WebsiteContent::html(WebsiteContent::get($page)),
         ]);
     }
 
@@ -78,6 +85,8 @@ class HomeController extends Controller
         $xml = '<?xml version="1.0" encoding="UTF-8"?>'."\n"
             .'<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'."\n"
             .'  <url><loc>'.e(url('/')).'</loc><lastmod>'.Carbon::parse($updated)->toDateString().'</lastmod><changefreq>weekly</changefreq><priority>1.0</priority></url>'."\n"
+            .collect(array_filter(['register' => RegistrationService::enabled(), 'privacy' => true, 'terms' => true]))
+                ->keys()->map(fn ($name) => '  <url><loc>'.e(route($name)).'</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>'."\n")->join('')
             .'</urlset>'."\n";
 
         return response($xml, 200, ['Content-Type' => 'application/xml; charset=UTF-8']);

@@ -1,6 +1,7 @@
 <nav class="mb-6 flex gap-1 overflow-x-auto border-b border-line" aria-label="Settings">
     @foreach ([
         'admin.settings' => 'General',
+        'admin.settings.website' => 'Website',
         'admin.settings.registration' => 'Registration',
         'admin.settings.currencies' => 'Currencies',
         'admin.settings.email' => 'Email (SMTP)',

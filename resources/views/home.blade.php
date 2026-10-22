@@ -15,10 +15,8 @@
                     <span class="rounded-full bg-brand px-2 py-0.5 text-[11px] text-white">New</span>
                     <span class="truncate">School management, made simple</span>
                 </p>
-                <h1 data-reveal style="--delay: 80ms" class="heading-xl mt-6">Run your entire school from <span class="text-gradient">one place.</span></h1>
-                <p data-reveal style="--delay: 160ms" class="mt-6 max-w-xl text-lg leading-relaxed text-body">
-                    Admissions, attendance, fees, exams, staff and parent communication in one secure system. Every school gets its own private portal that works on any device.
-                </p>
+                <h1 data-reveal style="--delay: 80ms" class="heading-xl mt-6 break-words">{{ $content['hero_title'] }} <span class="text-gradient">{{ $content['hero_highlight'] }}</span></h1>
+                <p data-reveal style="--delay: 160ms" class="mt-6 max-w-xl text-lg leading-relaxed text-body">{{ $content['hero_subtitle'] }}</p>
                 <div data-reveal style="--delay: 240ms" class="mt-8 flex flex-col gap-3 sm:flex-row">
                     @if (\App\Services\RegistrationService::enabled())
                         <a href="{{ route('register') }}" class="btn btn-primary btn-lg">Register your school <x-icon name="arrow-right" size="4" /></a>
@@ -29,7 +27,7 @@
                     @endif
                 </div>
                 <ul data-reveal style="--delay: 320ms" class="mt-8 flex flex-wrap gap-x-6 gap-y-3 text-sm text-body">
-                    @foreach (['Free trial on every plan', 'No installation needed', 'Works on phone & laptop'] as $point)
+                    @foreach ($content['hero_points'] as $point)
                         <li class="flex items-center gap-2"><x-icon name="check-circle" size="4" class="shrink-0 text-success" /> {{ $point }}</li>
                     @endforeach
                 </ul>
@@ -365,6 +363,32 @@
             </div>
         </div>
     </section>
+
+    @if ($content['testimonials'])
+        {{-- Testimonials --}}
+        <section class="section" aria-labelledby="testimonials-title">
+            <div class="container-x">
+                <div data-reveal class="mx-auto max-w-2xl text-center">
+                    <p class="eyebrow">Schools on Skooline</p>
+                    <h2 id="testimonials-title" class="heading-lg mt-3">What schools say</h2>
+                </div>
+                <div class="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                    @foreach ($content['testimonials'] as $i => $t)
+                        <figure data-reveal style="--delay: {{ $i * 80 }}ms" class="card flex flex-col p-6">
+                            <blockquote class="flex-1 text-body"><p class="leading-relaxed break-words">“{{ $t['quote'] }}”</p></blockquote>
+                            <figcaption class="mt-5 flex items-center gap-3 border-t border-line pt-4">
+                                <span class="grid size-10 shrink-0 place-items-center rounded-full bg-brand-tint font-bold text-brand-text">{{ mb_strtoupper(mb_substr($t['name'], 0, 1)) }}</span>
+                                <span class="min-w-0">
+                                    <span class="block truncate font-semibold text-ink">{{ $t['name'] }}</span>
+                                    <span class="block truncate text-xs text-muted">{{ collect([$t['role'] ?? null, $t['school'] ?? null])->filter()->join(', ') }}</span>
+                                </span>
+                            </figcaption>
+                        </figure>
+                    @endforeach
+                </div>
+            </div>
+        </section>
+    @endif
 
     {{-- FAQ --}}
     <section id="faq" class="section bg-canvas">

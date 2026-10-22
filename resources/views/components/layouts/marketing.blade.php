@@ -7,6 +7,7 @@
     $demo = $home.'#demo';
     $registerOn = \App\Services\RegistrationService::enabled();
     $appHost = preg_replace('#^https?://#', '', rtrim(config('app.url'), '/'));
+    $contact = \App\Support\WebsiteContent::all();
 @endphp
 <!DOCTYPE html>
 <html lang="en" class="scroll-pt-20">
@@ -114,7 +115,10 @@
             <div>
                 <p class="text-sm font-semibold">Contact</p>
                 <ul class="mt-4 space-y-3 text-sm text-white/60">
-                    <li class="flex items-center gap-2"><x-icon name="mail" size="4" class="shrink-0" /><a href="mailto:{{ config('skooline.sales_email') }}" class="truncate transition hover:text-white">{{ config('skooline.sales_email') }}</a></li>
+                    <li class="flex items-center gap-2"><x-icon name="mail" size="4" class="shrink-0" /><a href="mailto:{{ $contact['contact_email'] }}" class="truncate transition hover:text-white">{{ $contact['contact_email'] }}</a></li>
+                    @if ($contact['contact_phone'])<li class="flex items-center gap-2"><x-icon name="phone" size="4" class="shrink-0" /><a href="tel:{{ preg_replace('/[^0-9+]/', '', $contact['contact_phone']) }}" class="truncate transition hover:text-white">{{ $contact['contact_phone'] }}</a></li>@endif
+                    @if ($contact['contact_whatsapp'])<li class="flex items-center gap-2"><x-icon name="chat" size="4" class="shrink-0" /><a href="https://wa.me/{{ preg_replace('/\D/', '', $contact['contact_whatsapp']) }}" class="truncate transition hover:text-white" target="_blank" rel="noopener">WhatsApp {{ $contact['contact_whatsapp'] }}</a></li>@endif
+                    @if ($contact['contact_address'])<li class="flex items-start gap-2"><x-icon name="building" size="4" class="mt-0.5 shrink-0" /><span class="break-words">{{ $contact['contact_address'] }}</span></li>@endif
                     <li class="flex items-center gap-2"><x-icon name="chat" size="4" class="shrink-0" /><a href="mailto:{{ config('skooline.support_email') }}" class="truncate transition hover:text-white">{{ config('skooline.support_email') }}</a></li>
                     <li class="flex items-center gap-2"><x-icon name="globe" size="4" class="shrink-0" /><a href="{{ config('skooline.company_url') }}" class="transition hover:text-white" target="_blank" rel="noopener">aivrasol.com</a></li>
                 </ul>
@@ -123,7 +127,7 @@
         <div class="relative border-t border-white/10">
             <div class="container-x flex flex-col gap-2 px-4 py-6 text-xs text-white/45 sm:flex-row sm:justify-between sm:px-6 lg:px-8">
                 <p>&copy; {{ date('Y') }} AivraSol. All rights reserved.</p>
-                <p>Skooline is a trademark of AivraSol.</p>
+                <p class="flex flex-wrap gap-x-4 gap-y-1"><a href="{{ route('privacy') }}" class="transition hover:text-white">Privacy Policy</a><a href="{{ route('terms') }}" class="transition hover:text-white">Terms of Service</a><span>Skooline is a trademark of AivraSol.</span></p>
             </div>
         </div>
     </footer>
