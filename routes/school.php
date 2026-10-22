@@ -71,6 +71,26 @@ Route::prefix('{school}')
                 Route::post('support/{ticket}/reply', [School\SupportController::class, 'reply'])->name('support.reply');
             });
 
+            // Step 8: exams, marks, results and report cards
+            Route::prefix('exams')->name('exams.')->group(function () {
+                Route::middleware('school.can:marks.enter')->group(function () {
+                    Route::get('/', [Academics\ExamController::class, 'index'])->name('index');
+                    Route::get('{exam}', [Academics\ExamController::class, 'show'])->name('show');
+                    Route::get('{exam}/papers/{paper}/sections/{section}', [Academics\MarksController::class, 'edit'])->name('marks');
+                    Route::put('{exam}/papers/{paper}/sections/{section}', [Academics\MarksController::class, 'update'])->name('marks.update');
+                    Route::get('{exam}/sections/{section}/results', [Academics\ResultController::class, 'section'])->name('results');
+                    Route::get('{exam}/sections/{section}/report-cards', [Academics\ResultController::class, 'reportCards'])->name('report-cards');
+                });
+                Route::middleware('school.can:exams.manage')->group(function () {
+                    Route::post('/', [Academics\ExamController::class, 'store'])->name('store');
+                    Route::put('settings/grading', [Academics\ExamController::class, 'saveSettings'])->name('settings');
+                    Route::put('{exam}/classes/{class}/papers', [Academics\ExamController::class, 'savePapers'])->name('papers');
+                    Route::post('{exam}/toggle', [Academics\ExamController::class, 'toggle'])->name('toggle');
+                    Route::delete('{exam}', [Academics\ExamController::class, 'destroy'])->name('destroy');
+                    Route::get('{exam}/analysis', [Academics\ResultController::class, 'analysis'])->name('analysis');
+                });
+            });
+
             // Step 7: homework / diary and notices
             Route::middleware('school.can:homework')->group(function () {
                 Route::get('homework', [Academics\HomeworkController::class, 'index'])->name('homework.index');

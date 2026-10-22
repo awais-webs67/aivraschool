@@ -19,4 +19,29 @@
     </section>
 @endif
 
-@stack('student-more')
+@if ($viewer->allows('marks.enter') && $student->section)
+    @php
+        $exams = \App\Models\Exam::query()->whereHas('papers', fn ($q) => $q->where('class_id', $student->class_id))->latest('starts_on')->latest('id')->limit(4)->get();
+        $results = $exams->map(fn ($e) => [$e, app(\App\Services\School\ResultService::class)->forStudent($e, $student)]);
+    @endphp
+    @if ($results->isNotEmpty())
+        <section class="card">
+            <div class="card-header"><h2 class="card-title">Exam results</h2></div>
+            <ul class="divide-y divide-line">
+                @foreach ($results as [$exam, $res])
+                    <li class="flex flex-wrap items-center gap-x-4 gap-y-1 px-5 py-3 text-sm">
+                        <span class="min-w-0 flex-1 font-medium text-ink">{{ $exam->name }}</span>
+                        @if ($res['row'] && $res['row']['percent'] !== null)
+                            <span class="tabular">{{ $res['row']['percent'] }}%</span>
+                            <span class="badge badge-brand">{{ $res['row']['grade'] }}</span>
+                            <span class="text-muted">position {{ $res['row']['position'] }}/{{ $res['classSize'] }}</span>
+                            <a href="{{ route('school.exams.report-cards', [$exam, $student->section_id, 'student' => $student->id]) }}" target="_blank" class="btn btn-ghost btn-sm" title="Report card"><x-icon name="printer" size="4" /><span class="sr-only">Report card</span></a>
+                        @else
+                            <span class="text-muted">No marks yet</span>
+                        @endif
+                    </li>
+                @endforeach
+            </ul>
+        </section>
+    @endif
+@endif
