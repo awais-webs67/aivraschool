@@ -46,4 +46,13 @@ class HomePageTest extends TestCase
 
         $this->assertSame(0, DemoRequest::count());
     }
+
+    public function test_demo_seeder_creates_two_schools_that_can_sign_in(): void
+    {
+        $this->seed(\Database\Seeders\DemoSeeder::class);
+
+        $this->assertSame(2, \App\Models\School::count());
+        $this->post('http://localhost/greenfield/login', ['email' => 'admin@greenfield.test', 'password' => 'password'])
+            ->assertRedirect('http://localhost/greenfield/dashboard');
+    }
 }

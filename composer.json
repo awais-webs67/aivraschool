@@ -45,7 +45,8 @@
             "@php -r \"file_exists('.env') || copy('.env.example', '.env');\"",
             "@php artisan key:generate",
             "@php -r \"file_exists('database/database.sqlite') || touch('database/database.sqlite');\"",
-            "@php artisan migrate --seed --force"
+            "@php artisan migrate --seed --force",
+            "@php artisan db:seed --class=DemoSeeder --force"
         ],
         "dev": [
             "Composer\\Config::disableProcessTimeout",
@@ -72,6 +73,17 @@
         ],
         "pre-package-uninstall": [
             "Illuminate\\Foundation\\ComposerScripts::prePackageUninstall"
+        ],
+        "refresh": [
+            "Composer\\Config::disableProcessTimeout",
+            "git pull",
+            "composer install",
+            "@php artisan migrate --force",
+            "@php artisan optimize:clear"
+        ],
+        "reset-demo": [
+            "@php artisan migrate:fresh --seed --force",
+            "@php artisan db:seed --class=DemoSeeder --force"
         ]
     },
     "extra": {

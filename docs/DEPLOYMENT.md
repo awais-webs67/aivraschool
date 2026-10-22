@@ -144,23 +144,31 @@ Schools need **no** subdomains or DNS changes. Each one opens at its own path.
 
 ## C. Localhost (Windows, macOS, Linux)
 
-Install **PHP 8.3+, Composer and Git**. On Windows the easiest option is [Laravel Herd](https://herd.laravel.com/windows) (PHP + Composer included). XAMPP/Laragon with PHP 8.3+ also work.
+Install **PHP 8.3+, Composer and Git**. On Windows the easiest option is [Laravel Herd](https://herd.laravel.com/windows) (PHP + Composer included) + [Git for Windows](https://git-scm.com/download/win). XAMPP/Laragon with PHP 8.3+ also work.
 
 ```bash
-git clone https://github.com/awais-webs67/aivraschool.git skooline
+git clone -b claude/confident-noether-uavff0 https://github.com/awais-webs67/aivraschool.git skooline
 cd skooline
-composer run setup        # installs packages, creates .env + SQLite database, tables, plans and a Super Admin
+composer run setup        # packages, .env, SQLite database, tables, plans, Super Admin, 2 demo schools
 php artisan serve
 ```
-The Super Admin email and password are printed at the end of `composer run setup`. To choose them, set `SUPER_ADMIN_EMAIL` / `SUPER_ADMIN_PASSWORD` in `.env` first.
 
-| Open | URL |
+| Open | URL | Login |
+|---|---|---|
+| Website | http://localhost:8000 | — |
+| Super Admin | http://localhost:8000/admin | `admin@skooline.test` / `password123` |
+| Greenfield (paid, Standard) | http://localhost:8000/greenfield | `admin@greenfield.test` / `password` |
+| Riverside (trial, Premium) | http://localhost:8000/riverside | `admin@riverside.test` / `password` |
+
+These logins are for localhost only.
+
+| When | Command |
 |---|---|
-| Website | http://localhost:8000 |
-| Super Admin | http://localhost:8000/admin |
-| A school with address `greenfield` | http://localhost:8000/greenfield |
+| Get the latest changes | `composer run refresh` (git pull + packages + database changes) |
+| Start over with fresh demo data | `composer run reset-demo` (deletes all local data) |
+| Run the tests | `php artisan test` |
 
-Localhost uses SQLite by default (no database server needed). To use MySQL locally instead (XAMPP/Laragon), create a database, import `database/skooline.sql`, and set the `DB_*` lines in `.env` as in Step 4.
+Localhost uses SQLite (no database server needed). To use MySQL locally instead (XAMPP/Laragon), create a database, import `database/skooline.sql`, and set the `DB_*` lines in `.env` as in Step 4.
 
 Change styles or scripts? Run `npm install && npm run build` (Node 22) and commit `public/build`.
 

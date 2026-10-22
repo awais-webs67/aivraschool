@@ -17,8 +17,16 @@ class DatabaseSeeder extends Seeder
 
         $email = env('SUPER_ADMIN_EMAIL', 'admin@skooline.test');
 
+        $password = env('SUPER_ADMIN_PASSWORD') ?: Str::password(14, symbols: false);
+
+        // The sample password in .env.example is for localhost only.
+        if (app()->isProduction() && $password === 'password123') {
+            $this->command?->warn('Skipped Super Admin: set a real SUPER_ADMIN_PASSWORD, or open /admin to create one.');
+
+            return;
+        }
+
         if (! PlatformUser::query()->where('email', $email)->exists()) {
-            $password = env('SUPER_ADMIN_PASSWORD') ?: Str::password(14, symbols: false);
 
             PlatformUser::create([
                 'name' => env('SUPER_ADMIN_NAME', 'Super Admin'),
