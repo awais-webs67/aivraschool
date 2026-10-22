@@ -41,6 +41,7 @@ class Activity
                 'subject_id' => $subject?->getKey(),
                 'properties' => $properties ?: null,
                 'ip_address' => request()?->ip(),
+                'user_agent' => mb_substr((string) request()?->userAgent(), 0, 255) ?: null,
                 'created_at' => now(),
             ]);
         } catch (Throwable $e) {

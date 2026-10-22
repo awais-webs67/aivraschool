@@ -20,6 +20,7 @@
         <main class="flex flex-col justify-center px-4 py-10 sm:px-8">
             <div data-reveal class="mx-auto w-full max-w-sm">
                 <div class="mb-8 lg:hidden"><x-logo tagline /></div>
+                <div class="mb-6 space-y-3 empty:hidden"><x-flash /></div>
                 {{ $slot }}
             </div>
         </main>

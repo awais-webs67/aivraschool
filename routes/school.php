@@ -29,6 +29,10 @@ Route::prefix('{school}')
         Route::middleware('guest:school')->group(function () {
             Route::get('login', [School\LoginController::class, 'create'])->name('login');
             Route::post('login', [School\LoginController::class, 'store'])->name('login.store');
+            Route::get('forgot-password', [School\PasswordResetController::class, 'request'])->name('password.request');
+            Route::post('forgot-password', [School\PasswordResetController::class, 'send'])->middleware('throttle:5,1')->name('password.email');
+            Route::get('reset-password/{token}', [School\PasswordResetController::class, 'edit'])->name('password.reset');
+            Route::post('reset-password', [School\PasswordResetController::class, 'update'])->middleware('throttle:10,1')->name('password.update');
         });
 
         Route::middleware('auth:school')->group(function () {

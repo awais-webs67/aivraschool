@@ -40,15 +40,33 @@ class AdminLoginController extends Controller
             ]);
         }
 
-        if (! Auth::guard('web')->attempt($credentials + ['is_active' => true], $request->boolean('remember'))) {
+        if (! Auth::guard('web')->validate($credentials + ['is_active' => true])) {
             RateLimiter::hit($key, 60);
+            Activity::log('login.failed', 'Failed sign-in for '.Str::lower($credentials['email']), properties: ['email' => Str::lower($credentials['email'])]);
 
             throw ValidationException::withMessages(['email' => 'These credentials do not match our records.']);
         }
 
         RateLimiter::clear($key);
+        $user = PlatformUser::where('email', Str::lower($credentials['email']))->firstOrFail();
+
+        // Two-factor on: ask for the app code before signing in.
+        if ($user->hasTwoFactor()) {
+            $request->session()->put('two_factor', ['user_id' => $user->id, 'remember' => $request->boolean('remember')]);
+
+            return redirect()->route('admin.two-factor');
+        }
+
+        Auth::guard('web')->login($user, $request->boolean('remember'));
         $request->session()->regenerate();
-        Auth::guard('web')->user()->forceFill(['last_login_at' => now(), 'last_login_ip' => $request->ip()])->save();
+
+        return self::signedIn($request, $user);
+    }
+
+    /** Shared by the password and two-factor steps once the person is fully signed in. */
+    public static function signedIn(Request $request, PlatformUser $user): RedirectResponse
+    {
+        $user->forceFill(['last_login_at' => now(), 'last_login_ip' => $request->ip()])->save();
         Activity::log('login.platform', 'Signed in to the Super Admin panel');
 
         return redirect()->intended(route('admin.dashboard'));

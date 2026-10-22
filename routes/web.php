@@ -2,7 +2,9 @@
 
 use App\Http\Controllers\Admin;
 use App\Http\Controllers\Auth\AdminLoginController;
+use App\Http\Controllers\Auth\AdminPasswordResetController;
 use App\Http\Controllers\Auth\SetupController;
+use App\Http\Controllers\Auth\TwoFactorChallengeController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\RegistrationController;
 use App\Http\Controllers\StripeWebhookController;
@@ -37,6 +39,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::middleware('guest:web')->group(function () {
         Route::get('login', [AdminLoginController::class, 'create'])->name('login');
         Route::post('login', [AdminLoginController::class, 'store'])->name('login.store');
+
+        // Forgot password and the two-factor step of signing in
+        Route::get('forgot-password', [AdminPasswordResetController::class, 'request'])->name('password.request');
+        Route::post('forgot-password', [AdminPasswordResetController::class, 'send'])->middleware('throttle:5,1')->name('password.email');
+        Route::get('reset-password/{token}', [AdminPasswordResetController::class, 'edit'])->name('password.reset');
+        Route::post('reset-password', [AdminPasswordResetController::class, 'update'])->middleware('throttle:10,1')->name('password.update');
+        Route::get('two-factor', [TwoFactorChallengeController::class, 'create'])->name('two-factor');
+        Route::post('two-factor', [TwoFactorChallengeController::class, 'store'])->middleware('throttle:10,1')->name('two-factor.store');
 
         // One-time screen to create the first Super Admin after importing the SQL file.
         Route::get('setup', [SetupController::class, 'create'])->name('setup');
@@ -156,5 +166,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::get('account', [Admin\AccountController::class, 'edit'])->name('account');
         Route::put('account/password', [Admin\AccountController::class, 'updatePassword'])->name('account.password');
+        Route::post('account/two-factor', [Admin\AccountController::class, 'enableTwoFactor'])->name('account.two-factor.enable');
+        Route::post('account/two-factor/confirm', [Admin\AccountController::class, 'confirmTwoFactor'])->middleware('throttle:10,1')->name('account.two-factor.confirm');
+        Route::delete('account/two-factor', [Admin\AccountController::class, 'disableTwoFactor'])->name('account.two-factor.disable');
+        Route::post('account/recovery-codes', [Admin\AccountController::class, 'regenerateRecoveryCodes'])->name('account.recovery-codes');
+        Route::post('account/logout-others', [Admin\AccountController::class, 'logoutOtherDevices'])->name('account.logout-others');
     });
 });

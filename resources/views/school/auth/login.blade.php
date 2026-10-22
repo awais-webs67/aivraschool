@@ -20,11 +20,13 @@
         @csrf
         <x-form.input name="email" type="email" label="Email address" required autofocus autocomplete="username" />
         <x-form.input name="password" type="password" label="Password" required autocomplete="current-password" />
-        <label class="flex items-center gap-2 text-sm text-body">
-            <input type="checkbox" name="remember" class="checkbox"> Keep me signed in
-        </label>
+        <div class="flex items-center justify-between gap-3">
+            <label class="flex items-center gap-2 text-sm text-body">
+                <input type="checkbox" name="remember" class="checkbox"> Keep me signed in
+            </label>
+            <a href="{{ route('school.password.request', $school->slug) }}" class="text-sm font-medium text-brand-text hover:underline">Forgot password?</a>
+        </div>
         <button class="btn btn-primary w-full">Sign in <x-icon name="arrow-right" size="4" /></button>
     </form>
 
-    <p class="mt-8 text-xs text-muted">Forgot your password? Ask your school administrator to reset it.</p>
 </x-layouts.auth>

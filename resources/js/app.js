@@ -459,6 +459,21 @@ if (chat) {
     chat.querySelectorAll('[data-ai-suggestion]').forEach((button) => button.addEventListener('click', () => ask(button.textContent.trim())));
 }
 
+/* ------------------------------------------------------------------ QR codes
+ * <div data-qr="otpauth://..."> becomes a QR code. The library loads only on pages that need it.
+ */
+const qrTargets = document.querySelectorAll('[data-qr]');
+if (qrTargets.length) {
+    import('qrcode-generator').then(({ default: qrcode }) => {
+        qrTargets.forEach((el) => {
+            const qr = qrcode(0, 'M');
+            qr.addData(el.dataset.qr);
+            qr.make();
+            el.innerHTML = qr.createSvgTag({ cellSize: 4, margin: 2, scalable: true });
+        });
+    });
+}
+
 /* ------------------------------------------------------------------ Forms */
 
 // Auto-fill a slug field from a name field: <input data-slug-from="#name">
