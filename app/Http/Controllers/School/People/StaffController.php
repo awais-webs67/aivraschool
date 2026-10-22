@@ -213,7 +213,7 @@ class StaffController extends Controller
         }
 
         $staff = collect($data)->except(['photo', 'role', 'password'])->all();
-        $staff['email'] = $staff['email'] ? Str::lower($staff['email']) : null;
+        $staff['email'] = filled($staff['email'] ?? null) ? Str::lower($staff['email']) : null;
         $staff['left_on'] = $data['status'] === 'left' ? ($data['left_on'] ?? now()->toDateString()) : null;
 
         return [

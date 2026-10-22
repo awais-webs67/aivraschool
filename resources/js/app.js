@@ -521,6 +521,16 @@ if (conditionalBlocks.length) {
     refreshConditional();
 }
 
+// "Tick all" box: <input type="checkbox" data-check-all="students[]"> ticks every box with that name in its form.
+document.addEventListener('change', (event) => {
+    const master = event.target.closest('[data-check-all]');
+    if (!master) return;
+    const scope = master.form ?? document;
+    scope.querySelectorAll(`input[type="checkbox"][name="${master.dataset.checkAll}"]`).forEach((box) => {
+        box.checked = master.checked;
+    });
+});
+
 // Photo inputs: show the chosen image straight away: <input type="file" data-photo-input="name">
 document.addEventListener('change', (event) => {
     const input = event.target.closest('[data-photo-input]');

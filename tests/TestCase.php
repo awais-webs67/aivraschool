@@ -6,6 +6,7 @@ use App\Models\Plan;
 use App\Models\PlatformUser;
 use App\Models\School;
 use App\Models\Setting;
+use App\Models\User;
 use App\Services\SchoolProvisioner;
 use App\Support\DatabaseStatus;
 use App\Support\EnvFile;
@@ -53,6 +54,32 @@ abstract class TestCase extends BaseTestCase
             admin: ['name' => 'School Admin', 'email' => $adminEmail, 'password' => 'secret-pass-1'],
             billing: $billing,
         );
+    }
+
+    /** A school whose plan includes every module. */
+    protected function fullSchool(string $slug = 'greenfield'): School
+    {
+        return $this->createSchool($slug, Plan::factory()->create(['modules' => array_keys(config('skooline.modules')), 'max_students' => null]), adminEmail: "admin@{$slug}.test");
+    }
+
+    /** Signs in a portal user of the school with the given role (the school admin by default). */
+    protected function actingAsRole(School $school, string $role = 'admin', array $attributes = []): User
+    {
+        $user = $role === 'admin' && $attributes === []
+            ? User::withoutGlobalScopes()->where('school_id', $school->id)->where('role', 'admin')->firstOrFail()
+            : $school->run(fn () => User::create($attributes + ['name' => ucfirst($role).' User', 'email' => $role.uniqid().'@'.$school->slug.'.test', 'password' => 'secret-pass-1', 'role' => $role]));
+
+        $this->actingAs($user, 'school');
+
+        return $user;
+    }
+
+    /** URL inside a school portal; also resets the current school like a fresh request. */
+    protected function portal(string $path = '', string $slug = 'greenfield'): string
+    {
+        $this->forgetCurrentSchool();
+
+        return $this->schoolUrl($slug, $path);
     }
 
     protected function schoolUrl(string $slug, string $path = ''): string

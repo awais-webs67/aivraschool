@@ -52,22 +52,15 @@
 
         @if ($school->inGracePeriod() || ($school->status->value === 'trial' && ($days = $school->daysLeft()) !== null && $days <= 5))
             <div class="border-b border-warning/20 bg-warning-tint px-4 py-2.5 text-sm text-warning sm:px-6">
-                <div class="flex items-center gap-2"><x-icon name="clock" size="4" />
-                    @if ($impersonator = session('impersonator'))
-            <div class="flex flex-wrap items-center gap-x-4 gap-y-2 bg-ink px-4 py-2.5 text-sm text-white sm:px-6">
-                <span class="flex min-w-0 items-center gap-2"><x-icon name="eye" size="4" class="shrink-0 text-brand" /><span class="min-w-0">{{ $impersonator['name'] }} (AivraSol) is viewing this portal as <span class="font-semibold">{{ $user->name }}</span>.</span></span>
-                <form method="POST" action="{{ route('school.impersonation.leave') }}" class="ml-auto">
-                    @csrf
-                    <button class="btn btn-sm btn-white"><x-icon name="arrow-left" size="4" /> Return to Super Admin</button>
-                </form>
-            </div>
-        @endif
-
-        @if ($school->inGracePeriod())
-                        Your subscription has ended. Please renew within {{ config('skooline.grace_days') }} days of the end date to avoid interruption.
-                    @else
-                        Your free trial ends {{ $days === 0 ? 'today' : 'in '.$days.' '.\Illuminate\Support\Str::plural('day', $days) }}. Contact AivraSol to subscribe.
-                    @endif
+                <div class="flex flex-wrap items-center gap-x-3 gap-y-1"><x-icon name="clock" size="4" class="shrink-0" />
+                    <span class="min-w-0">
+                        @if ($school->inGracePeriod())
+                            Your subscription has ended. Please renew within {{ config('skooline.grace_days') }} days of the end date to avoid interruption.
+                        @else
+                            Your free trial ends {{ $days === 0 ? 'today' : 'in '.$days.' '.\Illuminate\Support\Str::plural('day', $days) }}.
+                        @endif
+                    </span>
+                    @if (in_array($user->role, ['admin', 'principal'], true))<a href="{{ route('school.renew') }}" class="font-semibold underline underline-offset-2">Renew now</a>@endif
                 </div>
             </div>
         @endif

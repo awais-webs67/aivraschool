@@ -32,6 +32,10 @@ Route::prefix('{school}')
         Route::post('renew', [School\BillingController::class, 'checkout'])->middleware('throttle:10,1')->name('renew.checkout');
         Route::get('renew/done', [School\BillingController::class, 'done'])->name('renew.done');
 
+        // Public "Apply for admission" form
+        Route::get('apply', [People\EnquiryController::class, 'apply'])->name('apply');
+        Route::post('apply', [People\EnquiryController::class, 'submit'])->middleware('throttle:10,1')->name('apply.submit');
+
         Route::middleware('guest:school')->group(function () {
             Route::get('login', [School\LoginController::class, 'create'])->name('login');
             Route::post('login', [School\LoginController::class, 'store'])->name('login.store');
@@ -64,8 +68,34 @@ Route::prefix('{school}')
                 Route::post('support/{ticket}/reply', [School\SupportController::class, 'reply'])->name('support.reply');
             });
 
+            // Step 3: students and admissions
+            Route::middleware('school.can:students.manage')->group(function () {
+                Route::get('students/create', [People\StudentController::class, 'create'])->name('students.create');
+                Route::post('students', [People\StudentController::class, 'store'])->name('students.store');
+                Route::get('students/import', [People\StudentToolsController::class, 'importForm'])->name('students.import');
+                Route::get('students/import/template', [People\StudentToolsController::class, 'template'])->name('students.import.template');
+                Route::post('students/import', [People\StudentToolsController::class, 'import'])->name('students.import.store');
+                Route::get('students/promote', [People\StudentToolsController::class, 'promoteForm'])->name('students.promote');
+                Route::post('students/promote', [People\StudentToolsController::class, 'promote'])->name('students.promote.store');
+                Route::get('students/{student}/edit', [People\StudentController::class, 'edit'])->name('students.edit');
+                Route::put('students/{student}', [People\StudentController::class, 'update'])->name('students.update');
+                Route::delete('students/{student}', [People\StudentController::class, 'destroy'])->name('students.destroy');
+            });
+            Route::middleware('school.can:students.view')->group(function () {
+                Route::get('students', [People\StudentController::class, 'index'])->name('students.index');
+                Route::get('students/export', [People\StudentController::class, 'export'])->name('students.export');
+                Route::get('students/{student}', [People\StudentController::class, 'show'])->name('students.show');
+                Route::get('students/{student}/photo', [People\StudentController::class, 'photo'])->name('students.photo');
+            });
+            Route::middleware('school.can:admissions')->group(function () {
+                Route::get('enquiries', [People\EnquiryController::class, 'index'])->name('enquiries.index');
+                Route::post('enquiries', [People\EnquiryController::class, 'store'])->name('enquiries.store');
+                Route::put('enquiries/{enquiry}', [People\EnquiryController::class, 'update'])->name('enquiries.update');
+                Route::delete('enquiries/{enquiry}', [People\EnquiryController::class, 'destroy'])->name('enquiries.destroy');
+            });
+
             // Step 2: staff and their portal logins — admins and principals only
-            Route::middleware('school.role:admin,principal')->group(function () {
+            Route::middleware('school.can:staff.manage')->group(function () {
                 Route::get('staff', [People\StaffController::class, 'index'])->name('staff.index');
                 Route::get('staff/create', [People\StaffController::class, 'create'])->name('staff.create');
                 Route::post('staff', [People\StaffController::class, 'store'])->name('staff.store');

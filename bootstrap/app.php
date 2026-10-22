@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\EnsureSchoolAbility;
 use App\Http\Middleware\EnsureSchoolRole;
 use App\Http\Middleware\IdentifySchool;
 use App\Http\Middleware\PlatformMaintenance;
@@ -25,7 +26,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // The school must be known before authentication looks up the user.
         $middleware->prependToPriorityList(AuthenticatesRequests::class, IdentifySchool::class);
 
-        $middleware->alias(['school.role' => EnsureSchoolRole::class]);
+        $middleware->alias(['school.role' => EnsureSchoolRole::class, 'school.can' => EnsureSchoolAbility::class]);
 
         // "Back soon" page for visitors and schools while maintenance mode is on (Admin → System).
         $middleware->web(append: [PlatformMaintenance::class]);

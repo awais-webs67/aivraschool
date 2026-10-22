@@ -131,7 +131,7 @@ CREATE TABLE `cache` (
 
 /*!40000 ALTER TABLE `cache` DISABLE KEYS */;
 INSERT INTO `cache` VALUES
-('skooline-cache-platform-settings','a:0:{}',2108057898);
+('skooline-cache-platform-settings','a:0:{}',2108058815);
 /*!40000 ALTER TABLE `cache` ENABLE KEYS */;
 DROP TABLE IF EXISTS `cache_locks`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -233,6 +233,40 @@ CREATE TABLE `demo_requests` (
 
 /*!40000 ALTER TABLE `demo_requests` DISABLE KEYS */;
 /*!40000 ALTER TABLE `demo_requests` ENABLE KEYS */;
+DROP TABLE IF EXISTS `enquiries`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `enquiries` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `school_id` bigint(20) unsigned NOT NULL,
+  `child_name` varchar(120) NOT NULL,
+  `gender` varchar(10) DEFAULT NULL,
+  `date_of_birth` date DEFAULT NULL,
+  `class_id` bigint(20) unsigned DEFAULT NULL,
+  `parent_name` varchar(120) DEFAULT NULL,
+  `phone` varchar(30) NOT NULL,
+  `email` varchar(150) DEFAULT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `previous_school` varchar(150) DEFAULT NULL,
+  `source` varchar(20) NOT NULL DEFAULT 'walk_in',
+  `status` varchar(20) NOT NULL DEFAULT 'new',
+  `follow_up_on` date DEFAULT NULL,
+  `notes` text DEFAULT NULL,
+  `student_id` bigint(20) unsigned DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `enquiries_class_id_foreign` (`class_id`),
+  KEY `enquiries_student_id_foreign` (`student_id`),
+  KEY `enquiries_school_id_status_index` (`school_id`,`status`),
+  CONSTRAINT `enquiries_class_id_foreign` FOREIGN KEY (`class_id`) REFERENCES `classes` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `enquiries_school_id_foreign` FOREIGN KEY (`school_id`) REFERENCES `schools` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `enquiries_student_id_foreign` FOREIGN KEY (`student_id`) REFERENCES `students` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+/*!40000 ALTER TABLE `enquiries` DISABLE KEYS */;
+/*!40000 ALTER TABLE `enquiries` ENABLE KEYS */;
 DROP TABLE IF EXISTS `failed_jobs`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8mb4 */;
@@ -298,7 +332,7 @@ CREATE TABLE `migrations` (
   `migration` varchar(255) NOT NULL,
   `batch` int(11) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 /*!40000 ALTER TABLE `migrations` DISABLE KEYS */;
@@ -320,7 +354,8 @@ INSERT INTO `migrations` VALUES
 (15,'2026_06_01_000001_add_ai_quotas',1),
 (16,'2026_07_01_000001_add_account_security',1),
 (17,'2026_08_01_000001_add_billing_extras',1),
-(18,'2026_09_01_000001_create_staff_table',1);
+(18,'2026_09_01_000001_create_staff_table',1),
+(19,'2026_09_02_000001_create_students_and_enquiries',1);
 /*!40000 ALTER TABLE `migrations` ENABLE KEYS */;
 DROP TABLE IF EXISTS `password_reset_tokens`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -372,10 +407,10 @@ CREATE TABLE `plans` (
 
 /*!40000 ALTER TABLE `plans` DISABLE KEYS */;
 INSERT INTO `plans` VALUES
-(1,'Starter','starter','For small schools getting started',NULL,'monthly',4000.00,0.00,NULL,0.00,14,'trial',NULL,200,25,1,5,500,0,'[\"students\",\"admissions\",\"attendance\",\"fees\",\"exams\",\"communication\",\"certificates\",\"reports\"]',1,1,0,1,'2026-10-22 19:38:18','2026-10-22 19:38:18'),
-(2,'Standard','standard','Pay only for active students',NULL,'per_student',0.00,50.00,NULL,0.00,14,'trial',NULL,NULL,150,1,20,2000,0,'[\"students\",\"admissions\",\"attendance\",\"fees\",\"exams\",\"communication\",\"certificates\",\"reports\",\"timetable\",\"homework\",\"hr_payroll\",\"accounts\",\"library\",\"mobile_apps\"]',1,1,1,2,'2026-10-22 19:38:18','2026-10-22 19:38:18'),
-(3,'Premium','premium','Everything, for multi-campus schools',NULL,'yearly',150000.00,0.00,NULL,0.00,14,'trial',NULL,NULL,NULL,5,100,10000,0,'[\"students\",\"admissions\",\"attendance\",\"fees\",\"exams\",\"timetable\",\"homework\",\"lms\",\"communication\",\"hr_payroll\",\"accounts\",\"library\",\"transport\",\"hostel\",\"inventory\",\"certificates\",\"reports\",\"multi_branch\",\"mobile_apps\",\"ai\"]',1,1,0,3,'2026-10-22 19:38:18','2026-10-22 19:38:18'),
-(4,'Lifetime','lifetime','One-time license with yearly support',NULL,'lifetime',450000.00,0.00,NULL,0.00,14,'trial',NULL,NULL,NULL,3,50,0,0,'[\"students\",\"admissions\",\"attendance\",\"fees\",\"exams\",\"timetable\",\"homework\",\"lms\",\"communication\",\"hr_payroll\",\"accounts\",\"library\",\"transport\",\"hostel\",\"inventory\",\"certificates\",\"reports\",\"multi_branch\",\"mobile_apps\",\"ai\"]',1,0,0,4,'2026-10-22 19:38:18','2026-10-22 19:38:18');
+(1,'Starter','starter','For small schools getting started',NULL,'monthly',4000.00,0.00,NULL,0.00,14,'trial',NULL,200,25,1,5,500,0,'[\"students\",\"admissions\",\"attendance\",\"fees\",\"exams\",\"communication\",\"certificates\",\"reports\"]',1,1,0,1,'2026-10-22 19:53:35','2026-10-22 19:53:35'),
+(2,'Standard','standard','Pay only for active students',NULL,'per_student',0.00,50.00,NULL,0.00,14,'trial',NULL,NULL,150,1,20,2000,0,'[\"students\",\"admissions\",\"attendance\",\"fees\",\"exams\",\"communication\",\"certificates\",\"reports\",\"timetable\",\"homework\",\"hr_payroll\",\"accounts\",\"library\",\"mobile_apps\"]',1,1,1,2,'2026-10-22 19:53:35','2026-10-22 19:53:35'),
+(3,'Premium','premium','Everything, for multi-campus schools',NULL,'yearly',150000.00,0.00,NULL,0.00,14,'trial',NULL,NULL,NULL,5,100,10000,0,'[\"students\",\"admissions\",\"attendance\",\"fees\",\"exams\",\"timetable\",\"homework\",\"lms\",\"communication\",\"hr_payroll\",\"accounts\",\"library\",\"transport\",\"hostel\",\"inventory\",\"certificates\",\"reports\",\"multi_branch\",\"mobile_apps\",\"ai\"]',1,1,0,3,'2026-10-22 19:53:35','2026-10-22 19:53:35'),
+(4,'Lifetime','lifetime','One-time license with yearly support',NULL,'lifetime',450000.00,0.00,NULL,0.00,14,'trial',NULL,NULL,NULL,3,50,0,0,'[\"students\",\"admissions\",\"attendance\",\"fees\",\"exams\",\"timetable\",\"homework\",\"lms\",\"communication\",\"hr_payroll\",\"accounts\",\"library\",\"transport\",\"hostel\",\"inventory\",\"certificates\",\"reports\",\"multi_branch\",\"mobile_apps\",\"ai\"]',1,0,0,4,'2026-10-22 19:53:35','2026-10-22 19:53:35');
 /*!40000 ALTER TABLE `plans` ENABLE KEYS */;
 DROP TABLE IF EXISTS `platform_users`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -619,6 +654,61 @@ CREATE TABLE `staff` (
 
 /*!40000 ALTER TABLE `staff` DISABLE KEYS */;
 /*!40000 ALTER TABLE `staff` ENABLE KEYS */;
+DROP TABLE IF EXISTS `students`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `students` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `school_id` bigint(20) unsigned NOT NULL,
+  `admission_no` varchar(30) NOT NULL,
+  `roll_no` varchar(20) DEFAULT NULL,
+  `name` varchar(120) NOT NULL,
+  `gender` varchar(10) DEFAULT NULL,
+  `date_of_birth` date DEFAULT NULL,
+  `national_id` varchar(40) DEFAULT NULL,
+  `religion` varchar(40) DEFAULT NULL,
+  `blood_group` varchar(5) DEFAULT NULL,
+  `photo_path` varchar(255) DEFAULT NULL,
+  `class_id` bigint(20) unsigned DEFAULT NULL,
+  `section_id` bigint(20) unsigned DEFAULT NULL,
+  `admission_date` date DEFAULT NULL,
+  `category` varchar(30) DEFAULT NULL,
+  `fee_discount` decimal(5,2) NOT NULL DEFAULT 0.00,
+  `father_name` varchar(120) DEFAULT NULL,
+  `father_phone` varchar(30) DEFAULT NULL,
+  `father_national_id` varchar(40) DEFAULT NULL,
+  `father_occupation` varchar(80) DEFAULT NULL,
+  `mother_name` varchar(120) DEFAULT NULL,
+  `mother_phone` varchar(30) DEFAULT NULL,
+  `guardian_name` varchar(120) DEFAULT NULL,
+  `guardian_relation` varchar(40) DEFAULT NULL,
+  `guardian_phone` varchar(30) DEFAULT NULL,
+  `email` varchar(150) DEFAULT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `city` varchar(80) DEFAULT NULL,
+  `previous_school` varchar(150) DEFAULT NULL,
+  `medical_notes` text DEFAULT NULL,
+  `family_code` varchar(40) DEFAULT NULL,
+  `status` varchar(12) NOT NULL DEFAULT 'active',
+  `left_on` date DEFAULT NULL,
+  `left_reason` varchar(255) DEFAULT NULL,
+  `notes` text DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `students_school_id_admission_no_unique` (`school_id`,`admission_no`),
+  KEY `students_class_id_foreign` (`class_id`),
+  KEY `students_section_id_foreign` (`section_id`),
+  KEY `students_school_id_status_class_id_section_id_index` (`school_id`,`status`,`class_id`,`section_id`),
+  KEY `students_school_id_family_code_index` (`school_id`,`family_code`),
+  CONSTRAINT `students_class_id_foreign` FOREIGN KEY (`class_id`) REFERENCES `classes` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `students_school_id_foreign` FOREIGN KEY (`school_id`) REFERENCES `schools` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `students_section_id_foreign` FOREIGN KEY (`section_id`) REFERENCES `sections` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+/*!40000 ALTER TABLE `students` DISABLE KEYS */;
+/*!40000 ALTER TABLE `students` ENABLE KEYS */;
 DROP TABLE IF EXISTS `subjects`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8mb4 */;

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\SchoolAccess;
 use App\Support\Tenancy\BelongsToSchool;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -53,6 +54,12 @@ class User extends Authenticatable
     public function staff(): HasOne
     {
         return $this->hasOne(Staff::class);
+    }
+
+    /** Role and plan check, see App\Support\SchoolAccess. */
+    public function allows(string $ability): bool
+    {
+        return SchoolAccess::allows($this, $ability);
     }
 
     public function roleLabel(): string
