@@ -17,8 +17,9 @@
                 ['school.setup.sessions', 'calendar', 'Academic sessions'],
                 ['school.setup.classes', 'layers', 'Classes & sections'],
                 ['school.setup.subjects', 'book-open', 'Subjects'],
+                ['school.support.index', 'chat', 'Help & support'],
             ] as [$route, $icon, $label])
-                <a href="{{ route($route) }}" class="nav-link" @if (request()->routeIs($route)) aria-current="page" @endif>
+                <a href="{{ route($route) }}" class="nav-link" @if (request()->routeIs(str_replace('.index', '.*', $route))) aria-current="page" @endif>
                     <x-icon :name="$icon" /> {{ $label }}
                 </a>
             @endforeach

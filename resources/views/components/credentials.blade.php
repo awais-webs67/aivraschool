@@ -1,11 +1,11 @@
-{{-- One-time display of freshly generated school login credentials --}}
+{{-- One-time display of freshly generated login credentials --}}
 @if ($credentials = session('credentials'))
     <div class="card border-brand/40 bg-brand-tint/40 p-5" role="status">
         <div class="flex items-start gap-3">
             <span class="grid size-9 shrink-0 place-items-center rounded-md bg-brand text-white"><x-icon name="key" /></span>
             <div class="min-w-0 flex-1">
-                <p class="font-semibold text-ink">School login credentials</p>
-                <p class="mt-0.5 text-sm text-body">Share these with the school. The password is shown only once.</p>
+                <p class="font-semibold text-ink">{{ $credentials['title'] ?? 'Login credentials' }}</p>
+                <p class="mt-0.5 text-sm text-body">Share these securely. The password is shown only once.</p>
                 <dl class="mt-4 grid gap-3 text-sm sm:grid-cols-3">
                     @foreach (['Login URL' => $credentials['url'], 'Email' => $credentials['email'], 'Password' => $credentials['password']] as $label => $value)
                         <div class="min-w-0 rounded border border-line bg-white px-3 py-2">

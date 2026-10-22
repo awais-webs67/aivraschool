@@ -26,6 +26,7 @@ Installs on **cPanel / hPanel** like any PHP script: upload, import `database/sk
 | New design: logo, animations, slide-in mobile menus, every page checked at phone to desktop widths | ✅ |
 | Currencies: billing currency, fee currency per school, currency switcher on website pricing (Super Admin → Currencies) | ✅ |
 | SEO: titles, descriptions, canonical, Open Graph image, structured data, `robots.txt`, `sitemap.xml`, private pages `noindex` | ✅ |
+| **Super Admin tools:** dashboard with revenue and growth charts, reports, invoices (numbered, printable/PDF, CSV), leads CRM with follow-ups and convert-to-school, support tickets with schools, announcements, team members with roles (Owner, Manager, Accountant, Support), login as a school, activity log, notification bell, company settings | ✅ |
 | Step 2 — Students & admissions | Next |
 
 ## Tech stack

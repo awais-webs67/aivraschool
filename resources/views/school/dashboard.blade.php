@@ -1,6 +1,17 @@
 <x-layouts.school heading="Dashboard" :subheading="'Welcome, '.auth('school')->user()->name.'.'">
     @php $remaining = collect($setup)->where('done', false)->count(); @endphp
 
+    @foreach ($announcements as $a)
+        <div class="alert alert-{{ $a->tone }} mb-4" role="status">
+            <x-icon :name="$a->tone === 'danger' || $a->tone === 'warning' ? 'alert' : 'bolt'" class="mt-px" />
+            <div class="min-w-0">
+                <p class="font-semibold">{{ $a->title }}</p>
+                <p class="mt-0.5 whitespace-pre-line opacity-90">{{ $a->body }}</p>
+                <p class="mt-1 text-xs opacity-70">From AivraSol · {{ $a->created_at->format('d M Y') }}</p>
+            </div>
+        </div>
+    @endforeach
+
     @if ($canSetup && $remaining > 0)
         <section class="card mb-6 border-brand/40">
             <div class="card-header">

@@ -33,6 +33,7 @@ class StoreSchoolRequest extends FormRequest
             'phone' => ['nullable', 'string', 'max:30'],
             'city' => ['nullable', 'string', 'max:80'],
             'country' => ['nullable', 'string', 'max:80'],
+            'lead_id' => ['nullable', 'integer', 'exists:demo_requests,id'],
             'currency' => ['nullable', Rule::in(array_keys(config('currencies')))],
             'address' => ['nullable', 'string', 'max:255'],
             'principal_name' => ['nullable', 'string', 'max:120'],

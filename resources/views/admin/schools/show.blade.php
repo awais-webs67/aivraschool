@@ -16,6 +16,13 @@
             </div>
         </div>
         <div class="flex flex-wrap gap-2">
+            @can('impersonate')
+                <form method="POST" action="{{ route('admin.schools.impersonate', $school) }}">
+                    @csrf
+                    <button class="btn btn-dark" @disabled(! $school->canAccess()) title="Open the school portal as its admin"><x-icon name="login-as" size="4" /> Login as school</button>
+                </form>
+            @endcan
+            @can('schools.manage')
             <a href="{{ route('admin.schools.edit', $school) }}" class="btn btn-secondary"><x-icon name="pencil" size="4" /> Edit</a>
             @if ($school->status->value === 'suspended')
                 <form method="POST" action="{{ route('admin.schools.activate', $school) }}">
@@ -25,11 +32,11 @@
             @else
                 <button type="button" class="btn btn-danger-outline" data-toggle="#suspend-form"><x-icon name="ban" size="4" /> Suspend</button>
             @endif
+            @endcan
         </div>
     </div>
 
     <div class="mb-6 space-y-3 empty:hidden">
-        <x-credentials />
         @if ($school->status->value === 'suspended')
             <div class="alert alert-danger"><x-icon name="ban" class="mt-px" />
                 <p>Suspended {{ $school->suspended_at?->diffForHumans() }}.@if ($school->suspension_reason) Reason: {{ $school->suspension_reason }}@endif Nobody from this school can sign in.</p>
@@ -58,7 +65,7 @@
             <section class="card">
                 <div class="card-header">
                     <h2 class="card-title">Subscription</h2>
-                    <button type="button" class="btn btn-primary btn-sm" data-toggle="#subscription-form"><x-icon name="plus" size="4" /> Add / renew</button>
+                    @can('billing')<button type="button" class="btn btn-primary btn-sm" data-toggle="#subscription-form"><x-icon name="plus" size="4" /> Add / renew</button>@endcan
                 </div>
 
                 <form id="subscription-form" method="POST" action="{{ route('admin.schools.subscriptions.store', $school) }}"
@@ -98,7 +105,7 @@
                     </div>
                 </div>
 
-                @if ($school->status->value === 'trial')
+                @if ($school->status->value === 'trial' && auth()->user()->can('schools.manage'))
                     <form method="POST" action="{{ route('admin.schools.extend-trial', $school) }}" class="flex flex-wrap items-end gap-3 border-t border-line px-5 py-4">
                         @csrf
                         <x-form.input name="days" type="number" min="1" max="365" value="7" label="Extend trial by (days)" class="w-44" />
@@ -114,18 +121,21 @@
                 @else
                     <div class="table-wrap">
                         <table class="table">
-                            <thead><tr><th>Period</th><th>Plan</th><th>Amount</th><th>Payment</th><th class="text-right"></th></tr></thead>
+                            <thead><tr><th>Invoice</th><th>Period</th><th>Amount</th><th>Payment</th><th class="text-right"></th></tr></thead>
                             <tbody>
                                 @foreach ($school->subscriptions as $subscription)
                                     <tr>
-                                        <td class="tabular">{{ $subscription->starts_at->format('d M Y') }} – {{ $subscription->ends_at?->format('d M Y') ?? 'Lifetime' }}</td>
-                                        <td>{{ $subscription->plan_name }}@if ($subscription->student_count)<span class="text-xs text-muted"> · {{ $subscription->student_count }} students</span>@endif</td>
+                                        <td><p class="font-mono text-xs font-semibold text-ink">{{ $subscription->invoice_number }}</p><p class="text-xs text-muted">{{ $subscription->plan_name }}@if ($subscription->student_count) · {{ $subscription->student_count }} students @endif</p></td>
+                                        <td class="tabular text-xs">{{ $subscription->starts_at->format('d M Y') }} – {{ $subscription->ends_at?->format('d M Y') ?? 'Lifetime' }}</td>
                                         <td class="tabular font-medium text-ink">{{ money($subscription->amount) }}</td>
                                         <td>
-                                            <span class="badge {{ $subscription->payment_status === 'paid' ? 'badge-success' : ($subscription->payment_status === 'unpaid' ? 'badge-danger' : 'badge-neutral') }}">{{ ucfirst($subscription->payment_status) }}</span>
+                                            <span class="badge {{ $subscription->paymentBadge() }}">{{ ucfirst($subscription->payment_status) }}</span>
                                             @if ($subscription->payment_method)<span class="text-xs text-muted"> · {{ \Illuminate\Support\Str::headline($subscription->payment_method) }}</span>@endif
                                         </td>
                                         <td class="text-right">
+                                            @can('billing')
+                                            <div class="inline-flex flex-wrap justify-end gap-1">
+                                            <a href="{{ route('admin.subscriptions.invoice', $subscription) }}" target="_blank" class="btn btn-ghost btn-sm" title="Print invoice"><x-icon name="printer" size="4" /><span class="sr-only">Print invoice</span></a>
                                             @if ($subscription->payment_status !== 'paid')
                                                 <form method="POST" action="{{ route('admin.subscriptions.paid', $subscription) }}" class="inline-flex gap-1">
                                                     @csrf
@@ -135,6 +145,8 @@
                                                     <button class="btn btn-secondary btn-sm">Mark paid</button>
                                                 </form>
                                             @endif
+                                            </div>
+                                            @endcan
                                         </td>
                                     </tr>
                                 @endforeach
@@ -162,6 +174,21 @@
 
         <div class="space-y-6">
             <section class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Usage</h2>
+                    <span class="text-xs text-muted">{{ $lastLogin ? 'Last sign-in '.\Illuminate\Support\Carbon::parse($lastLogin)->diffForHumans() : 'Nobody has signed in yet' }}</span>
+                </div>
+                <div class="card-body grid grid-cols-2 gap-3">
+                    @foreach ($usage as $label => $n)
+                        <div class="rounded-md bg-canvas px-3 py-2.5">
+                            <p class="text-xs text-muted">{{ $label }}</p>
+                            <p class="font-display tabular text-xl text-ink">{{ number_format($n) }}</p>
+                        </div>
+                    @endforeach
+                </div>
+            </section>
+
+            <section class="card">
                 <div class="card-header"><h2 class="card-title">School admins</h2></div>
                 <ul class="divide-y divide-line">
                     @forelse ($admins as $admin)
@@ -171,11 +198,13 @@
                                 <p class="truncate text-sm font-medium text-ink">{{ $admin->name }}</p>
                                 <p class="truncate text-xs text-muted">{{ $admin->email }} · {{ $admin->last_login_at ? 'last login '.$admin->last_login_at->diffForHumans() : 'never signed in' }}</p>
                             </div>
+                            @can('schools.manage')
                             <form method="POST" action="{{ route('admin.schools.reset-password', $school) }}" data-confirm="Generate a new password for {{ $admin->email }}?">
                                 @csrf
                                 <input type="hidden" name="user_id" value="{{ $admin->id }}">
                                 <button class="btn btn-ghost btn-sm" title="Reset password"><x-icon name="key" size="4" /><span class="sr-only">Reset password</span></button>
                             </form>
+                            @endcan
                         </li>
                     @empty
                         <li class="px-5 py-4 text-sm text-muted">No admin accounts.</li>
@@ -201,6 +230,29 @@
                 @endif
             </section>
 
+            @can('tickets')
+                <section class="card">
+                    <div class="card-header"><h2 class="card-title">Support tickets</h2></div>
+                    @if ($tickets->isEmpty())
+                        <p class="card-body text-sm text-muted">No tickets from this school.</p>
+                    @else
+                        <ul class="divide-y divide-line">
+                            @foreach ($tickets as $ticket)
+                                <li><a href="{{ route('admin.tickets.show', $ticket->id) }}" class="flex items-center gap-3 px-5 py-3 text-sm hover:bg-canvas"><span class="min-w-0 flex-1 truncate text-ink">{{ $ticket->subject }}</span><span class="badge {{ $ticket->statusBadge() }}">{{ \App\Models\SupportTicket::STATUSES[$ticket->status] }}</span></a></li>
+                            @endforeach
+                        </ul>
+                    @endif
+                </section>
+            @endcan
+
+            @can('activity')
+                <section class="card">
+                    <div class="card-header"><h2 class="card-title">Recent activity</h2></div>
+                    @include('admin.partials.activity-feed', ['items' => $activity])
+                </section>
+            @endcan
+
+            @can('schools.manage')
             <section class="card border-danger/30">
                 <div class="card-header"><h2 class="card-title text-danger">Danger zone</h2></div>
                 <form method="POST" action="{{ route('admin.schools.destroy', $school) }}" class="card-body space-y-3" data-confirm="This permanently deletes {{ $school->name }} and ALL of its data. Continue?">
@@ -211,6 +263,7 @@
                     <button class="btn btn-danger w-full"><x-icon name="trash" size="4" /> Delete school permanently</button>
                 </form>
             </section>
+            @endcan
         </div>
     </div>
 </x-layouts.admin>

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\PlanRequest;
 use App\Models\Plan;
+use App\Support\Activity;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
@@ -33,6 +34,7 @@ class PlanController extends Controller
     public function store(PlanRequest $request): RedirectResponse
     {
         $plan = Plan::create($request->planData());
+        Activity::log('plan.created', "Created plan {$plan->name}", $plan);
 
         return redirect()->route('admin.plans.index')->with('success', "Plan \"{$plan->name}\" created.");
     }
@@ -45,6 +47,7 @@ class PlanController extends Controller
     public function update(PlanRequest $request, Plan $plan): RedirectResponse
     {
         $plan->update($request->planData());
+        Activity::log('plan.updated', "Updated plan {$plan->name}", $plan);
 
         return redirect()->route('admin.plans.index')->with('success', "Plan \"{$plan->name}\" updated.");
     }
@@ -56,6 +59,7 @@ class PlanController extends Controller
         }
 
         $plan->delete();
+        Activity::log('plan.deleted', "Deleted plan {$plan->name}");
 
         return redirect()->route('admin.plans.index')->with('success', 'Plan deleted.');
     }

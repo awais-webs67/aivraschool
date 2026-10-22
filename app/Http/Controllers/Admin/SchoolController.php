@@ -6,9 +6,17 @@ use App\Enums\SchoolStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreSchoolRequest;
 use App\Http\Requests\Admin\UpdateSchoolRequest;
+use App\Models\ActivityLog;
+use App\Models\DemoRequest;
 use App\Models\Plan;
 use App\Models\School;
+use App\Models\SchoolClass;
+use App\Models\Section;
+use App\Models\Subject;
+use App\Models\SupportTicket;
+use App\Models\User;
 use App\Services\SchoolProvisioner;
+use App\Support\Activity;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -46,10 +54,28 @@ class SchoolController extends Controller
         ]);
     }
 
-    public function create(): View
+    public function create(Request $request): View
     {
+        // "Convert to school" from a lead: start the form with the lead's details.
+        $lead = $request->integer('lead') ? DemoRequest::find($request->integer('lead')) : null;
+
+        if ($lead && ! $request->session()->hasOldInput()) {
+            $request->session()->now('_old_input', [
+                'name' => $lead->school_name,
+                'slug' => Str::slug(Str::limit($lead->school_name, 40, '')),
+                'principal_name' => $lead->name,
+                'email' => $lead->email,
+                'phone' => $lead->phone,
+                'city' => $lead->city,
+                'admin_name' => $lead->name,
+                'admin_email' => $lead->email,
+                'student_count' => $lead->students,
+            ]);
+        }
+
         return view('admin.schools.create', [
             'plans' => Plan::query()->active()->ordered()->get(),
+            'lead' => $lead,
         ]);
     }
 
@@ -57,7 +83,7 @@ class SchoolController extends Controller
     {
         $data = $request->validated();
         $plan = Plan::findOrFail($data['plan_id']);
-        $password = $data['admin_password'] ?: Str::password(12, symbols: false);
+        $password = ($data['admin_password'] ?? null) ?: Str::password(12, symbols: false);
 
         $school = $provisioner->create(
             school: $data,
@@ -74,9 +100,16 @@ class SchoolController extends Controller
             createdBy: $request->user()->id,
         );
 
+        if (! empty($data['lead_id'])) {
+            DemoRequest::whereKey($data['lead_id'])->update(['status' => 'converted', 'school_id' => $school->id]);
+        }
+
+        Activity::log('school.created', "Added school {$school->name} on {$plan->name}", $school);
+
         return redirect()->route('admin.schools.show', $school)
             ->with('success', "{$school->name} is ready.")
             ->with('credentials', [
+                'title' => 'School login credentials',
                 'url' => $school->url('login'),
                 'email' => $data['admin_email'],
                 'password' => $password,
@@ -89,10 +122,21 @@ class SchoolController extends Controller
 
         $admins = $school->users()->where('role', 'admin')->orderBy('id')->get();
 
+        $usage = $school->run(fn () => [
+            'Users' => User::query()->count(),
+            'Classes' => SchoolClass::query()->count(),
+            'Sections' => Section::query()->count(),
+            'Subjects' => Subject::query()->count(),
+        ]);
+
         return view('admin.schools.show', [
             'school' => $school,
             'admins' => $admins,
             'plans' => Plan::query()->active()->ordered()->get(),
+            'usage' => $usage,
+            'lastLogin' => $school->users()->max('last_login_at'),
+            'tickets' => SupportTicket::query()->withoutGlobalScopes()->where('school_id', $school->id)->latest('id')->limit(5)->get(),
+            'activity' => ActivityLog::query()->where('school_id', $school->id)->latest('id')->limit(8)->get(),
         ]);
     }
 
@@ -104,6 +148,7 @@ class SchoolController extends Controller
     public function update(UpdateSchoolRequest $request, School $school): RedirectResponse
     {
         $school->update($request->validated());
+        Activity::log('school.updated', "Updated details of {$school->name}", $school);
 
         return redirect()->route('admin.schools.show', $school)->with('success', 'School details updated.');
     }
@@ -118,6 +163,7 @@ class SchoolController extends Controller
 
         $name = $school->name;
         $school->delete(); // cascades to the school's users and subscriptions
+        Activity::log('school.deleted', "Deleted school {$name} and all of its data");
 
         return redirect()->route('admin.schools.index')->with('success', "{$name} and all of its data were deleted.");
     }
@@ -131,6 +177,7 @@ class SchoolController extends Controller
             'suspended_at' => now(),
             'suspension_reason' => $data['reason'] ?? null,
         ]);
+        Activity::log('school.suspended', "Suspended {$school->name}".(! empty($data['reason']) ? ": {$data['reason']}" : ''), $school);
 
         return back()->with('success', "{$school->name} has been suspended.");
     }
@@ -144,6 +191,8 @@ class SchoolController extends Controller
             'suspended_at' => null,
             'suspension_reason' => null,
         ]);
+
+        Activity::log('school.activated', "Reactivated {$school->name}", $school);
 
         $message = $school->canAccess()
             ? "{$school->name} has been reactivated."
@@ -163,6 +212,8 @@ class SchoolController extends Controller
             'trial_ends_at' => $from->copy()->addDays($data['days'])->endOfDay(),
         ]);
 
+        Activity::log('school.trial', "Extended {$school->name}'s trial by {$data['days']} days", $school);
+
         return back()->with('success', "Trial extended by {$data['days']} days.");
     }
 
@@ -174,8 +225,10 @@ class SchoolController extends Controller
         $user = $school->users()->findOrFail($data['user_id']);
         $user->update(['password' => $password]);
         $email = $user->email;
+        Activity::log('school.password', "Reset password for {$email} at {$school->name}", $school);
 
         return back()->with('credentials', [
+            'title' => 'School login credentials',
             'url' => $school->url('login'),
             'email' => $email,
             'password' => $password,

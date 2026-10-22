@@ -2,7 +2,12 @@
 
 namespace App\Providers;
 
+use App\Models\PlatformUser;
+use App\Models\Setting;
 use App\Support\Tenancy\CurrentSchool;
+use App\View\Composers\AdminNotifications;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -23,7 +28,22 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // Platform permissions (see PlatformUser::PERMISSIONS): @can('billing'), ->middleware('can:billing')
+        foreach (array_keys(PlatformUser::PERMISSION_LABELS) as $permission) {
+            Gate::define($permission, fn ($user) => $user instanceof PlatformUser && ($user->is_active ?? true) && $user->hasPermission($permission));
+        }
+
+        // Defaults the Super Admin can change under Settings.
+        $overrides = array_filter([
+            'skooline.default_trial_days' => Setting::get('trial_days'),
+            'skooline.grace_days' => Setting::get('grace_days'),
+        ], fn ($value) => $value !== null && $value !== '');
+
+        if ($overrides) {
+            config(array_map('intval', $overrides));
+        }
+
+        View::composer('components.layouts.admin', AdminNotifications::class);
     }
 
     /**

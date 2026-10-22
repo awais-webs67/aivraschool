@@ -41,6 +41,61 @@ CREATE TABLE `academic_sessions` (
 
 /*!40000 ALTER TABLE `academic_sessions` DISABLE KEYS */;
 /*!40000 ALTER TABLE `academic_sessions` ENABLE KEYS */;
+DROP TABLE IF EXISTS `activity_logs`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `activity_logs` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `school_id` bigint(20) unsigned DEFAULT NULL,
+  `actor_type` varchar(20) NOT NULL DEFAULT 'system',
+  `actor_id` bigint(20) unsigned DEFAULT NULL,
+  `actor_name` varchar(120) DEFAULT NULL,
+  `action` varchar(60) NOT NULL,
+  `description` varchar(255) NOT NULL,
+  `subject_type` varchar(60) DEFAULT NULL,
+  `subject_id` bigint(20) unsigned DEFAULT NULL,
+  `properties` text DEFAULT NULL,
+  `ip_address` varchar(45) DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `activity_logs_school_id_foreign` (`school_id`),
+  KEY `activity_logs_action_index` (`action`),
+  KEY `activity_logs_created_at_index` (`created_at`),
+  CONSTRAINT `activity_logs_school_id_foreign` FOREIGN KEY (`school_id`) REFERENCES `schools` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+/*!40000 ALTER TABLE `activity_logs` DISABLE KEYS */;
+/*!40000 ALTER TABLE `activity_logs` ENABLE KEYS */;
+DROP TABLE IF EXISTS `announcements`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `announcements` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `title` varchar(150) NOT NULL,
+  `body` text NOT NULL,
+  `tone` varchar(20) NOT NULL DEFAULT 'info',
+  `audience` varchar(20) NOT NULL DEFAULT 'all',
+  `plan_id` bigint(20) unsigned DEFAULT NULL,
+  `school_id` bigint(20) unsigned DEFAULT NULL,
+  `starts_on` date DEFAULT NULL,
+  `ends_on` date DEFAULT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  `created_by` bigint(20) unsigned DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `announcements_plan_id_foreign` (`plan_id`),
+  KEY `announcements_school_id_foreign` (`school_id`),
+  KEY `announcements_created_by_foreign` (`created_by`),
+  CONSTRAINT `announcements_created_by_foreign` FOREIGN KEY (`created_by`) REFERENCES `platform_users` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `announcements_plan_id_foreign` FOREIGN KEY (`plan_id`) REFERENCES `plans` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `announcements_school_id_foreign` FOREIGN KEY (`school_id`) REFERENCES `schools` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+/*!40000 ALTER TABLE `announcements` DISABLE KEYS */;
+/*!40000 ALTER TABLE `announcements` ENABLE KEYS */;
 DROP TABLE IF EXISTS `cache`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8mb4 */;
@@ -54,6 +109,8 @@ CREATE TABLE `cache` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 /*!40000 ALTER TABLE `cache` DISABLE KEYS */;
+INSERT INTO `cache` VALUES
+('skooline-cache-platform-settings','a:0:{}',2108047118);
 /*!40000 ALTER TABLE `cache` ENABLE KEYS */;
 DROP TABLE IF EXISTS `cache_locks`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -114,12 +171,17 @@ CREATE TABLE `demo_requests` (
   `city` varchar(255) DEFAULT NULL,
   `students` int(10) unsigned DEFAULT NULL,
   `message` text DEFAULT NULL,
+  `notes` text DEFAULT NULL,
+  `follow_up_on` date DEFAULT NULL,
   `status` varchar(20) NOT NULL DEFAULT 'new',
+  `school_id` bigint(20) unsigned DEFAULT NULL,
   `ip_address` varchar(45) DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
-  KEY `demo_requests_status_index` (`status`)
+  KEY `demo_requests_status_index` (`status`),
+  KEY `demo_requests_school_id_foreign` (`school_id`),
+  CONSTRAINT `demo_requests_school_id_foreign` FOREIGN KEY (`school_id`) REFERENCES `schools` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -190,7 +252,7 @@ CREATE TABLE `migrations` (
   `migration` varchar(255) NOT NULL,
   `batch` int(11) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 /*!40000 ALTER TABLE `migrations` DISABLE KEYS */;
@@ -206,7 +268,8 @@ INSERT INTO `migrations` VALUES
 (9,'2026_02_01_000001_create_academic_sessions_table',1),
 (10,'2026_02_01_000002_create_classes_and_sections_tables',1),
 (11,'2026_02_01_000003_create_subjects_tables',1),
-(12,'2026_03_01_000001_add_settings_and_school_currency',1);
+(12,'2026_03_01_000001_add_settings_and_school_currency',1),
+(13,'2026_04_01_000001_add_super_admin_tools',1);
 /*!40000 ALTER TABLE `migrations` ENABLE KEYS */;
 DROP TABLE IF EXISTS `password_reset_tokens`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -254,10 +317,10 @@ CREATE TABLE `plans` (
 
 /*!40000 ALTER TABLE `plans` DISABLE KEYS */;
 INSERT INTO `plans` VALUES
-(1,'Starter','starter','For small schools getting started',NULL,'monthly',4000.00,0.00,0.00,14,200,25,1,5,500,'[\"students\",\"admissions\",\"attendance\",\"fees\",\"exams\",\"communication\",\"certificates\",\"reports\"]',1,1,0,1,'2026-10-22 15:59:20','2026-10-22 15:59:20'),
-(2,'Standard','standard','Pay only for active students',NULL,'per_student',0.00,50.00,0.00,14,NULL,150,1,20,2000,'[\"students\",\"admissions\",\"attendance\",\"fees\",\"exams\",\"communication\",\"certificates\",\"reports\",\"timetable\",\"homework\",\"hr_payroll\",\"accounts\",\"library\",\"mobile_apps\"]',1,1,1,2,'2026-10-22 15:59:20','2026-10-22 15:59:20'),
-(3,'Premium','premium','Everything, for multi-campus schools',NULL,'yearly',150000.00,0.00,0.00,14,NULL,NULL,5,100,10000,'[\"students\",\"admissions\",\"attendance\",\"fees\",\"exams\",\"timetable\",\"homework\",\"lms\",\"communication\",\"hr_payroll\",\"accounts\",\"library\",\"transport\",\"hostel\",\"inventory\",\"certificates\",\"reports\",\"multi_branch\",\"mobile_apps\",\"ai\"]',1,1,0,3,'2026-10-22 15:59:20','2026-10-22 15:59:20'),
-(4,'Lifetime','lifetime','One-time license with yearly support',NULL,'lifetime',450000.00,0.00,0.00,14,NULL,NULL,3,50,0,'[\"students\",\"admissions\",\"attendance\",\"fees\",\"exams\",\"timetable\",\"homework\",\"lms\",\"communication\",\"hr_payroll\",\"accounts\",\"library\",\"transport\",\"hostel\",\"inventory\",\"certificates\",\"reports\",\"multi_branch\",\"mobile_apps\",\"ai\"]',1,0,0,4,'2026-10-22 15:59:20','2026-10-22 15:59:20');
+(1,'Starter','starter','For small schools getting started',NULL,'monthly',4000.00,0.00,0.00,14,200,25,1,5,500,'[\"students\",\"admissions\",\"attendance\",\"fees\",\"exams\",\"communication\",\"certificates\",\"reports\"]',1,1,0,1,'2026-10-22 16:38:39','2026-10-22 16:38:39'),
+(2,'Standard','standard','Pay only for active students',NULL,'per_student',0.00,50.00,0.00,14,NULL,150,1,20,2000,'[\"students\",\"admissions\",\"attendance\",\"fees\",\"exams\",\"communication\",\"certificates\",\"reports\",\"timetable\",\"homework\",\"hr_payroll\",\"accounts\",\"library\",\"mobile_apps\"]',1,1,1,2,'2026-10-22 16:38:39','2026-10-22 16:38:39'),
+(3,'Premium','premium','Everything, for multi-campus schools',NULL,'yearly',150000.00,0.00,0.00,14,NULL,NULL,5,100,10000,'[\"students\",\"admissions\",\"attendance\",\"fees\",\"exams\",\"timetable\",\"homework\",\"lms\",\"communication\",\"hr_payroll\",\"accounts\",\"library\",\"transport\",\"hostel\",\"inventory\",\"certificates\",\"reports\",\"multi_branch\",\"mobile_apps\",\"ai\"]',1,1,0,3,'2026-10-22 16:38:39','2026-10-22 16:38:39'),
+(4,'Lifetime','lifetime','One-time license with yearly support',NULL,'lifetime',450000.00,0.00,0.00,14,NULL,NULL,3,50,0,'[\"students\",\"admissions\",\"attendance\",\"fees\",\"exams\",\"timetable\",\"homework\",\"lms\",\"communication\",\"hr_payroll\",\"accounts\",\"library\",\"transport\",\"hostel\",\"inventory\",\"certificates\",\"reports\",\"multi_branch\",\"mobile_apps\",\"ai\"]',1,0,0,4,'2026-10-22 16:38:39','2026-10-22 16:38:39');
 /*!40000 ALTER TABLE `plans` ENABLE KEYS */;
 DROP TABLE IF EXISTS `platform_users`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -271,6 +334,7 @@ CREATE TABLE `platform_users` (
   `role` varchar(30) NOT NULL DEFAULT 'super_admin',
   `is_active` tinyint(1) NOT NULL DEFAULT 1,
   `last_login_at` timestamp NULL DEFAULT NULL,
+  `last_login_ip` varchar(45) DEFAULT NULL,
   `remember_token` varchar(100) DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
@@ -393,6 +457,7 @@ DROP TABLE IF EXISTS `subscriptions`;
 /*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `subscriptions` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `invoice_number` varchar(30) DEFAULT NULL,
   `school_id` bigint(20) unsigned NOT NULL,
   `plan_id` bigint(20) unsigned DEFAULT NULL,
   `plan_name` varchar(255) NOT NULL,
@@ -410,6 +475,7 @@ CREATE TABLE `subscriptions` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
+  UNIQUE KEY `subscriptions_invoice_number_unique` (`invoice_number`),
   KEY `subscriptions_plan_id_foreign` (`plan_id`),
   KEY `subscriptions_created_by_foreign` (`created_by`),
   KEY `subscriptions_school_id_starts_at_index` (`school_id`,`starts_at`),
@@ -421,6 +487,53 @@ CREATE TABLE `subscriptions` (
 
 /*!40000 ALTER TABLE `subscriptions` DISABLE KEYS */;
 /*!40000 ALTER TABLE `subscriptions` ENABLE KEYS */;
+DROP TABLE IF EXISTS `support_tickets`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `support_tickets` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `school_id` bigint(20) unsigned NOT NULL,
+  `user_id` bigint(20) unsigned DEFAULT NULL,
+  `subject` varchar(150) NOT NULL,
+  `category` varchar(30) NOT NULL DEFAULT 'general',
+  `priority` varchar(20) NOT NULL DEFAULT 'normal',
+  `status` varchar(20) NOT NULL DEFAULT 'open',
+  `assigned_to` bigint(20) unsigned DEFAULT NULL,
+  `last_reply_at` timestamp NULL DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `support_tickets_user_id_foreign` (`user_id`),
+  KEY `support_tickets_assigned_to_foreign` (`assigned_to`),
+  KEY `support_tickets_school_id_status_index` (`school_id`,`status`),
+  KEY `support_tickets_status_index` (`status`),
+  CONSTRAINT `support_tickets_assigned_to_foreign` FOREIGN KEY (`assigned_to`) REFERENCES `platform_users` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `support_tickets_school_id_foreign` FOREIGN KEY (`school_id`) REFERENCES `schools` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `support_tickets_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+/*!40000 ALTER TABLE `support_tickets` DISABLE KEYS */;
+/*!40000 ALTER TABLE `support_tickets` ENABLE KEYS */;
+DROP TABLE IF EXISTS `ticket_messages`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `ticket_messages` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `support_ticket_id` bigint(20) unsigned NOT NULL,
+  `author_type` varchar(20) NOT NULL,
+  `author_id` bigint(20) unsigned DEFAULT NULL,
+  `author_name` varchar(120) NOT NULL,
+  `body` text NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `ticket_messages_support_ticket_id_foreign` (`support_ticket_id`),
+  CONSTRAINT `ticket_messages_support_ticket_id_foreign` FOREIGN KEY (`support_ticket_id`) REFERENCES `support_tickets` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+/*!40000 ALTER TABLE `ticket_messages` DISABLE KEYS */;
+/*!40000 ALTER TABLE `ticket_messages` ENABLE KEYS */;
 DROP TABLE IF EXISTS `users`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8mb4 */;

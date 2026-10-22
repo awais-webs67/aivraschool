@@ -1,6 +1,7 @@
 <x-layouts.admin heading="Schools" subheading="Every school subscribed to Skooline. Each one has its own portal and fully separate data.">
     <x-slot:actions>
-        <a href="{{ route('admin.schools.create') }}" class="btn btn-primary"><x-icon name="plus" size="4" /> Add school</a>
+        @can('schools.view')<a href="{{ route('admin.schools.export', request()->query()) }}" class="btn btn-secondary"><x-icon name="download" size="4" /> Export CSV</a>@endcan
+        @can('schools.manage')<a href="{{ route('admin.schools.create') }}" class="btn btn-primary"><x-icon name="plus" size="4" /> Add school</a>@endcan
     </x-slot:actions>
 
     <form method="GET" class="card mb-4 grid gap-3 p-4 sm:grid-cols-[1fr_auto_auto_auto]">
@@ -36,7 +37,7 @@
                 <p class="mt-4 text-lg font-semibold text-ink">{{ array_filter($filters) ? 'No schools match these filters' : 'No schools yet' }}</p>
                 <p class="mt-1 text-sm text-muted">{{ array_filter($filters) ? 'Try a different search or clear the filters.' : 'Add a school to give it its own Skooline portal.' }}</p>
                 @unless (array_filter($filters))
-                    <a href="{{ route('admin.schools.create') }}" class="btn btn-primary mt-5"><x-icon name="plus" size="4" /> Add school</a>
+                    @can('schools.manage')<a href="{{ route('admin.schools.create') }}" class="btn btn-primary mt-5"><x-icon name="plus" size="4" /> Add school</a>@endcan
                 @endunless
             </div>
         @else

@@ -4,8 +4,13 @@
         <a href="{{ route('admin.schools.index') }}" class="btn btn-ghost"><x-icon name="arrow-left" size="4" /> Back to schools</a>
     </x-slot:actions>
 
+    @if ($lead)
+        <div class="alert alert-info mb-6"><x-icon name="info" class="mt-px" /><p>Converting the lead from <span class="font-semibold">{{ $lead->name }}</span>. Check the details, then create the school.</p></div>
+    @endif
+
     <form method="POST" action="{{ route('admin.schools.store') }}" class="grid gap-6 xl:grid-cols-3">
         @csrf
+        @if ($lead)<input type="hidden" name="lead_id" value="{{ $lead->id }}">@endif
         <div class="space-y-6 xl:col-span-2">
             <section class="card">
                 <div class="card-header"><h2 class="card-title">1. School details</h2></div>

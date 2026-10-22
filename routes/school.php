@@ -32,7 +32,16 @@ Route::prefix('{school}')
 
         Route::middleware('auth:school')->group(function () {
             Route::post('logout', [School\LoginController::class, 'destroy'])->name('logout');
+            Route::post('impersonation/leave', [School\ImpersonationController::class, 'leave'])->name('impersonation.leave');
             Route::get('dashboard', School\DashboardController::class)->name('dashboard');
+
+            // Help desk with AivraSol
+            Route::middleware('school.role:admin,principal')->group(function () {
+                Route::get('support', [School\SupportController::class, 'index'])->name('support.index');
+                Route::post('support', [School\SupportController::class, 'store'])->name('support.store');
+                Route::get('support/{ticket}', [School\SupportController::class, 'show'])->name('support.show');
+                Route::post('support/{ticket}/reply', [School\SupportController::class, 'reply'])->name('support.reply');
+            });
 
             // Step 1: school setup — admins and principals only
             Route::prefix('setup')->name('setup.')->middleware('school.role:admin,principal')->group(function () {

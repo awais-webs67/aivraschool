@@ -4,6 +4,7 @@ namespace App\Http\Controllers\School;
 
 use App\Http\Controllers\Controller;
 use App\Models\AcademicSession;
+use App\Models\Announcement;
 use App\Models\School;
 use App\Models\SchoolClass;
 use App\Models\Section;
@@ -42,6 +43,7 @@ class DashboardController extends Controller
             'counts' => $counts,
             'session' => AcademicSession::current(),
             'setup' => $setup,
+            'announcements' => Announcement::query()->visibleTo($school)->latest()->limit(5)->get(),
             'canSetup' => in_array(auth('school')->user()->role, ['admin', 'principal'], true),
         ]);
     }

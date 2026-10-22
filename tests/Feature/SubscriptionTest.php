@@ -112,11 +112,11 @@ class SubscriptionTest extends TestCase
         $school = $this->createSchool('greenfield');
         $subscription = app(SubscriptionManager::class)->assign($school, Plan::factory()->create(), []);
 
-        $this->post(route('admin.subscriptions.paid', $subscription), ['payment_method' => 'jazzcash', 'payment_reference' => 'TX-1'])
+        $this->post(route('admin.subscriptions.paid', $subscription), ['payment_method' => 'mobile_wallet', 'payment_reference' => 'TX-1'])
             ->assertRedirect();
 
         $this->assertSame('paid', $subscription->fresh()->payment_status);
-        $this->assertSame('jazzcash', $subscription->fresh()->payment_method);
+        $this->assertSame('mobile_wallet', $subscription->fresh()->payment_method);
     }
 
     public function test_dashboard_reports_mrr(): void

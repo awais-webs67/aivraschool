@@ -15,9 +15,9 @@ class CurrencyAndSeoTest extends TestCase
     {
         $this->actingAs($this->superAdmin(), 'web');
 
-        $this->get(route('admin.settings'))->assertOk();
+        $this->get(route('admin.settings.currencies'))->assertOk();
 
-        $this->put(route('admin.settings.update'), [
+        $this->put(route('admin.settings.currencies.update'), [
             'currency' => 'USD',
             'enabled' => ['GBP', 'EUR'],
             'website' => ['GBP' => '1.25', 'EUR' => '', 'AED' => '0.27'], // EUR has no rate, AED not ticked
@@ -33,7 +33,7 @@ class CurrencyAndSeoTest extends TestCase
     {
         $this->actingAs($this->superAdmin(), 'web');
 
-        $this->put(route('admin.settings.update'), ['currency' => 'XYZ'])->assertSessionHasErrors('currency');
+        $this->put(route('admin.settings.currencies.update'), ['currency' => 'XYZ'])->assertSessionHasErrors('currency');
     }
 
     public function test_school_currency_is_used_inside_its_portal(): void

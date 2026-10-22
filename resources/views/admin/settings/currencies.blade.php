@@ -1,5 +1,6 @@
 <x-layouts.admin heading="Settings" subheading="Currencies for billing and for the prices shown on your website.">
-    <form method="POST" action="{{ route('admin.settings.update') }}" class="max-w-4xl space-y-6">
+    @include('admin.settings.tabs')
+    <form method="POST" action="{{ route('admin.settings.currencies.update') }}" class="max-w-4xl space-y-6">
         @csrf
         @method('PUT')
 

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\PlatformUser;
+use App\Support\Activity;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -47,7 +48,8 @@ class AdminLoginController extends Controller
 
         RateLimiter::clear($key);
         $request->session()->regenerate();
-        Auth::guard('web')->user()->forceFill(['last_login_at' => now()])->save();
+        Auth::guard('web')->user()->forceFill(['last_login_at' => now(), 'last_login_ip' => $request->ip()])->save();
+        Activity::log('login.platform', 'Signed in to the Super Admin panel');
 
         return redirect()->intended(route('admin.dashboard'));
     }

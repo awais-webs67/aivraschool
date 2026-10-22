@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\School;
 
 use App\Http\Controllers\Controller;
+use App\Support\Activity;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -43,12 +44,17 @@ class LoginController extends Controller
         RateLimiter::clear($key);
         $request->session()->regenerate();
         Auth::guard('school')->user()->forceFill(['last_login_at' => now()])->save();
+        Activity::log('login.school', 'Signed in to the school portal');
 
         return redirect()->intended(route('school.dashboard'));
     }
 
     public function destroy(Request $request): RedirectResponse
     {
+        if ($request->session()->has('impersonator')) {
+            return app(ImpersonationController::class)->leave($request);
+        }
+
         Auth::guard('school')->logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
