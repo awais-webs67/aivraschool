@@ -44,6 +44,7 @@ class PlanRequest extends FormRequest
             'max_branches' => ['required', 'integer', 'min:1', 'max:1000'],
             'storage_gb' => ['required', 'integer', 'min:1', 'max:100000'],
             'sms_credits' => ['nullable', 'integer', 'min:0'],
+            'ai_requests_monthly' => ['nullable', 'integer', 'min:0', 'max:1000000'],
             'modules' => ['array'],
             'modules.*' => ['string', Rule::in(array_keys(config('skooline.modules')))],
             'is_active' => ['boolean'],
@@ -62,7 +63,7 @@ class PlanRequest extends FormRequest
     {
         $data = $this->validated();
 
-        foreach (['price_per_student', 'setup_fee', 'sms_credits', 'sort_order'] as $key) {
+        foreach (['price_per_student', 'setup_fee', 'sms_credits', 'sort_order', 'ai_requests_monthly'] as $key) {
             $data[$key] = $data[$key] ?? 0;
         }
 

@@ -32,7 +32,7 @@ class SchoolProvisioner
             $model = School::create(Arr::only($school, [
                 'name', 'slug', 'email', 'phone', 'city', 'country', 'currency', 'address', 'notes', 'photo_path', 'student_count',
                 'principal_name', 'principal_email', 'principal_phone', 'principal_national_id', 'principal_qualification',
-                'principal_address', 'principal_bio', 'principal_photo_path',
+                'principal_address', 'principal_bio', 'principal_photo_path', 'ai_requests_limit',
             ]) + [
                 'plan_id' => $plan->id,
                 'status' => $isTrial ? SchoolStatus::Trial : SchoolStatus::Active,

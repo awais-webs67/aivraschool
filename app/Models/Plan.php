@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 #[Fillable([
     'name', 'slug', 'tagline', 'description', 'billing_model', 'price', 'price_per_student', 'prices',
     'setup_fee', 'trial_days', 'cta_mode', 'cta_label', 'max_students', 'max_staff', 'max_branches', 'storage_gb',
-    'sms_credits', 'modules', 'is_active', 'show_on_website', 'is_featured', 'sort_order',
+    'sms_credits', 'ai_requests_monthly', 'modules', 'is_active', 'show_on_website', 'is_featured', 'sort_order',
 ])]
 class Plan extends Model
 {

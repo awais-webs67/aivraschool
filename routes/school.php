@@ -36,6 +36,13 @@ Route::prefix('{school}')
             Route::post('impersonation/leave', [School\ImpersonationController::class, 'leave'])->name('impersonation.leave');
             Route::get('dashboard', School\DashboardController::class)->name('dashboard');
 
+            // AI assistant: principals analyse, admins can also confirm suggested changes
+            Route::middleware('school.role:admin,principal')->group(function () {
+                Route::get('ai', [School\AiAssistantController::class, 'index'])->name('ai.index');
+                Route::post('ai/ask', [School\AiAssistantController::class, 'ask'])->middleware('throttle:20,1')->name('ai.ask');
+                Route::post('ai/actions/{action}', [School\AiAssistantController::class, 'confirm'])->name('ai.confirm');
+            });
+
             // Help desk with AivraSol
             Route::middleware('school.role:admin,principal')->group(function () {
                 Route::get('support', [School\SupportController::class, 'index'])->name('support.index');

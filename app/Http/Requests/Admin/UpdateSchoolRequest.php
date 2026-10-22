@@ -33,6 +33,7 @@ class UpdateSchoolRequest extends FormRequest
             'student_count' => ['nullable', 'integer', 'min:0', 'max:100000'],
             'school_photo' => Uploads::PHOTO_RULES,
             'principal_photo' => Uploads::PHOTO_RULES,
+            'ai_requests_limit' => ['nullable', 'integer', 'min:0', 'max:1000000'],
             'notes' => ['nullable', 'string', 'max:2000'],
         ];
     }

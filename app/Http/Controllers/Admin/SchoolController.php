@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreSchoolRequest;
 use App\Http\Requests\Admin\UpdateSchoolRequest;
 use App\Models\ActivityLog;
+use App\Models\AiUsage;
 use App\Models\DemoRequest;
 use App\Models\Plan;
 use App\Models\School;
@@ -140,6 +141,7 @@ class SchoolController extends Controller
             'plans' => Plan::query()->active()->ordered()->get(),
             'usage' => $usage,
             'lastLogin' => $school->users()->max('last_login_at'),
+            'aiUsed' => AiUsage::requestsThisMonth($school),
             'tickets' => SupportTicket::query()->withoutGlobalScopes()->where('school_id', $school->id)->latest('id')->limit(5)->get(),
             'activity' => ActivityLog::query()->where('school_id', $school->id)->latest('id')->limit(8)->get(),
         ]);

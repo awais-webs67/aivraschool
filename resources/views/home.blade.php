@@ -113,14 +113,15 @@
                 <h2 class="heading-lg mt-3">One system. The right screen for every role.</h2>
                 <p class="mt-4 text-lg text-body">Each person signs in and sees only what they need, with permissions you control.</p>
             </div>
-            <div class="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {{-- Phones: a swipeable row; larger screens: a grid --}}
+            <div class="-mx-4 mt-10 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 sm:mx-0 sm:mt-14 sm:grid sm:grid-cols-2 sm:gap-5 sm:overflow-visible sm:px-0 sm:pb-0 lg:grid-cols-4">
                 @foreach ([
                     ['building', 'Principal & admin', 'Live dashboards for enrolment, attendance, collections and results across every class and campus.'],
                     ['academic-cap', 'Teachers', 'Mark attendance in seconds, post homework, enter marks and message parents from any device.'],
                     ['calculator', 'Accounts & office', 'Generate fee invoices in bulk, record payments, issue receipts and follow up on dues.'],
                     ['users', 'Parents & students', 'Attendance, homework, results, invoices and school notices, always up to date.'],
                 ] as $i => [$icon, $title, $text])
-                    <div data-reveal style="--delay: {{ $i * 90 }}ms" class="group card card-hover relative overflow-hidden p-6">
+                    <div data-reveal style="--delay: {{ $i * 90 }}ms" class="group card card-hover relative w-[78%] shrink-0 snap-start overflow-hidden p-6 sm:w-auto">
                         <div aria-hidden="true" class="absolute -top-12 -right-12 size-32 rounded-full bg-brand/0 blur-2xl transition duration-500 group-hover:bg-brand/15"></div>
                         <span class="relative grid size-12 place-items-center rounded-lg bg-ink text-white transition duration-300 group-hover:rotate-[-6deg] group-hover:bg-brand"><x-icon :name="$icon" size="6" /></span>
                         <h3 class="relative mt-5 text-lg font-semibold text-ink">{{ $title }}</h3>
@@ -133,7 +134,7 @@
 
     {{-- Feature spotlights --}}
     <section class="section bg-canvas">
-        <div class="container-x space-y-24">
+        <div class="container-x space-y-14 lg:space-y-24">
             @foreach ([
                 [
                     'eyebrow' => 'Fees & finance', 'title' => 'Collect fees faster. Chase dues less.',
@@ -165,7 +166,7 @@
                             @endforeach
                         </ul>
                     </div>
-                    <div data-reveal style="--delay: 120ms" class="{{ $loop->even ? 'lg:order-1' : '' }}">
+                    <div data-reveal style="--delay: 120ms" class="hidden lg:block {{ $loop->even ? 'lg:order-1' : '' }}">
                         <div class="relative overflow-hidden rounded-xl bg-ink p-5 sm:p-10">
                             <div aria-hidden="true" class="bg-grid-dark absolute inset-0"></div>
                             <div aria-hidden="true" class="glow animate-float-slow -top-20 -right-16 size-72 bg-brand/30"></div>
@@ -203,7 +204,7 @@
                     @endforeach
                 </ul>
             </div>
-            <div data-reveal style="--delay: 120ms" class="space-y-3">
+            <div data-reveal style="--delay: 120ms" class="hidden space-y-3 sm:block">
                 @foreach (['greenfield' => ['Greenfield Grammar School', 'G', 'bg-ink'], 'riverside' => ['Riverside Academy', 'R', 'bg-info'], 'yourschool' => ['Your School', '+', 'bg-brand']] as $slug => [$name, $letter, $bg])
                     <div class="card card-hover flex items-center gap-4 p-4 {{ $loop->last ? 'border-dashed border-brand/50 bg-brand-tint/30' : '' }}" style="margin-left: {{ $loop->index * 6 }}%">
                         <span class="font-display grid size-11 shrink-0 place-items-center rounded-lg text-lg text-white {{ $bg }}">{{ $letter }}</span>
@@ -228,9 +229,9 @@
                 </div>
                 <a href="#demo" class="btn btn-secondary">Get the full feature list</a>
             </div>
-            <div class="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div id="all-modules" class="mt-10 grid gap-3 sm:mt-12 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4">
                 @foreach (array_values($modules) as $i => $module)
-                    <div data-reveal style="--delay: {{ ($i % 4) * 70 }}ms" class="group card card-hover flex gap-4 p-5">
+                    <div data-reveal style="--delay: {{ ($i % 4) * 70 }}ms" class="group card card-hover flex gap-4 p-4 sm:p-5 {{ $i >= 6 ? 'module-extra' : '' }}">
                         <span class="grid size-10 shrink-0 place-items-center rounded-lg bg-brand-tint text-brand-text transition duration-300 group-hover:bg-brand group-hover:text-white"><x-icon :name="$module['icon']" /></span>
                         <div class="min-w-0">
                             <h3 class="text-sm font-semibold text-ink">{{ $module['label'] }}</h3>
@@ -239,6 +240,7 @@
                     </div>
                 @endforeach
             </div>
+            <button type="button" class="btn btn-secondary mt-4 w-full sm:hidden" data-expand="#all-modules" data-expanded-label="Show fewer modules">Show all {{ count($modules) }} modules</button>
         </div>
     </section>
 
@@ -251,13 +253,13 @@
                 <p class="eyebrow text-brand">Go live in days, not months</p>
                 <h2 class="font-display mt-3 text-3xl leading-tight sm:text-4xl lg:text-[2.75rem]">How schools join Skooline</h2>
             </div>
-            <ol class="mt-12 grid gap-5 md:grid-cols-3">
+            <ol class="-mx-4 mt-10 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 md:mx-0 md:mt-12 md:grid md:grid-cols-3 md:gap-5 md:overflow-visible md:px-0 md:pb-0">
                 @foreach ([
                     ['Book a demo', 'See Skooline with your own workflow and choose the plan that fits your school.'],
                     ['We set up your portal', 'Your school\'s private portal is created and we help import your students, staff and fee data.'],
                     ['Start managing', 'Your admin signs in, adds staff and classes, and the whole school runs on one system.'],
                 ] as $i => [$title, $text])
-                    <li data-reveal style="--delay: {{ $i * 110 }}ms" class="group relative rounded-lg border border-white/10 bg-white/[.04] p-6 transition duration-300 hover:-translate-y-1 hover:border-brand/40 hover:bg-white/[.07]">
+                    <li data-reveal style="--delay: {{ $i * 110 }}ms" class="group relative w-[78%] shrink-0 snap-start rounded-lg border border-white/10 bg-white/[.04] p-6 transition duration-300 hover:-translate-y-1 hover:border-brand/40 hover:bg-white/[.07] md:w-auto">
                         <span class="font-display text-5xl text-brand">0{{ $i + 1 }}</span>
                         <h3 class="mt-4 text-lg font-semibold">{{ $title }}</h3>
                         <p class="mt-2 text-sm leading-relaxed text-white/65">{{ $text }}</p>
@@ -298,14 +300,14 @@
                     </div>
                 @endif
 
-                <div class="mx-auto mt-12 grid max-w-6xl gap-6 md:grid-cols-2 {{ $plans->count() >= 3 ? 'lg:grid-cols-3' : '' }}">
+                <div class="-mx-4 mt-10 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pt-4 pb-4 md:mx-auto md:mt-12 md:grid md:max-w-6xl md:grid-cols-2 md:gap-6 md:overflow-visible md:px-0 {{ $plans->count() >= 3 ? 'lg:grid-cols-3' : '' }}">
                     @foreach ($plans as $plan)
                         @php
                             $amount = $plan->headlinePrice();
                             // Where the button goes: the registration form, or the demo form for "contact" plans.
                             $ctaUrl = $plan->cta_mode !== 'contact' && \App\Services\RegistrationService::enabled() ? route('register', ['plan' => $plan->slug]) : '#demo';
                         @endphp
-                        <article data-reveal style="--delay: {{ $loop->index * 90 }}ms" class="relative flex flex-col rounded-xl border bg-white p-6 transition duration-300 hover:-translate-y-1 sm:p-8 {{ $plan->is_featured ? 'border-brand shadow-pop ring-4 ring-brand/10' : 'border-line shadow-card hover:shadow-lift' }}">
+                        <article data-reveal style="--delay: {{ $loop->index * 90 }}ms" class="relative flex w-[85%] shrink-0 snap-center flex-col rounded-xl border bg-white p-6 transition duration-300 hover:-translate-y-1 sm:p-8 md:w-auto {{ $plan->is_featured ? 'border-brand shadow-pop ring-4 ring-brand/10' : 'border-line shadow-card hover:shadow-lift' }}">
                             @if ($plan->is_featured)
                                 <span class="absolute -top-3 left-6 rounded-full bg-gradient-to-r from-brand to-brand-light px-3 py-1 text-xs font-semibold text-white shadow-brand">Most popular</span>
                             @endif
@@ -347,17 +349,17 @@
                 <h2 class="heading-lg mt-3">Your school's data stays your school's data.</h2>
                 <p class="mt-4 text-lg leading-relaxed text-body">Every record in Skooline belongs to exactly one school. Other schools can never see your students, staff or fee records, and every page checks who is signed in.</p>
             </div>
-            <div class="grid gap-4 sm:grid-cols-2">
+            <div class="grid grid-cols-2 gap-3 sm:gap-4">
                 @foreach ([
                     ['shield', 'Fully separated', 'Each school can only ever see its own records.'],
                     ['lock', 'Secure sign-in', 'HTTPS, hashed passwords and login protection.'],
                     ['users', 'Role-based access', 'Staff only see the pages and classes you allow.'],
                     ['refresh', 'Regular backups', 'Your records are backed up so they are never lost.'],
                 ] as $i => [$icon, $title, $text])
-                    <div data-reveal style="--delay: {{ $i * 80 }}ms" class="card card-hover p-5">
+                    <div data-reveal style="--delay: {{ $i * 80 }}ms" class="card card-hover p-4 sm:p-5">
                         <span class="grid size-10 place-items-center rounded-lg bg-success-tint text-success"><x-icon :name="$icon" /></span>
-                        <h3 class="mt-4 font-semibold text-ink">{{ $title }}</h3>
-                        <p class="mt-1 text-sm text-body">{{ $text }}</p>
+                        <h3 class="mt-3 text-sm font-semibold text-ink sm:mt-4 sm:text-base">{{ $title }}</h3>
+                        <p class="mt-1 hidden text-sm text-body sm:block">{{ $text }}</p>
                     </div>
                 @endforeach
             </div>

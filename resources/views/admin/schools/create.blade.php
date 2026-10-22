@@ -35,6 +35,7 @@
                     <x-form.input name="country" label="Country" />
                     <x-form.select name="currency" label="Fee currency" :value="\App\Models\Setting::currency()" :options="collect(config('currencies'))->mapWithKeys(fn ($c, $code) => [$code => $code.' — '.$c[0]])->all()" hint="The school can change this later in its profile." />
                     <x-form.input name="address" label="Address" class="sm:col-span-2" />
+                    <x-form.input name="ai_requests_limit" type="number" min="0" label="AI questions / month"  hint="Blank = use the plan's limit." />
                     <x-photo-input name="school_photo" label="School photo" hint="JPG, PNG or WebP, up to 2 MB." class="sm:col-span-2" />
                 </div>
             </section>

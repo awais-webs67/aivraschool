@@ -78,6 +78,18 @@ document.addEventListener('click', (event) => {
         button.setAttribute('aria-expanded', String(shouldOpen));
     });
 
+    // Expand a shortened list: <button data-expand="#list" data-expanded-label="Show fewer">
+    const expand = event.target.closest('[data-expand]');
+    if (expand) {
+        const target = document.querySelector(expand.dataset.expand);
+        if (target) {
+            const open = target.classList.toggle('is-open');
+            expand.dataset.collapsedLabel ??= expand.textContent;
+            expand.textContent = open ? expand.dataset.expandedLabel : expand.dataset.collapsedLabel;
+            target.querySelectorAll('[data-reveal]').forEach((el) => el.classList.add('is-visible'));
+        }
+    }
+
     // Copy text: <button data-copy="text to copy">
     const copy = event.target.closest('[data-copy]');
     if (copy && navigator.clipboard) {
@@ -294,6 +306,158 @@ document.addEventListener('click', async (event) => {
         window.alert('Could not reach the server. Try again.');
     }
 });
+
+/* ------------------------------------------------------------------ AI setup
+ * [data-ai-test] runs a tiny test call, [data-ai-models] loads the provider's model list,
+ * [data-ai-test-all] tests every switched-on provider one after another.
+ */
+const csrf = () => document.querySelector('meta[name="csrf-token"]')?.content;
+const escapeHtml = (text) => String(text ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+
+const runAiTest = async (button) => {
+    const key = button.dataset.key;
+    const result = document.querySelector(`[data-ai-result="${key}"]`);
+    const badge = document.querySelector(`[data-ai-badge="${key}"]`);
+    button.classList.add('is-busy');
+    button.disabled = true;
+    result.textContent = 'Testing…';
+    try {
+        const response = await fetch(button.dataset.aiTest, { method: 'POST', headers: { Accept: 'application/json', 'X-CSRF-TOKEN': csrf() } });
+        const data = await response.json();
+        if (data.ok) {
+            result.innerHTML = `<span class="font-semibold text-success">✓ Working</span> · ${data.ms} ms · replied "${escapeHtml(data.reply)}"`;
+            badge.className = 'badge badge-success';
+            badge.textContent = 'Working';
+        } else {
+            result.innerHTML = `<span class="font-semibold text-danger">✗ ${escapeHtml(data.title || 'Error')}</span> — ${escapeHtml(data.explanation || data.message || '')}`
+                + (data.detail ? `<span class="mt-1 block font-mono break-words">${escapeHtml(data.detail)}</span>` : '');
+            badge.className = 'badge badge-danger';
+            badge.textContent = data.title || 'Error';
+        }
+    } catch {
+        result.textContent = 'Could not reach the server.';
+    } finally {
+        button.classList.remove('is-busy');
+        button.disabled = false;
+    }
+};
+
+document.addEventListener('click', async (event) => {
+    const test = event.target.closest('[data-ai-test]');
+    if (test) return runAiTest(test);
+
+    if (event.target.closest('[data-ai-test-all]')) {
+        for (const button of document.querySelectorAll('[data-ai-enabled] [data-ai-test]:not([disabled])')) {
+            await runAiTest(button);
+        }
+        return;
+    }
+
+    const load = event.target.closest('[data-ai-models]');
+    if (load) {
+        const status = document.querySelector(`[data-ai-models-status="${load.dataset.target}"]`);
+        status.textContent = 'Loading…';
+        try {
+            const data = await (await fetch(load.dataset.aiModels, { headers: { Accept: 'application/json' } })).json();
+            if (!data.ok) {
+                status.textContent = `${data.title}: ${data.explanation}`;
+                return;
+            }
+            document.getElementById(load.dataset.target).innerHTML = data.models.map((m) => `<option value="${escapeHtml(m)}">`).join('');
+            status.textContent = `${data.models.length} models available — click the model field to choose.`;
+        } catch {
+            status.textContent = 'Could not load models.';
+        }
+    }
+});
+
+/* ------------------------------------------------------------------ School AI assistant
+ * Keeps the conversation in the page (sent back with each question) and shows a Confirm card
+ * when the assistant proposes a change.
+ */
+const chat = document.querySelector('[data-ai-chat]');
+if (chat) {
+    const list = chat.querySelector('[data-ai-messages]');
+    const form = chat.querySelector('[data-ai-form]');
+    const input = chat.querySelector('[data-ai-input]');
+    const history = [];
+
+    const bubble = (role, html) => {
+        const row = document.createElement('div');
+        row.className = role === 'user' ? 'flex justify-end' : 'flex gap-3';
+        row.innerHTML = role === 'user'
+            ? `<div class="max-w-[42rem] rounded-lg rounded-tr-none bg-ink px-4 py-3 text-sm whitespace-pre-line text-white">${html}</div>`
+            : `<span class="grid size-8 shrink-0 place-items-center rounded-full bg-brand text-white">✦</span><div class="ai-prose max-w-[42rem] min-w-0 rounded-lg rounded-tl-none border border-line bg-white px-4 py-3 text-sm">${html}</div>`;
+        list.append(row);
+        list.scrollTop = list.scrollHeight;
+        return row;
+    };
+
+    const actionCard = (action) => {
+        const card = document.createElement('div');
+        card.className = 'ml-11 max-w-[42rem] rounded-lg border border-brand/40 bg-brand-tint/40 p-4';
+        card.innerHTML = `<p class="text-xs font-semibold tracking-wide text-brand-text uppercase">Suggested change</p>
+            <p class="mt-1 text-sm font-medium text-ink">${escapeHtml(action.summary)}</p>
+            <div class="mt-3 flex gap-2"><button type="button" class="btn btn-primary btn-sm" data-confirm-ai>Confirm</button><button type="button" class="btn btn-ghost btn-sm" data-cancel-ai>Cancel</button></div>`;
+        card.querySelector('[data-cancel-ai]').addEventListener('click', () => (card.innerHTML = '<p class="text-sm text-muted">Cancelled. Nothing was changed.</p>'));
+        card.querySelector('[data-confirm-ai]').addEventListener('click', async (e) => {
+            e.target.classList.add('is-busy');
+            e.target.disabled = true;
+            const response = await fetch(action.url, { method: 'POST', headers: { Accept: 'application/json', 'X-CSRF-TOKEN': csrf() } });
+            const data = await response.json().catch(() => ({}));
+            card.innerHTML = response.ok
+                ? `<p class="text-sm font-medium text-success">✓ ${escapeHtml(data.message)}</p>`
+                : `<p class="text-sm font-medium text-danger">${escapeHtml(data.error || 'This change could not be made.')}</p>`;
+        });
+        list.append(card);
+        list.scrollTop = list.scrollHeight;
+    };
+
+    const ask = async (question) => {
+        bubble('user', escapeHtml(question));
+        const thinking = bubble('assistant', '<span class="text-muted">Thinking…</span>');
+        form.querySelector('[data-ai-send]').disabled = true;
+        try {
+            const response = await fetch(chat.dataset.askUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', Accept: 'application/json', 'X-CSRF-TOKEN': csrf() },
+                body: JSON.stringify({ question, history }),
+            });
+            const data = await response.json().catch(() => ({}));
+            thinking.remove();
+            if (!response.ok) {
+                bubble('assistant', `<p class="text-danger">${escapeHtml(data.error || data.message || 'Something went wrong.')}</p>`);
+                return;
+            }
+            bubble('assistant', data.html); // server-rendered Markdown with HTML stripped
+            history.push({ role: 'user', content: question }, { role: 'assistant', content: data.answer });
+            if (data.action) actionCard(data.action);
+            chat.parentElement.querySelectorAll('[data-ai-used]').forEach((el) => (el.textContent = data.used));
+            chat.parentElement.querySelectorAll('[data-ai-meter]').forEach((el) => (el.style.width = `${Math.min(100, Math.round((data.used / data.limit) * 100))}%`));
+        } catch {
+            thinking.remove();
+            bubble('assistant', '<p class="text-danger">Could not reach the server. Try again.</p>');
+        } finally {
+            form.querySelector('[data-ai-send]').disabled = false;
+        }
+    };
+
+    form?.addEventListener('submit', (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        const question = input.value.trim();
+        if (!question) return;
+        input.value = '';
+        ask(question);
+    });
+    input?.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter' && !event.shiftKey) {
+            event.preventDefault();
+            form.requestSubmit();
+        }
+    });
+    chat.querySelectorAll('[data-ai-suggestion]').forEach((button) => button.addEventListener('click', () => ask(button.textContent.trim())));
+}
 
 /* ------------------------------------------------------------------ Forms */
 

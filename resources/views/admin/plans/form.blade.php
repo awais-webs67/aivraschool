@@ -85,6 +85,7 @@
                     <x-form.input name="max_branches" type="number" min="1" label="Branches / campuses" :value="$plan->max_branches" required />
                     <x-form.input name="storage_gb" type="number" min="1" label="Storage (GB)" :value="$plan->storage_gb" required />
                     <x-form.input name="sms_credits" type="number" min="0" label="SMS credits / cycle" :value="$plan->sms_credits" />
+                    <x-form.input name="ai_requests_monthly" type="number" min="0" label="AI questions / month" :value="$plan->ai_requests_monthly ?? 0" hint="Needs the AI Assistant module. 0 = no AI." />
                 </div>
             </section>
 

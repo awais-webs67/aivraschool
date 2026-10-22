@@ -27,7 +27,7 @@ use Illuminate\Support\Carbon;
 #[Fillable([
     'name', 'slug', 'email', 'phone', 'city', 'country', 'currency', 'address', 'logo_path', 'photo_path', 'status', 'student_count',
     'principal_name', 'principal_email', 'principal_phone', 'principal_national_id', 'principal_qualification',
-    'principal_address', 'principal_bio', 'principal_photo_path',
+    'principal_address', 'principal_bio', 'principal_photo_path', 'ai_requests_limit',
     'plan_id', 'trial_ends_at', 'subscription_ends_at', 'suspended_at', 'suspension_reason', 'notes',
 ])]
 class School extends Model
@@ -69,6 +69,16 @@ class School extends Model
     public function url(string $path = ''): string
     {
         return url($this->slug.($path !== '' ? '/'.ltrim($path, '/') : ''));
+    }
+
+    /** AI assistant questions allowed per month: the school's own limit, else its plan's. */
+    public function aiMonthlyLimit(): int
+    {
+        if (! $this->hasModule('ai')) {
+            return 0;
+        }
+
+        return (int) ($this->ai_requests_limit ?? $this->plan?->ai_requests_monthly ?? 0);
     }
 
     /** The currency this school's fees are charged in. */

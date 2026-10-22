@@ -20,6 +20,7 @@
             <x-form.select name="currency" label="Fee currency" :value="$school->currencyCode()" :options="collect(config('currencies'))->mapWithKeys(fn ($c, $code) => [$code => $code.' — '.$c[0]])->all()" />
             <x-form.input name="address" label="Address" :value="$school->address" class="sm:col-span-2" />
             <x-form.input name="student_count" type="number" min="0" label="Students" :value="$school->student_count" />
+            <x-form.input name="ai_requests_limit" type="number" min="0" label="AI questions / month" :value="$school->ai_requests_limit" hint="Blank = use the plan's limit." />
             <x-photo-input name="school_photo" label="School photo" hint="JPG, PNG or WebP, up to 2 MB." class="sm:col-span-2"
                 :current="$school->photo_path ? route('admin.schools.photo', [$school, 'school']) : null" />
             <h2 class="border-t border-line pt-5 text-base font-semibold text-ink sm:col-span-2">Principal</h2>

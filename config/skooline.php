@@ -9,7 +9,7 @@ return [
     */
 
     'name' => 'Skooline',
-    'version' => '0.4.0',
+    'version' => '0.5.0',
     'company' => 'AivraSol',
     'company_url' => 'https://aivrasol.com',
     'support_email' => env('SKOOLINE_SUPPORT_EMAIL', 'info@aivrasol.com'),

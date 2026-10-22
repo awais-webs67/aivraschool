@@ -162,7 +162,14 @@
     .page-title { @apply font-display font-extrabold tracking-[-0.03em] text-2xl leading-tight text-ink sm:text-3xl; }
 
     /* Marketing */
-    .section { @apply px-4 py-16 sm:px-6 md:py-24 lg:px-8; }
+    .section { @apply px-4 py-12 sm:px-6 sm:py-16 md:py-24 lg:px-8; }
+    /* Long lists: phones show the first few until "Show all" is pressed ([data-expand]) */
+    @media (max-width: 639px) {
+        #all-modules:not(.is-open) > .module-extra { display: none !important; } /* beats the card's flex utility */
+    }
+    /* Horizontal swipe rows: hide the scrollbar but keep scrolling */
+    .snap-x { scrollbar-width: none; }
+    .snap-x::-webkit-scrollbar { display: none; }
     .container-x { @apply mx-auto w-full max-w-7xl; }
     .eyebrow { @apply text-sm font-semibold tracking-wide text-brand-text; }
     .heading-xl { @apply font-display font-extrabold tracking-[-0.03em] text-[2.6rem] leading-[1.05] text-ink sm:text-6xl lg:text-[4.25rem]; }
@@ -218,6 +225,18 @@
         animation: btn-spin .6s linear infinite;
     }
     @keyframes btn-spin { to { transform: rotate(360deg); } }
+
+    /* AI answers (server-rendered Markdown) */
+    .ai-prose { @apply leading-relaxed text-ink; overflow-wrap: anywhere; }
+    .ai-prose > * + * { @apply mt-2; }
+    .ai-prose h1, .ai-prose h2, .ai-prose h3 { @apply text-sm font-semibold text-ink; }
+    .ai-prose ul { @apply list-disc space-y-1 pl-5; }
+    .ai-prose ol { @apply list-decimal space-y-1 pl-5; }
+    .ai-prose strong { @apply font-semibold; }
+    .ai-prose code { @apply rounded bg-chip px-1 py-0.5 text-xs; }
+    .ai-prose table { @apply block w-full overflow-x-auto text-left text-xs; }
+    .ai-prose th { @apply border-b border-line bg-canvas px-2 py-1.5 font-semibold; }
+    .ai-prose td { @apply border-b border-line px-2 py-1.5; }
 
     /* Simple dropdown menu (currency picker etc.) */
     .menu { @apply absolute z-30 mt-2 max-h-72 min-w-44 origin-top overflow-y-auto rounded-md border border-line bg-white p-1.5 shadow-pop; }

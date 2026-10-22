@@ -189,6 +189,10 @@
                             <p class="font-display tabular text-xl text-ink">{{ number_format($n) }}</p>
                         </div>
                     @endforeach
+                    <div class="col-span-2 rounded-md bg-canvas px-3 py-2.5">
+                        <p class="flex items-center gap-1.5 text-xs text-muted"><x-icon name="sparkles" size="3" /> AI questions this month</p>
+                        <p class="font-display tabular text-xl text-ink">{{ number_format($aiUsed) }} <span class="text-sm font-normal text-muted">/ {{ $school->aiMonthlyLimit() ?: 'no AI' }}</span></p>
+                    </div>
                 </div>
             </section>
 

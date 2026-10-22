@@ -138,6 +138,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('settings/payments/test', [Admin\IntegrationController::class, 'testStripe'])->name('settings.payments.test');
             Route::get('settings/security', [Admin\IntegrationController::class, 'security'])->name('settings.security');
             Route::put('settings/security/pin', [Admin\IntegrationController::class, 'updatePin'])->name('settings.pin');
+            // AI setup
+            Route::get('ai', [Admin\AiSetupController::class, 'index'])->name('ai.index');
+            Route::post('ai/edit-mode', [Admin\AiSetupController::class, 'editMode'])->name('ai.edit-mode');
+            Route::post('ai/custom', [Admin\AiSetupController::class, 'storeCustom'])->name('ai.custom.store');
+            Route::delete('ai/custom/{provider}', [Admin\AiSetupController::class, 'destroyCustom'])->name('ai.custom.destroy');
+            Route::put('ai/{provider}', [Admin\AiSetupController::class, 'update'])->name('ai.update');
+            Route::post('ai/{provider}/test', [Admin\AiSetupController::class, 'test'])->middleware('throttle:30,1')->name('ai.test');
+            Route::get('ai/{provider}/models', [Admin\AiSetupController::class, 'models'])->middleware('throttle:30,1')->name('ai.models');
+
             Route::post('settings/reveal', [Admin\IntegrationController::class, 'reveal'])->middleware('throttle:20,1')->name('settings.reveal');
         });
         Route::middleware('can:system')->group(function () {

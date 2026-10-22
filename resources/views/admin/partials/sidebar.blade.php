@@ -18,6 +18,7 @@
         'Administration' => [
             ['admin.team.index', 'admin.team.*', 'users', 'Team', 'team'],
             ['admin.activity', 'admin.activity', 'clock', 'Activity log', 'activity'],
+            ['admin.ai.index', 'admin.ai.*', 'sparkles', 'AI setup', 'settings'],
             ['admin.settings', 'admin.settings*', 'sliders', 'Settings', 'settings'],
             ['admin.system', 'admin.system', 'cube', 'System', 'system'],
         ],

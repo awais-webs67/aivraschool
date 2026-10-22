@@ -46,6 +46,7 @@ class StoreSchoolRequest extends FormRequest
             'principal_bio' => ['nullable', 'string', 'max:1000'],
             'school_photo' => Uploads::PHOTO_RULES,
             'principal_photo' => Uploads::PHOTO_RULES,
+            'ai_requests_limit' => ['nullable', 'integer', 'min:0', 'max:1000000'],
             'notes' => ['nullable', 'string', 'max:2000'],
 
             'plan_id' => ['required', Rule::exists('plans', 'id')],

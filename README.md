@@ -27,6 +27,9 @@ Installs on **cPanel / hPanel** like any PHP script: upload, import `database/sk
 | Currencies: billing currency, fee currency per school, currency switcher on website pricing (Super Admin → Currencies) | ✅ |
 | SEO: titles, descriptions, canonical, Open Graph image, structured data, `robots.txt`, `sitemap.xml`, private pages `noindex` | ✅ |
 | **Super Admin tools:** dashboard with revenue and growth charts, reports, invoices (numbered, printable/PDF, CSV), leads CRM with follow-ups and convert-to-school, support tickets with schools, announcements, team members with roles (Owner, Manager, Accountant, Support), login as a school, activity log, notification bell, company settings | ✅ |
+| **Self-registration:** "Register your school" with principal profile (CNIC, photo, bio), plan or free trial, Stripe payment, admin approval or auto-approve, emails | ✅ |
+| **Integrations:** SMTP email with test, Stripe with test, secrets in `.env` shown masked (PIN to reveal) | ✅ |
+| **AI:** 23 providers + custom (OpenAI-compatible / Anthropic), test & error help, failover order, AI quota per plan/school, school AI assistant (principal: analysis; admin: confirmed actions) — see [`docs/AI.md`](docs/AI.md) | ✅ |
 | Step 2 — Students & admissions | Next |
 
 ## Tech stack

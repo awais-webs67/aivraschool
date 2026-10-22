@@ -10,6 +10,11 @@
         <a href="{{ route('school.dashboard') }}" class="nav-link" @if (request()->routeIs('school.dashboard')) aria-current="page" @endif>
             <x-icon name="home" /> Dashboard
         </a>
+        @if (in_array($user->role, ['admin', 'principal'], true) && $school->aiMonthlyLimit() > 0)
+            <a href="{{ route('school.ai.index') }}" class="nav-link" @if (request()->routeIs('school.ai.*')) aria-current="page" @endif>
+                <x-icon name="sparkles" /> AI assistant <span class="ml-auto rounded-full bg-brand/90 px-1.5 text-[10px] leading-5 font-bold text-white">AI</span>
+            </a>
+        @endif
         @if (in_array($user->role, ['admin', 'principal'], true))
             <p class="nav-section">School setup</p>
             @foreach ([
@@ -26,7 +31,7 @@
         @endif
         <p class="nav-section">Coming next</p>
         @foreach (config('skooline.modules') as $key => $module)
-            @if ($school->hasModule($key))
+            @if ($school->hasModule($key) && $key !== 'ai')
                 <span class="nav-link cursor-default opacity-60" title="Coming soon">
                     <x-icon :name="$module['icon']" /> <span class="truncate">{{ $module['label'] }}</span>
                     <span class="ml-auto rounded-sm bg-white/10 px-1.5 py-0.5 text-[10px] font-semibold">Soon</span>
