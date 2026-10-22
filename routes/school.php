@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\School;
+use App\Http\Controllers\School\People;
 use App\Http\Controllers\School\Setup;
 use App\Http\Middleware\EnsureDatabaseIsUpToDate;
 use App\Http\Middleware\EnsureSchoolCanAccess;
@@ -61,6 +62,21 @@ Route::prefix('{school}')
                 Route::post('support', [School\SupportController::class, 'store'])->name('support.store');
                 Route::get('support/{ticket}', [School\SupportController::class, 'show'])->name('support.show');
                 Route::post('support/{ticket}/reply', [School\SupportController::class, 'reply'])->name('support.reply');
+            });
+
+            // Step 2: staff and their portal logins — admins and principals only
+            Route::middleware('school.role:admin,principal')->group(function () {
+                Route::get('staff', [People\StaffController::class, 'index'])->name('staff.index');
+                Route::get('staff/create', [People\StaffController::class, 'create'])->name('staff.create');
+                Route::post('staff', [People\StaffController::class, 'store'])->name('staff.store');
+                Route::get('staff/export', [People\StaffController::class, 'export'])->name('staff.export');
+                Route::get('staff/class-teachers', [People\StaffController::class, 'classTeachers'])->name('staff.class-teachers');
+                Route::put('staff/class-teachers', [People\StaffController::class, 'saveClassTeachers'])->name('staff.class-teachers.save');
+                Route::get('staff/{member}', [People\StaffController::class, 'show'])->name('staff.show');
+                Route::get('staff/{member}/edit', [People\StaffController::class, 'edit'])->name('staff.edit');
+                Route::put('staff/{member}', [People\StaffController::class, 'update'])->name('staff.update');
+                Route::delete('staff/{member}', [People\StaffController::class, 'destroy'])->name('staff.destroy');
+                Route::get('staff/{member}/photo', [People\StaffController::class, 'photo'])->name('staff.photo');
             });
 
             // Step 1: school setup — admins and principals only

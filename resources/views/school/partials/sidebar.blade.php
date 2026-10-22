@@ -16,6 +16,14 @@
             </a>
         @endif
         @if (in_array($user->role, ['admin', 'principal'], true))
+            <p class="nav-section">People</p>
+            @foreach ([
+                ['school.staff.index', 'school.staff.*', 'briefcase', 'Staff'],
+            ] as [$route, $active, $icon, $label])
+                <a href="{{ route($route) }}" class="nav-link" @if (request()->routeIs($active)) aria-current="page" @endif>
+                    <x-icon :name="$icon" /> {{ $label }}
+                </a>
+            @endforeach
             <p class="nav-section">School setup</p>
             @foreach ([
                 ['school.setup.profile', 'building', 'School profile'],

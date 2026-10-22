@@ -149,10 +149,13 @@ AI pack (remarks, question papers, at-risk students, WhatsApp assistant) · GPS 
 ---
 
 ## Part C — Step by step
+Detailed principal portal plan: [`PRINCIPAL_PORTAL.md`](PRINCIPAL_PORTAL.md).
+
 1. ✅ **School setup:** school profile and logo, academic sessions, classes and sections, subjects
-2. **Students & admissions** ← next
-3. **Attendance**
-4. **Fees & challans**
+2. ✅ **Staff & roles:** staff records, portal logins with roles, class teachers
+3. **Students & admissions** ← next
+4. **Attendance**
+5. **Fees & challans**
 
 ## Part D — Definition of Done (every feature)
 - Permission checked (policy) + module/plan check
