@@ -10,7 +10,7 @@
         <p>{{ session('error') }}</p>
     </div>
 @endif
-@if ($errors->any() && ! ($inline ?? false))
+@if ($errors->any())
     <div class="alert alert-danger" role="alert">
         <x-icon name="alert" class="mt-px" />
         <div>

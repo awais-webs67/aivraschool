@@ -9,8 +9,8 @@ use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Defence in depth: all schools share one domain and one session cookie. If a user
- * of school A ever reaches a school B page, sign them out and send them to B's login.
+ * All schools share one domain and one session cookie. If a user signed in to
+ * school A opens a school B page, sign them out and send them to B's login.
  */
 class EnsureUserBelongsToSchool
 {
