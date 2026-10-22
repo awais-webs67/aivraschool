@@ -1,7 +1,7 @@
-# AivraSchool — Product Research & Full Feature Specification
+# Skooline by AivraSol — Product Research & Full Feature Specification
 
 > Multi-tenant, subscription-based School Management SaaS by **AivraSol** (aivrasol.com).
-> One product, one brand (**AivraSchool**). AivraSol is the **Super Admin** and sells subscriptions directly to schools — no resellers, no white-label.
+> One product, one brand (**Skooline**). AivraSol is the **Super Admin** and sells subscriptions directly to schools — no resellers, no white-label.
 > Each subscribing school receives its own credentials and an isolated workspace; what it can access is decided by its subscription plan.
 > Stack: **PHP (Laravel)**. UI theme: AivraSol brand colors (see §13).
 
@@ -73,7 +73,7 @@ SCHOOL (Tenant)  — may have multiple Branches/Campuses
 - System health: queue status, failed jobs, error rate, backup status
 
 ### 3.2 School (Tenant) Management
-- Add school wizard: name, logo, address, city, contact, owner info, **subdomain** (`schoolname.aivraschool.com`), optional **custom domain**
+- Add school wizard: name, logo, address, city, contact, owner info, **subdomain** (`schoolname.skooline.com`), optional **custom domain**
 - Auto-create school admin account + send welcome credentials (SMS/WhatsApp/email)
 - Assign plan, trial days, branches limit, student limit
 - Enable/disable individual modules per school (feature flags)
@@ -312,7 +312,7 @@ Every module below is toggleable by plan. ✅ = MVP, 🔷 = Phase 2, 🔶 = Phas
 | **Driver app** 🔶 | Start trip → GPS share, mark pickup/drop |
 | **Staff / Accountant** | Fee collection on mobile, receipts |
 
-All apps are published under the single **AivraSchool** brand; each school's logo/name is shown inside the app after login (no separate store apps per school).
+All apps are published under the single **Skooline** brand; each school's logo/name is shown inside the app after login (no separate store apps per school).
 
 ---
 
@@ -335,7 +335,7 @@ All apps are published under the single **AivraSchool** brand; each school's log
 | Layer | Choice | Why |
 |---|---|---|
 | Language / Framework | **PHP 8.3+ / Laravel 12** (LTS-track) | Mature, huge PK talent pool, fast to build ERP CRUD |
-| Multi-tenancy | **stancl/tenancy** (database-per-tenant) | Each school's data in its own DB → strongest isolation, easy per-school backup/restore/export; subdomain per school (`school.aivraschool.com`) |
+| Multi-tenancy | **stancl/tenancy** (database-per-tenant) | Each school's data in its own DB → strongest isolation, easy per-school backup/restore/export; subdomain per school (`school.skooline.com`) |
 | Central DB | MySQL 8 / MariaDB (or PostgreSQL) | Plans, tenants, subscriptions, platform invoices |
 | Auth & RBAC | Laravel Sanctum (API/mobile) + **spatie/laravel-permission** | Roles, permissions, scopes |
 | Feature flags / plan limits | Laravel Pennant + custom plan-limit middleware | Turn modules on/off per subscription |
@@ -422,7 +422,7 @@ Add-ons: SMS bundles, WhatsApp API, GPS, extra storage, data migration.
 ---
 
 ## 12. Decisions Made
-- Brand: single product **AivraSchool** by AivraSol, sold directly — no resellers, no white-label.
+- Brand: single product **Skooline** by AivraSol, sold directly — no resellers, no white-label.
 - Each subscribed school gets admin credentials; module access follows its plan.
 - Stack: PHP / Laravel, database-per-school.
 - Theme: AivraSol brand palette (§13).
@@ -437,7 +437,7 @@ Add-ons: SMS bundles, WhatsApp API, GPS, extra storage, data migration.
 
 ## 13. Brand & UI Design System (from aivrasol.com)
 
-Extracted from `aivrasol.com/assets/css/app.css` — AivraSchool uses the same family so it is recognisably an AivraSol product, with app-specific extensions for dashboards.
+Extracted from `aivrasol.com/assets/css/app.css` — Skooline uses the same family so it is recognisably an AivraSol product, with app-specific extensions for dashboards.
 
 ### Core palette
 | Token | Hex | Use |
@@ -473,24 +473,21 @@ Extracted from `aivrasol.com/assets/css/app.css` — AivraSchool uses the same f
 - Shadows: card `0 1px 10px rgba(0,0,0,.08)`, popover `0 20px 25px -5px rgba(0,0,0,.12)`.
 
 ### Layout ("a bit different" from the website)
-- Website is a marketing page; AivraSchool is an app, so: **dark slate (#333F48) left sidebar** with orange active indicator, white top bar with school logo + session switcher + search (Ctrl+K), light grey (#F6F7F8) workspace with white cards.
+- Website is a marketing page; Skooline is an app, so: **dark slate (#333F48) left sidebar** with orange active indicator, white top bar with school logo + session switcher + search (Ctrl+K), light grey (#F6F7F8) workspace with white cards.
 - Super Admin panel uses the inverse accent (ink `#191F24` sidebar) so staff instantly know they are in the platform panel, not a school.
 - Dark mode: surface `#191F24`, cards `#232B31`, orange stays primary.
 - Status always = color **+ icon/text** (accessible; never color alone).
 
 ---
 
-## 14. Product Name
+## 14. Product Name — FINAL
 
-**Recommended: keep `AivraSchool`** — it carries the AivraSol brand, is self-explanatory to principals, and matches the repo/domain plan (`aivraschool.com`, subdomains `school.aivraschool.com`).
-Tagline ideas: *"AivraSchool — The Complete School ERP"* · *"Run your whole school from one screen."*
+**Skooline by AivraSol**
 
-Alternatives if a broader name is wanted later:
-| Name | Note |
-|---|---|
-| **AivraCampus** | Fits multi-branch schools, colleges later |
-| **AivraEdu** | Room to expand to colleges/academies/universities |
-| **Aivra SchoolOS** | Modern "operating system for schools" positioning |
-| **AivraLearn** | Leans LMS — less suited to an ERP |
+- Product name: **Skooline** (always written with capital S, one word)
+- Endorsement line: "by AivraSol" under the logo / in the footer / on the login page
+- Tagline ideas: *"Skooline — The Complete School ERP"* · *"Your whole school, one line."*
+- Domain plan: `skooline.com` (or `skooline.pk`) — each school on `schoolname.skooline.com`
+- Logo idea: "Skooline" wordmark in Bebas Neue, ink `#191F24`, with an orange `#FF5B35` line/underline (the "line" in Skooline)
 
-> Domain & trademark availability (aivraschool.com / .pk, IPO Pakistan trademark search) must be checked before final branding.
+> Domain & trademark availability (skooline.com / .pk, IPO Pakistan trademark search) must be confirmed before buying assets.
