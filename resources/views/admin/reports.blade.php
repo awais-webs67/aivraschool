@@ -64,9 +64,9 @@
             <section class="card">
                 <div class="card-header"><h2 class="card-title">Exports</h2></div>
                 <div class="card-body grid gap-2">
-                    @can('schools.view')<a href="{{ route('admin.schools.export') }}" class="btn btn-secondary justify-start"><x-icon name="download" size="4" /> Schools (CSV)</a>@endcan
-                    @can('billing')<a href="{{ route('admin.subscriptions.export') }}" class="btn btn-secondary justify-start"><x-icon name="download" size="4" /> Invoices (CSV)</a>@endcan
-                    @can('leads')<a href="{{ route('admin.demo-requests.export') }}" class="btn btn-secondary justify-start"><x-icon name="download" size="4" /> Leads (CSV)</a>@endcan
+                    @can('schools.view')<a data-no-progress href="{{ route('admin.schools.export') }}" class="btn btn-secondary justify-start"><x-icon name="download" size="4" /> Schools (CSV)</a>@endcan
+                    @can('billing')<a data-no-progress href="{{ route('admin.subscriptions.export') }}" class="btn btn-secondary justify-start"><x-icon name="download" size="4" /> Invoices (CSV)</a>@endcan
+                    @can('leads')<a data-no-progress href="{{ route('admin.demo-requests.export') }}" class="btn btn-secondary justify-start"><x-icon name="download" size="4" /> Leads (CSV)</a>@endcan
                 </div>
             </section>
         </div>

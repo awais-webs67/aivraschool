@@ -37,7 +37,7 @@
 <link rel="icon" href="{{ asset('images/icon-192.png') }}" type="image/png" sizes="192x192">
 <link rel="apple-touch-icon" href="{{ asset('images/apple-touch-icon.png') }}">
 <link rel="manifest" href="{{ asset('site.webmanifest') }}">
-<link rel="preconnect" href="https://fonts.bunny.net" crossorigin>
-<link href="https://fonts.bunny.net/css?family=inter:400,500,600,700|plus-jakarta-sans:600,700,800&display=swap" rel="stylesheet">
+{{-- Start loading a page when the pointer rests on its link, so the click feels instant (Chrome/Edge). --}}
+<script type="speculationrules">{"prefetch":[{"where":{"and":[{"href_matches":"/*"},{"not":{"href_matches":"/*export*"}},{"not":{"href_matches":"/*/invoice"}},{"not":{"selector_matches":"[data-no-progress], [download], [target=_blank]"}}]},"eagerness":"moderate"}]}</script>
 <script>document.documentElement.classList.add('js')</script>
 @vite(['resources/css/app.css', 'resources/js/app.js'])

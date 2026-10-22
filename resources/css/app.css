@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@import './fonts.css';
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 
@@ -158,14 +159,14 @@
     .nav-section { @apply px-3 pt-5 pb-2 text-[11px] font-semibold tracking-wider text-white/40 uppercase; }
 
     /* Page headings inside the apps */
-    .page-title { @apply font-display text-2xl leading-tight text-ink sm:text-3xl; }
+    .page-title { @apply font-display font-extrabold tracking-[-0.03em] text-2xl leading-tight text-ink sm:text-3xl; }
 
     /* Marketing */
     .section { @apply px-4 py-16 sm:px-6 md:py-24 lg:px-8; }
     .container-x { @apply mx-auto w-full max-w-7xl; }
     .eyebrow { @apply text-sm font-semibold tracking-wide text-brand-text; }
-    .heading-xl { @apply font-display text-[2.6rem] leading-[1.05] text-ink sm:text-6xl lg:text-[4.25rem]; }
-    .heading-lg { @apply font-display text-3xl leading-tight text-ink sm:text-4xl lg:text-[2.75rem]; }
+    .heading-xl { @apply font-display font-extrabold tracking-[-0.03em] text-[2.6rem] leading-[1.05] text-ink sm:text-6xl lg:text-[4.25rem]; }
+    .heading-lg { @apply font-display font-extrabold tracking-[-0.03em] text-3xl leading-tight text-ink sm:text-4xl lg:text-[2.75rem]; }
     .bg-grid {
         background-image: linear-gradient(to right, rgba(17, 22, 27, .06) 1px, transparent 1px), linear-gradient(to bottom, rgba(17, 22, 27, .06) 1px, transparent 1px);
         background-size: 44px 44px;
@@ -204,6 +205,19 @@
     .drawer-right .drawer-panel { @apply right-0 translate-x-full; }
     .drawer[data-open] .drawer-panel { @apply translate-x-0; }
     .drawer-close { @apply grid size-10 place-items-center rounded-md transition; }
+
+    /* Thin bar at the top while the next page loads, and a spinner on the button that submitted a form */
+    .page-progress {
+        @apply pointer-events-none fixed top-0 left-0 z-[100] h-[3px] w-0 bg-gradient-to-r from-brand to-brand-light opacity-0 shadow-brand;
+        transition: width .2s ease, opacity .4s ease;
+    }
+    .page-progress.is-loading { @apply w-[88%] opacity-100; transition: width 6s cubic-bezier(.08, .8, .2, 1), opacity .1s; }
+    .btn.is-busy { @apply cursor-wait opacity-80; }
+    .btn.is-busy::before {
+        content: ''; @apply size-3.5 shrink-0 rounded-full border-2 border-current border-r-transparent;
+        animation: btn-spin .6s linear infinite;
+    }
+    @keyframes btn-spin { to { transform: rotate(360deg); } }
 
     /* Simple dropdown menu (currency picker etc.) */
     .menu { @apply absolute z-30 mt-2 max-h-72 min-w-44 origin-top overflow-y-auto rounded-md border border-line bg-white p-1.5 shadow-pop; }

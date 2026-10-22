@@ -22,6 +22,9 @@ class Setting extends Model
 
     protected const CACHE_KEY = 'platform-settings';
 
+    /** Loaded once per request; money() alone may ask for the currency dozens of times. */
+    protected static ?array $loaded = null;
+
     public static function get(string $key, mixed $default = null): mixed
     {
         return static::all_()[$key] ?? $default;
@@ -34,13 +37,23 @@ class Setting extends Model
         }
 
         Cache::forget(self::CACHE_KEY);
+        static::$loaded = null;
+    }
+
+    public static function flushMemory(): void
+    {
+        static::$loaded = null;
     }
 
     /** @return array<string, mixed> */
     protected static function all_(): array
     {
+        if (static::$loaded !== null) {
+            return static::$loaded;
+        }
+
         try {
-            return Cache::rememberForever(self::CACHE_KEY, fn () => Schema::hasTable('settings')
+            return static::$loaded = Cache::rememberForever(self::CACHE_KEY, fn () => Schema::hasTable('settings')
                 ? static::query()->pluck('value', 'key')->map(fn ($v) => json_decode((string) $v, true))->all()
                 : []);
         } catch (Throwable) {

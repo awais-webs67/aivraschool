@@ -5,6 +5,7 @@ namespace Tests;
 use App\Models\Plan;
 use App\Models\PlatformUser;
 use App\Models\School;
+use App\Models\Setting;
 use App\Services\SchoolProvisioner;
 use App\Support\DatabaseStatus;
 use App\Support\Tenancy\CurrentSchool;
@@ -16,7 +17,9 @@ abstract class TestCase extends BaseTestCase
     {
         parent::setUp();
 
-        DatabaseStatus::forget(); // static per process; reset between tests
+        // Both remember things for the rest of the request; tests share one process.
+        DatabaseStatus::forget();
+        Setting::flushMemory();
 
         $this->withoutVite();
     }

@@ -106,6 +106,55 @@ document.addEventListener('submit', (event) => {
     }
 });
 
+/* ------------------------------------------------------------------ Page loading feedback
+ * A thin bar at the top as soon as a link is clicked or a form is sent, and a spinner on the
+ * button that sent it (also stops double submits). Links that download a file: data-no-progress.
+ */
+const progress = document.createElement('div');
+progress.className = 'page-progress';
+progress.setAttribute('aria-hidden', 'true');
+document.body.append(progress);
+let progressTimer;
+
+const startProgress = () => {
+    progress.classList.add('is-loading');
+    clearTimeout(progressTimer);
+    progressTimer = setTimeout(stopProgress, 15000);
+};
+const stopProgress = () => {
+    progress.classList.remove('is-loading');
+    document.querySelectorAll('.btn.is-busy').forEach((b) => {
+        b.classList.remove('is-busy');
+        b.disabled = false;
+    });
+};
+
+document.addEventListener('click', (event) => {
+    const link = event.target.closest('a[href]');
+    if (!link || event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    if ((link.target && link.target !== '_self') || link.hasAttribute('download') || 'noProgress' in link.dataset) return;
+    const url = new URL(link.href, window.location.href);
+    if (url.origin !== window.location.origin || !/^https?:$/.test(url.protocol)) return;
+    if (url.pathname === window.location.pathname && url.search === window.location.search) return; // same page / #anchor
+    startProgress();
+});
+
+document.addEventListener('submit', (event) => {
+    if (event.defaultPrevented || event.target.target === '_blank') return;
+    startProgress();
+    const button = event.submitter;
+    if (button?.classList.contains('btn')) {
+        // Disable after the browser has read the button's name/value.
+        setTimeout(() => {
+            button.classList.add('is-busy');
+            button.disabled = true;
+        }, 0);
+    }
+});
+
+// Back/forward cache restores the old page: clear any loading state.
+window.addEventListener('pageshow', stopProgress);
+
 /* ------------------------------------------------------------------ Effects */
 
 // Header gets a shadow once the page is scrolled: <header data-scroll-header>

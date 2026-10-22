@@ -3,7 +3,7 @@
 @endphp
 <x-layouts.admin heading="Billing & invoices" subheading="Every invoice across all schools. Record payments, print invoices and export.">
     <x-slot:actions>
-        <a href="{{ route('admin.subscriptions.export', request()->query()) }}" class="btn btn-secondary"><x-icon name="download" size="4" /> Export CSV</a>
+        <a data-no-progress href="{{ route('admin.subscriptions.export', request()->query()) }}" class="btn btn-secondary"><x-icon name="download" size="4" /> Export CSV</a>
     </x-slot:actions>
 
     <div class="grid gap-4 sm:grid-cols-3">

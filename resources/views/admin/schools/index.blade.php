@@ -1,6 +1,6 @@
 <x-layouts.admin heading="Schools" subheading="Every school subscribed to Skooline. Each one has its own portal and fully separate data.">
     <x-slot:actions>
-        @can('schools.view')<a href="{{ route('admin.schools.export', request()->query()) }}" class="btn btn-secondary"><x-icon name="download" size="4" /> Export CSV</a>@endcan
+        @can('schools.view')<a data-no-progress href="{{ route('admin.schools.export', request()->query()) }}" class="btn btn-secondary"><x-icon name="download" size="4" /> Export CSV</a>@endcan
         @can('schools.manage')<a href="{{ route('admin.schools.create') }}" class="btn btn-primary"><x-icon name="plus" size="4" /> Add school</a>@endcan
     </x-slot:actions>
 

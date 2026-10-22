@@ -27,6 +27,7 @@ class SystemController extends Controller
                 'Database' => DB::connection()->getDriverName().' '.$this->databaseVersion(),
                 'Environment' => app()->environment(),
                 'Debug mode' => config('app.debug') ? 'On (turn off in production)' : 'Off',
+                'OPcache (speed)' => $this->opcacheEnabled() ? 'On' : 'Off — turn it on in php.ini, pages load several times faster',
                 'Storage writable' => is_writable(storage_path()) ? 'Yes' : 'No — make storage/ writable',
             ],
             'cron' => 'cd '.base_path().' && php artisan schedule:run >> /dev/null 2>&1',
@@ -41,6 +42,12 @@ class SystemController extends Controller
             Artisan::call('migrate', ['--force' => true]);
             Artisan::call('optimize:clear');
             DatabaseStatus::forget();
+
+            // On the live server, pre-build config and page templates so every request is faster.
+            if (app()->isProduction()) {
+                Artisan::call('config:cache');
+                Artisan::call('view:cache');
+            }
         } catch (Throwable $e) {
             report($e);
 
@@ -48,6 +55,18 @@ class SystemController extends Controller
         }
 
         return back()->with('success', 'Database is up to date.');
+    }
+
+    protected function opcacheEnabled(): bool
+    {
+        if (! function_exists('opcache_get_status')) {
+            return false;
+        }
+
+        $status = @opcache_get_status(false);
+
+        // Some hosts hide the status but still run OPcache.
+        return $status === false ? (bool) ini_get('opcache.enable') : (bool) ($status['opcache_enabled'] ?? false);
     }
 
     protected function databaseVersion(): string

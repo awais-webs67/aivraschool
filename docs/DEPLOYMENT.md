@@ -243,3 +243,23 @@ Nothing in Skooline is tied to one hosting company. Moving takes about an hour, 
 | `/admin` asks to create a Super Admin again | The `platform_users` table is empty, so the SQL was imported into a different database than the one in `.env`. |
 | A school address shows "404" | No school has that address. Check it in Super Admin → Schools. |
 | `.env` changes don't apply | Delete `bootstrap/cache/config.php` if it exists. |
+
+## Speed: make pages load fast
+
+Laravel reads many PHP files on every click. **OPcache** keeps them ready in memory, which makes pages several times faster. Super Admin → System shows whether it is on.
+
+**XAMPP (Windows):** open `C:\xampp\php\php.ini`, find these lines, remove the `;` in front and set the values, then restart Apache:
+
+```
+zend_extension=opcache
+opcache.enable=1
+opcache.memory_consumption=256
+opcache.max_accelerated_files=20000
+opcache.revalidate_freq=0
+realpath_cache_size=4096K
+realpath_cache_ttl=600
+```
+
+**cPanel / hPanel:** OPcache is usually on already. If System shows "Off", enable the `opcache` extension under *Select PHP Version* (cPanel) or *PHP Configuration → PHP extensions* (hPanel).
+
+On the live server keep `APP_ENV=production` and `APP_DEBUG=false` in `.env`. "Run updates" then also pre-builds the configuration and page templates. After editing `.env` on the live server, press **Run updates** once so the change is picked up.
