@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\PlatformUser;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -13,8 +14,13 @@ use Illuminate\View\View;
 
 class AdminLoginController extends Controller
 {
-    public function create(): View
+    public function create(): View|RedirectResponse
     {
+        // Fresh install (SQL just imported): create the first Super Admin instead.
+        if (! PlatformUser::query()->exists()) {
+            return redirect()->route('admin.setup');
+        }
+
         return view('admin.auth.login');
     }
 

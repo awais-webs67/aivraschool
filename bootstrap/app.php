@@ -1,21 +1,29 @@
 <?php
 
+use App\Http\Middleware\IdentifySchool;
+use Illuminate\Contracts\Auth\Middleware\AuthenticatesRequests;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
         web: __DIR__.'/../routes/web.php',
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
+        // School portals (/{school}/...) are registered last so fixed paths like /admin win.
+        then: fn () => Route::middleware('web')->group(base_path('routes/school.php')),
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        $isCentral = fn (Request $request) => in_array($request->getHost(), config('tenancy.central_domains'), true);
+        // The school must be known before authentication looks up the user.
+        $middleware->prependToPriorityList(AuthenticatesRequests::class, IdentifySchool::class);
 
-        $middleware->redirectGuestsTo(fn (Request $request) => $isCentral($request) ? route('admin.login') : route('school.login'));
-        $middleware->redirectUsersTo(fn (Request $request) => $isCentral($request) ? route('admin.dashboard') : route('school.dashboard'));
+        $isPlatform = fn (Request $request) => $request->is('admin', 'admin/*');
+
+        $middleware->redirectGuestsTo(fn (Request $request) => $isPlatform($request) ? route('admin.login') : route('school.login'));
+        $middleware->redirectUsersTo(fn (Request $request) => $isPlatform($request) ? route('admin.dashboard') : route('school.dashboard'));
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

@@ -1,5 +1,5 @@
-@php $domain = config('skooline.school_domain'); @endphp
-<x-layouts.admin heading="Add a school" subheading="Skooline creates the school's own database, portal address and admin login in one step.">
+@php $base = preg_replace('#^https?://#', '', rtrim(config('app.url'), '/')).'/'; @endphp
+<x-layouts.admin heading="Add a school" subheading="Skooline creates the school's portal, admin login and subscription in one step.">
     <x-slot:actions>
         <a href="{{ route('admin.schools.index') }}" class="btn btn-ghost"><x-icon name="arrow-left" size="4" /> Back to schools</a>
     </x-slot:actions>
@@ -12,16 +12,16 @@
                 <div class="card-body grid gap-5 sm:grid-cols-2">
                     <x-form.input name="name" id="name" label="School name" required class="sm:col-span-2" placeholder="e.g. Greenfield Grammar School" />
                     <div class="sm:col-span-2">
-                        <label for="subdomain" class="label">Portal address <span class="text-brand" aria-hidden="true">*</span></label>
+                        <label for="slug" class="label">Portal address <span class="text-brand" aria-hidden="true">*</span></label>
                         <div class="flex rounded focus-within:ring-2 focus-within:ring-brand/20">
-                            <input id="subdomain" name="subdomain" value="{{ old('subdomain') }}" required data-slug-from="#name" maxlength="40"
-                                class="input rounded-r-none {{ $errors->has('subdomain') ? 'input-error' : '' }}" placeholder="greenfield" autocomplete="off" spellcheck="false">
-                            <span class="inline-flex items-center rounded-r border border-l-0 border-line-strong bg-canvas px-3 text-sm text-muted">.{{ $domain }}</span>
+                            <span class="inline-flex max-w-[45%] items-center truncate rounded-l border border-r-0 border-line-strong bg-canvas px-3 text-sm text-muted">{{ $base }}</span>
+                            <input id="slug" name="slug" value="{{ old('slug') }}" required data-slug-from="#name" maxlength="40"
+                                class="input min-w-0 rounded-l-none {{ $errors->has('slug') ? 'input-error' : '' }}" placeholder="greenfield" autocomplete="off" spellcheck="false">
                         </div>
-                        @error('subdomain')
+                        @error('slug')
                             <p class="error">{{ $message }}</p>
                         @else
-                            <p class="hint">School will sign in at <span class="font-medium text-ink"><span data-preview-of="#subdomain" data-fallback="your-school"></span>.{{ $domain }}</span>. Lowercase letters, numbers and hyphens only.</p>
+                            <p class="hint">School will sign in at <span class="font-medium text-ink">{{ $base }}<span data-preview-of="#slug" data-fallback="your-school"></span></span>. Lowercase letters, numbers and hyphens only.</p>
                         @enderror
                     </div>
                     <x-form.input name="principal_name" label="Principal / owner name" />
@@ -82,7 +82,7 @@
             <div class="card bg-canvas p-5 text-sm text-body">
                 <p class="flex items-center gap-2 font-semibold text-ink"><x-icon name="shield" size="4" class="text-success" /> What happens next</p>
                 <ol class="mt-2 list-decimal space-y-1 pl-5">
-                    <li>A private database is created for this school.</li>
+                    <li>The school's private workspace is created.</li>
                     <li>The portal goes live on its own address.</li>
                     <li>You get the admin login to share with the school.</li>
                 </ol>

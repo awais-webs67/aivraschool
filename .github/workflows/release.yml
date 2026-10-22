@@ -1,0 +1,37 @@
+name: Release ZIP
+
+# Builds the upload-ready ZIP for cPanel / hPanel (includes vendor/ and database/skooline.sql).
+# Run it from the Actions tab, or push a tag like v0.2.0 to attach it to a GitHub Release.
+on:
+  workflow_dispatch:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  zip:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, pdo_mysql, intl, gd, zip
+          coverage: none
+
+      - name: Build ZIP
+        run: bash scripts/make-release.sh
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: skooline-release
+          path: dist/*.zip
+
+      - name: Attach to GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*.zip

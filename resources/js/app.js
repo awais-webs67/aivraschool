@@ -68,7 +68,7 @@ document.querySelectorAll('[data-slug-from]').forEach((slugInput) => {
     });
 });
 
-// Live preview text: <span data-preview-of="#subdomain" data-fallback="your-school">
+// Live preview text: <span data-preview-of="#slug" data-fallback="your-school">
 document.querySelectorAll('[data-preview-of]').forEach((preview) => {
     const source = document.querySelector(preview.dataset.previewOf);
     if (!source) return;
@@ -93,14 +93,13 @@ if (conditionalBlocks.length) {
     refreshConditional();
 }
 
-// Website "School login": send visitors to {subdomain}.{domain}/login
+// Website "School login": send visitors to {APP_URL}/{school}/login
 document.querySelectorAll('[data-school-finder]').forEach((form) => {
     form.addEventListener('submit', (event) => {
         event.preventDefault();
         const input = form.querySelector('input');
         const sub = input.value.trim().toLowerCase().replace(/[^a-z0-9-]/g, '');
         if (!sub) return input.focus();
-        const base = new URL(form.dataset.base || window.location.origin);
-        window.location.href = `${base.protocol}//${sub}.${form.dataset.domain}${base.port ? ':' + base.port : ''}/login`;
+        window.location.href = `${form.dataset.base || window.location.origin}/${sub}/login`;
     });
 });

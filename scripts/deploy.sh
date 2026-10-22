@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Skooline deploy/update script — run on the server from the project folder:
 #   bash scripts/deploy.sh
-# Safe to run on every update (pulls code, installs deps, migrates central + all school DBs).
+# Safe to run on every update (pulls code, installs deps, runs migrations, refreshes caches).
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
@@ -26,11 +26,8 @@ if grep -q '^DB_CONNECTION=sqlite' .env && [ ! -f database/database.sqlite ]; th
     touch database/database.sqlite
 fi
 
-echo "→ Migrating central database"
+echo "→ Running database migrations"
 $PHP artisan migrate --force
-
-echo "→ Migrating every school database"
-$PHP artisan tenants:migrate --force
 
 echo "→ Caching config and views"
 $PHP artisan config:cache

@@ -15,7 +15,7 @@ class LoginController extends Controller
 {
     public function create(): View
     {
-        return view('school.auth.login', ['school' => tenant()]);
+        return view('school.auth.login', ['school' => current_school()]);
     }
 
     public function store(Request $request): RedirectResponse
@@ -26,7 +26,7 @@ class LoginController extends Controller
         ]);
         $credentials['email'] = Str::lower($credentials['email']);
 
-        $key = 'school-login:'.tenant('id').'|'.$credentials['email'].'|'.$request->ip();
+        $key = 'school-login:'.current_school()->id.'|'.$credentials['email'].'|'.$request->ip();
 
         if (RateLimiter::tooManyAttempts($key, 5)) {
             throw ValidationException::withMessages([

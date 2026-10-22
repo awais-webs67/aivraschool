@@ -10,7 +10,7 @@
             <x-form.input name="name" label="School name" :value="$school->name" required class="sm:col-span-2" />
             <div class="sm:col-span-2">
                 <span class="label">Portal address</span>
-                <p class="input bg-canvas text-muted">{{ $school->host() }}</p>
+                <p class="input bg-canvas text-muted">{{ $school->displayUrl() }}</p>
                 <p class="hint">The portal address can't be changed after creation.</p>
             </div>
             <x-form.input name="principal_name" label="Principal / owner name" :value="$school->principal_name" />

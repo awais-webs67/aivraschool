@@ -2,41 +2,41 @@
 
 namespace App\Models;
 
+use App\Support\Tenancy\BelongsToSchool;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
-use Stancl\Tenancy\Database\Concerns\CentralConnection;
 
 /**
- * AivraSol platform user (Super Admin and platform staff). Lives in the central database.
+ * A person using one school's portal (admin, principal, staff, teacher...).
  */
-#[Fillable(['name', 'email', 'password', 'role', 'is_active'])]
+#[Fillable(['school_id', 'name', 'email', 'phone', 'password', 'role', 'is_active'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use CentralConnection, HasFactory, Notifiable;
+    use BelongsToSchool, HasFactory;
 
     public const ROLES = [
-        'super_admin' => 'Super Admin',
-        'staff' => 'Platform Staff',
+        'admin' => 'School Admin',
+        'principal' => 'Principal',
+        'staff' => 'Staff',
+        'teacher' => 'Teacher',
     ];
 
     protected function casts(): array
     {
         return [
-            'email_verified_at' => 'datetime',
             'last_login_at' => 'datetime',
             'password' => 'hashed',
             'is_active' => 'boolean',
         ];
     }
 
-    public function isSuperAdmin(): bool
+    public function roleLabel(): string
     {
-        return $this->role === 'super_admin';
+        return self::ROLES[$this->role] ?? ucfirst($this->role);
     }
 }

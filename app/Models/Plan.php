@@ -7,7 +7,6 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Stancl\Tenancy\Database\Concerns\CentralConnection;
 
 #[Fillable([
     'name', 'slug', 'tagline', 'description', 'billing_model', 'price', 'price_per_student',
@@ -16,7 +15,7 @@ use Stancl\Tenancy\Database\Concerns\CentralConnection;
 ])]
 class Plan extends Model
 {
-    use CentralConnection, HasFactory;
+    use HasFactory;
 
     protected function casts(): array
     {

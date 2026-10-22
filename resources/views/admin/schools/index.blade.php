@@ -7,7 +7,7 @@
         <label class="sr-only" for="q">Search</label>
         <div class="relative">
             <x-icon name="search" size="4" class="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-muted" />
-            <input id="q" type="search" name="q" value="{{ $filters['q'] ?? '' }}" placeholder="Name, subdomain, city or email" class="input pl-9">
+            <input id="q" type="search" name="q" value="{{ $filters['q'] ?? '' }}" placeholder="Name, address, city or email" class="input pl-9">
         </div>
         <select name="status" class="input sm:w-40" aria-label="Status">
             <option value="">All statuses</option>
@@ -50,7 +50,7 @@
                             <tr>
                                 <td>
                                     <a href="{{ route('admin.schools.show', $school) }}" class="font-medium text-ink hover:text-brand-text">{{ $school->name }}</a>
-                                    <p class="text-xs text-muted">{{ $school->host() }}</p>
+                                    <p class="text-xs text-muted">{{ $school->displayUrl() }}</p>
                                 </td>
                                 <td>
                                     <p>{{ $school->principal_name ?? '—' }}</p>

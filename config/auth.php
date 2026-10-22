@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\PlatformUser;
 use App\Models\User;
 
 return [
@@ -38,12 +39,13 @@ return [
     */
 
     'guards' => [
+        // AivraSol Super Admin and platform staff.
         'web' => [
             'driver' => 'session',
             'provider' => 'users',
         ],
 
-        // Users of a single school, stored in that school's own database.
+        // Users of one school (scoped to the school in the URL).
         'school' => [
             'driver' => 'session',
             'provider' => 'school_users',
@@ -70,12 +72,12 @@ return [
     'providers' => [
         'users' => [
             'driver' => 'eloquent',
-            'model' => env('AUTH_MODEL', User::class),
+            'model' => PlatformUser::class,
         ],
 
         'school_users' => [
             'driver' => 'eloquent',
-            'model' => App\Models\School\User::class,
+            'model' => User::class,
         ],
 
         // 'users' => [
@@ -106,7 +108,7 @@ return [
     'passwords' => [
         'users' => [
             'provider' => 'users',
-            'table' => env('AUTH_PASSWORD_RESET_TOKEN_TABLE', 'password_reset_tokens'),
+            'table' => 'password_reset_tokens',
             'expire' => 60,
             'throttle' => 60,
         ],

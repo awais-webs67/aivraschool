@@ -17,7 +17,7 @@ Shared hosting (cPanel / hPanel) has limits. Skooline is designed around them, s
 | No Redis, no Supervisor, no long-running workers | Queue, cache and sessions use the **database** driver. **One cron job** (`schedule:run` every minute) runs the scheduled tasks and works through the queue. |
 | No Chromium / headless browser | PDFs (vouchers, report cards, ID cards) use **DomPDF** (pure PHP). |
 | `symlink()` often disabled | Uploaded files are stored privately in `storage/app` and served through an authorised download route. No `storage:link` needed. |
-| SSH not always available | A **web installer** (`/install`) and a release ZIP that already contains `vendor/` (planned), so setup can be done from the File Manager. |
+| SSH not always available | A release ZIP that already contains `vendor/`, an importable `database/skooline.sql`, a first-run **Create Super Admin** screen, an auto-generated `APP_KEY`, and **Super Admin → System → Run updates** for later versions. |
 | Document root fixed to `public_html` | Root `.htaccess` forwards every request to `public/` (already in place). |
 | Only common PHP extensions | Only standard extensions are used: `pdo_mysql`, `mbstring`, `openssl`, `gd`, `zip`, `intl`, `fileinfo`. |
 | Outgoing email via the host's SMTP | Mail uses SMTP settings from `.env`. |
@@ -291,12 +291,11 @@ The scheduler then runs:
 
 ---
 
-## 8. Change from the current code
+## 8. History
 
-The first version used **one database per school** (stancl/tenancy). That needs permission to create databases and wildcard subdomains, which shared hosting usually doesn't give. To meet the "runs on cPanel/hPanel easily" rule, the platform moves to **one database with `school_id`** as described above:
+Version 0.1 used **one database per school** (stancl/tenancy). That needs permission to create databases and wildcard subdomains, which shared hosting usually doesn't give. Since 0.2 the platform uses **one database with `school_id`** as described above:
 
-- Replace stancl/tenancy with the small `Support/Tenancy` layer (`CurrentSchool`, `BelongsToSchool`, `IdentifySchool`).
-- `tenants` / `domains` become a normal `schools` table with a unique `slug` and an optional `custom_domain`.
-- School users move into one `users` table with `school_id`. Platform staff use a separate `platform_users` table and guard.
-- The Super Admin panel, plans, subscriptions, website and design stay as they are.
-- All existing tests are kept and adapted, and isolation tests are added.
+- stancl/tenancy was replaced with the small `Support/Tenancy` layer (`CurrentSchool`, `BelongsToSchool`, `IdentifySchool`).
+- `tenants` / `domains` became a normal `schools` table with a unique `slug`.
+- School users live in one `users` table with `school_id`. Platform staff use a separate `platform_users` table and guard.
+- The Super Admin panel, plans, subscriptions, website and design stayed the same. Tests were adapted and isolation tests added; the suite runs on SQLite and MySQL/MariaDB.

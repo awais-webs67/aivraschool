@@ -11,7 +11,7 @@
                 <h1 class="font-display truncate text-4xl leading-none text-ink sm:text-[2.75rem]">{{ $school->name }}</h1>
                 <div class="mt-2 flex flex-wrap items-center gap-2 text-sm">
                     @include('admin.partials.school-status')
-                    <a href="{{ $school->url('login') }}" target="_blank" rel="noopener" class="inline-flex items-center gap-1 font-medium text-brand-text hover:underline">{{ $school->host() }} <x-icon name="external" size="3" /></a>
+                    <a href="{{ $school->url('login') }}" target="_blank" rel="noopener" class="inline-flex items-center gap-1 font-medium text-brand-text hover:underline">{{ $school->displayUrl() }} <x-icon name="external" size="3" /></a>
                 </div>
             </div>
         </div>
@@ -206,8 +206,8 @@
                 <form method="POST" action="{{ route('admin.schools.destroy', $school) }}" class="card-body space-y-3" data-confirm="This permanently deletes {{ $school->name }} and ALL of its data. Continue?">
                     @csrf
                     @method('DELETE')
-                    <p class="text-sm text-body">Deleting removes the school's database, users and records permanently. This cannot be undone.</p>
-                    <x-form.input name="confirm_subdomain" label="Type {{ $school->subdomain }} to confirm" autocomplete="off" />
+                    <p class="text-sm text-body">Deleting removes all of this school's users, records and billing history permanently. This cannot be undone.</p>
+                    <x-form.input name="confirm_slug" label="Type {{ $school->slug }} to confirm" autocomplete="off" />
                     <button class="btn btn-danger w-full"><x-icon name="trash" size="4" /> Delete school permanently</button>
                 </form>
             </section>

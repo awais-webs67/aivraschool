@@ -1,7 +1,9 @@
 # Skooline by AivraSol — Capacity Plan & Build Plan
 
 Companion to [`SCHOOL_ERP_FEATURES.md`](SCHOOL_ERP_FEATURES.md).
-Stack: **Laravel 13 (PHP 8.3+) + MySQL 8**, database-per-school (stancl/tenancy), Redis, Horizon, Livewire + Tailwind, Flutter apps.
+Stack: **Laravel 13 (PHP 8.3+) + MySQL/MariaDB**, one database with `school_id` scoping (see [`ARCHITECTURE.md`](ARCHITECTURE.md)), Blade + Tailwind, database queue + cron on shared hosting (Redis/Horizon optional on a VPS), Flutter apps.
+
+> **Update (v0.2):** the database-per-school design below was replaced by one shared database so Skooline installs on cPanel/hPanel. The capacity numbers still apply per school; at scale, large tables are partitioned by `school_id` and big schools can move to their own DB server.
 
 ---
 

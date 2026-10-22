@@ -9,6 +9,7 @@ return [
     */
 
     'name' => 'Skooline',
+    'version' => '0.2.0',
     'company' => 'AivraSol',
     'company_url' => 'https://aivrasol.com',
     'support_email' => env('SKOOLINE_SUPPORT_EMAIL', 'info@aivrasol.com'),
@@ -17,20 +18,19 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | School domains
+    | School addresses
     |--------------------------------------------------------------------------
     |
-    | Each school is served on "{subdomain}.{school_domain}". The school domain
-    | is normally the first central domain (e.g. skooline.com).
+    | Each school is served at APP_URL/{slug}, e.g. skooline.com/greenfield.
+    | These slugs can't be used because they clash with platform pages.
     |
     */
 
-    'school_domain' => env('SCHOOL_DOMAIN', explode(',', (string) env('CENTRAL_DOMAINS', 'localhost'))[0]),
-
-    'reserved_subdomains' => [
-        'www', 'admin', 'app', 'api', 'mail', 'smtp', 'ftp', 'cdn', 'static', 'assets',
-        'support', 'help', 'docs', 'blog', 'status', 'billing', 'dashboard', 'demo',
-        'skooline', 'aivrasol', 'test', 'staging', 'dev',
+    'reserved_slugs' => [
+        'admin', 'login', 'logout', 'register', 'setup', 'install', 'demo-request', 'up', 'build',
+        'storage', 'assets', 'api', 'app', 'www', 'mail', 'support', 'help', 'docs', 'blog',
+        'status', 'billing', 'dashboard', 'demo', 'pricing', 'about', 'contact', 'terms', 'privacy',
+        'favicon', 'robots', 'skooline', 'aivrasol', 'test', 'staging', 'dev',
     ],
 
     /*

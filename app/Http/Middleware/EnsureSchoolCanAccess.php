@@ -3,7 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Enums\SchoolStatus;
-use App\Models\School;
+use App\Support\Tenancy\CurrentSchool;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -16,8 +16,7 @@ class EnsureSchoolCanAccess
 {
     public function handle(Request $request, Closure $next): Response
     {
-        /** @var School $school */
-        $school = tenant();
+        $school = app(CurrentSchool::class)->get();
 
         if ($school->canAccess()) {
             return $next($request);

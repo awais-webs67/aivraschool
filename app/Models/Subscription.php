@@ -5,16 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Stancl\Tenancy\Database\Concerns\CentralConnection;
 
 #[Fillable([
-    'tenant_id', 'plan_id', 'plan_name', 'billing_model', 'starts_at', 'ends_at', 'student_count',
+    'school_id', 'plan_id', 'plan_name', 'billing_model', 'starts_at', 'ends_at', 'student_count',
     'amount', 'payment_status', 'payment_method', 'payment_reference', 'paid_at', 'notes', 'created_by',
 ])]
 class Subscription extends Model
 {
-    use CentralConnection;
-
     public const PAYMENT_STATUSES = ['unpaid', 'paid', 'partial', 'waived'];
 
     public const PAYMENT_METHODS = ['bank_transfer', 'cash', 'cheque', 'jazzcash', 'easypaisa', 'card', 'other'];
@@ -31,7 +28,7 @@ class Subscription extends Model
 
     public function school(): BelongsTo
     {
-        return $this->belongsTo(School::class, 'tenant_id');
+        return $this->belongsTo(School::class);
     }
 
     public function plan(): BelongsTo
@@ -41,7 +38,7 @@ class Subscription extends Model
 
     public function creator(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'created_by');
+        return $this->belongsTo(PlatformUser::class, 'created_by');
     }
 
     /** Monthly value of this subscription (used for MRR). Lifetime counts as 0. */

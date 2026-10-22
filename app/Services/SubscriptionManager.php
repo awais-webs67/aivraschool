@@ -27,7 +27,7 @@ class SubscriptionManager
         $amount = isset($data['amount']) && $data['amount'] !== '' ? (float) $data['amount'] : $plan->priceFor($students ?? 0);
         $paymentStatus = $data['payment_status'] ?? 'unpaid';
 
-        return DB::connection($school->getConnectionName())->transaction(function () use (
+        return DB::transaction(function () use (
             $school, $plan, $data, $createdBy, $starts, $ends, $students, $amount, $paymentStatus
         ) {
             $subscription = $school->subscriptions()->create([

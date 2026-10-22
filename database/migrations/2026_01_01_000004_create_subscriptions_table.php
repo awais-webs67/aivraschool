@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('subscriptions', function (Blueprint $table) {
             $table->id();
-            $table->string('tenant_id');
+            $table->foreignId('school_id')->constrained('schools')->cascadeOnDelete();
             $table->foreignId('plan_id')->nullable()->constrained('plans')->nullOnDelete();
             $table->string('plan_name');
             $table->string('billing_model', 20);
@@ -23,11 +23,10 @@ return new class extends Migration
             $table->string('payment_reference')->nullable();
             $table->timestamp('paid_at')->nullable();
             $table->text('notes')->nullable();
-            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignId('created_by')->nullable()->constrained('platform_users')->nullOnDelete();
             $table->timestamps();
 
-            $table->foreign('tenant_id')->references('id')->on('tenants')->cascadeOnUpdate()->cascadeOnDelete();
-            $table->index(['tenant_id', 'starts_at']);
+            $table->index(['school_id', 'starts_at']);
         });
     }
 

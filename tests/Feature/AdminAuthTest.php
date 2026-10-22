@@ -9,8 +9,40 @@ class AdminAuthTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_fresh_install_asks_to_create_the_first_super_admin(): void
+    {
+        $this->get('http://localhost/admin/login')->assertRedirect('http://localhost/admin/setup');
+        $this->get('http://localhost/admin/setup')->assertOk()->assertSee('Create Super Admin');
+
+        $this->post('http://localhost/admin/setup', [
+            'name' => 'Awais',
+            'email' => 'owner@aivrasol.com',
+            'password' => 'strong-pass-2026',
+            'password_confirmation' => 'strong-pass-2026',
+        ])->assertRedirect('http://localhost/admin');
+
+        $this->assertAuthenticated('web');
+        $this->assertDatabaseHas('platform_users', ['email' => 'owner@aivrasol.com', 'role' => 'super_admin']);
+    }
+
+    public function test_setup_is_closed_once_a_super_admin_exists(): void
+    {
+        $this->superAdmin();
+
+        $this->get('http://localhost/admin/setup')->assertRedirect('http://localhost/admin/login');
+        $this->post('http://localhost/admin/setup', [
+            'name' => 'Intruder',
+            'email' => 'x@evil.test',
+            'password' => 'strong-pass-2026',
+            'password_confirmation' => 'strong-pass-2026',
+        ])->assertForbidden();
+
+        $this->assertDatabaseMissing('platform_users', ['email' => 'x@evil.test']);
+    }
+
     public function test_guests_are_redirected_to_the_admin_login(): void
     {
+        $this->superAdmin();
         $this->get('http://localhost/admin')->assertRedirect('http://localhost/admin/login');
         $this->get('http://localhost/admin/schools')->assertRedirect('http://localhost/admin/login');
     }
@@ -69,8 +101,16 @@ class AdminAuthTest extends TestCase
     {
         $this->actingAs($this->superAdmin(), 'web');
 
-        foreach (['/admin', '/admin/schools', '/admin/schools/create', '/admin/plans', '/admin/plans/create', '/admin/subscriptions', '/admin/demo-requests', '/admin/account'] as $path) {
+        foreach (['/admin', '/admin/schools', '/admin/schools/create', '/admin/plans', '/admin/plans/create', '/admin/subscriptions', '/admin/demo-requests', '/admin/account', '/admin/system'] as $path) {
             $this->get('http://localhost'.$path)->assertOk();
         }
+    }
+
+    public function test_super_admin_can_run_database_updates(): void
+    {
+        $this->actingAs($this->superAdmin(), 'web');
+
+        $this->get('http://localhost/admin/system')->assertOk()->assertSee('Up to date');
+        $this->post('http://localhost/admin/system/migrate')->assertRedirect()->assertSessionHas('success');
     }
 }

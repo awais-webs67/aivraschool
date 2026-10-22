@@ -80,7 +80,7 @@
                             <tr>
                                 <td>
                                     <a href="{{ route('admin.schools.show', $school) }}" class="font-medium text-ink hover:text-brand-text">{{ $school->name }}</a>
-                                    <p class="text-xs text-muted">{{ $school->host() }}</p>
+                                    <p class="text-xs text-muted">{{ $school->displayUrl() }}</p>
                                 </td>
                                 <td>{{ $school->city ?? '—' }}</td>
                                 <td>{{ $school->plan?->name ?? '—' }}</td>

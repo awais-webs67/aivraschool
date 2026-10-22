@@ -3,39 +3,35 @@
 namespace App\Models;
 
 use App\Enums\SchoolStatus;
+use App\Support\Tenancy\CurrentSchool;
+use Database\Factories\SchoolFactory;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Carbon;
-use Stancl\Tenancy\Contracts\TenantWithDatabase;
-use Stancl\Tenancy\Database\Concerns\HasDatabase;
-use Stancl\Tenancy\Database\Concerns\HasDomains;
-use Stancl\Tenancy\Database\Models\Tenant;
 
 /**
- * A subscribing school (a tenant). Each school has its own database.
+ * A subscribing school. All schools share one database; every school-owned
+ * row carries this school's id (see BelongsToSchool).
  *
- * @property string $id
+ * @property int $id
  * @property string $name
- * @property string $subdomain
+ * @property string $slug
  * @property SchoolStatus $status
  * @property Carbon|null $trial_ends_at
  * @property Carbon|null $subscription_ends_at
  */
-class School extends Tenant implements TenantWithDatabase
+#[Fillable([
+    'name', 'slug', 'email', 'phone', 'city', 'address', 'principal_name', 'logo_path', 'status',
+    'plan_id', 'trial_ends_at', 'subscription_ends_at', 'suspended_at', 'suspension_reason', 'notes',
+])]
+class School extends Model
 {
-    use HasDatabase, HasDomains;
-
-    protected $table = 'tenants';
-
-    public static function getCustomColumns(): array
-    {
-        return [
-            'id', 'name', 'subdomain', 'email', 'phone', 'city', 'address', 'principal_name',
-            'logo_path', 'status', 'plan_id', 'trial_ends_at', 'subscription_ends_at',
-            'suspended_at', 'suspension_reason', 'notes', 'created_at', 'updated_at',
-        ];
-    }
+    /** @use HasFactory<SchoolFactory> */
+    use HasFactory;
 
     protected function casts(): array
     {
@@ -54,28 +50,42 @@ class School extends Tenant implements TenantWithDatabase
 
     public function subscriptions(): HasMany
     {
-        return $this->hasMany(Subscription::class, 'tenant_id')->latest('starts_at')->latest('id');
+        return $this->hasMany(Subscription::class)->latest('starts_at')->latest('id');
     }
 
     public function latestSubscription(): HasOne
     {
-        return $this->hasOne(Subscription::class, 'tenant_id')->latestOfMany('starts_at');
+        return $this->hasOne(Subscription::class)->latestOfMany('starts_at');
     }
 
-    /** Full hostname, e.g. "greenfield.skooline.com". */
-    public function host(): string
+    public function users(): HasMany
     {
-        return $this->subdomain.'.'.config('skooline.school_domain');
+        return $this->hasMany(User::class)->withoutGlobalScopes();
     }
 
-    /** Public URL of the school's portal, keeping the scheme and port of APP_URL. */
-    public function url(string $path = '/'): string
+    /** Portal URL of this school, e.g. "https://skooline.com/greenfield/login". */
+    public function url(string $path = ''): string
     {
-        $app = parse_url((string) config('app.url'));
-        $scheme = $app['scheme'] ?? 'https';
-        $port = isset($app['port']) ? ':'.$app['port'] : '';
+        return url($this->slug.($path !== '' ? '/'.ltrim($path, '/') : ''));
+    }
 
-        return $scheme.'://'.$this->host().$port.'/'.ltrim($path, '/');
+    /** Address shown to people, e.g. "skooline.com/greenfield". */
+    public function displayUrl(): string
+    {
+        return preg_replace('#^https?://#', '', rtrim((string) config('app.url'), '/')).'/'.$this->slug;
+    }
+
+    /**
+     * Run code as this school (queries scoped to it, new rows stamped with it).
+     *
+     * @template T
+     *
+     * @param  callable(School): T  $callback
+     * @return T
+     */
+    public function run(callable $callback): mixed
+    {
+        return app(CurrentSchool::class)->runFor($this, $callback);
     }
 
     public function hasModule(string $module): bool

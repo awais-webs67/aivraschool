@@ -15,7 +15,7 @@ class StoreSchoolRequest extends FormRequest
     protected function prepareForValidation(): void
     {
         $this->merge([
-            'subdomain' => strtolower(trim((string) $this->input('subdomain'))),
+            'slug' => strtolower(trim((string) $this->input('slug'))),
             'admin_email' => strtolower(trim((string) $this->input('admin_email'))),
         ]);
     }
@@ -24,11 +24,10 @@ class StoreSchoolRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:150'],
-            'subdomain' => [
-                'required', 'string', 'min:3', 'max:40', 'regex:/^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/',
-                Rule::notIn(config('skooline.reserved_subdomains')),
-                Rule::unique('tenants', 'subdomain'),
-                Rule::unique('domains', 'domain'),
+            'slug' => [
+                'required', 'string', 'min:3', 'max:40', 'regex:/^[a-z0-9]+(-[a-z0-9]+)*$/',
+                Rule::notIn(config('skooline.reserved_slugs')),
+                Rule::unique('schools', 'slug'),
             ],
             'email' => ['nullable', 'email', 'max:150'],
             'phone' => ['nullable', 'string', 'max:30'],
@@ -54,9 +53,9 @@ class StoreSchoolRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'subdomain.regex' => 'Use only lowercase letters, numbers and hyphens (e.g. "city-grammar").',
-            'subdomain.not_in' => 'This subdomain is reserved. Please choose another.',
-            'subdomain.unique' => 'This subdomain is already taken by another school.',
+            'slug.regex' => 'Use only lowercase letters, numbers and single hyphens (e.g. "city-grammar").',
+            'slug.not_in' => 'This address is reserved. Please choose another.',
+            'slug.unique' => 'This address is already used by another school.',
         ];
     }
 }

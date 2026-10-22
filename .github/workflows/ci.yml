@@ -47,3 +47,44 @@ jobs:
 
       - name: Tests
         run: php artisan test
+
+  mysql:
+    # Shared hosting runs MySQL: run the suite on MySQL 8 and prove database/skooline.sql imports cleanly.
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: skooline_test
+        ports: ['3306:3306']
+        options: --health-cmd="mysqladmin ping -proot" --health-interval=5s --health-timeout=5s --health-retries=20
+    env:
+      DB_CONNECTION: mysql
+      DB_HOST: 127.0.0.1
+      DB_PORT: 3306
+      DB_USERNAME: root
+      DB_PASSWORD: root
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, pdo_mysql, intl
+          coverage: none
+
+      - run: composer install --no-interaction --prefer-dist --no-progress
+
+      - run: cp .env.example .env && php artisan key:generate
+
+      - name: Tests on MySQL
+        run: DB_DATABASE=skooline_test php artisan test
+
+      - name: Import database/skooline.sql into an empty database
+        run: |
+          mysql -h127.0.0.1 -uroot -proot -e "CREATE DATABASE skooline_import CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
+          mysql -h127.0.0.1 -uroot -proot skooline_import < database/skooline.sql
+          DB_DATABASE=skooline_import php artisan migrate:status
+          DB_DATABASE=skooline_import php artisan migrate --pretend --force | tee pending.txt
+          grep -q "Nothing to migrate" pending.txt || (echo "skooline.sql is behind the migrations: run scripts/make-sql.sh" && exit 1)

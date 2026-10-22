@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
+use App\Models\PlatformUser;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
 
@@ -17,10 +17,10 @@ class DatabaseSeeder extends Seeder
 
         $email = env('SUPER_ADMIN_EMAIL', 'admin@skooline.test');
 
-        if (! User::query()->where('email', $email)->exists()) {
+        if (! PlatformUser::query()->where('email', $email)->exists()) {
             $password = env('SUPER_ADMIN_PASSWORD') ?: Str::password(14, symbols: false);
 
-            User::create([
+            PlatformUser::create([
                 'name' => env('SUPER_ADMIN_NAME', 'Super Admin'),
                 'email' => $email,
                 'password' => $password,

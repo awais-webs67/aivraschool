@@ -1,6 +1,6 @@
 @props(['title' => null, 'heading' => null, 'subheading' => null])
 @php
-    $school = tenant();
+    $school = current_school();
     $user = auth('school')->user();
 @endphp
 <!DOCTYPE html>

@@ -5,7 +5,7 @@
             <dl class="card-body space-y-3 text-sm">
                 <div><dt class="text-xs text-muted">Name</dt><dd class="text-ink">{{ auth()->user()->name }}</dd></div>
                 <div><dt class="text-xs text-muted">Email</dt><dd class="text-ink">{{ auth()->user()->email }}</dd></div>
-                <div><dt class="text-xs text-muted">Role</dt><dd><span class="badge badge-brand">{{ \App\Models\User::ROLES[auth()->user()->role] ?? auth()->user()->role }}</span></dd></div>
+                <div><dt class="text-xs text-muted">Role</dt><dd><span class="badge badge-brand">{{ \App\Models\PlatformUser::ROLES[auth()->user()->role] ?? auth()->user()->role }}</span></dd></div>
                 <div><dt class="text-xs text-muted">Last sign-in</dt><dd class="text-ink">{{ auth()->user()->last_login_at?->format('d M Y, h:i A') ?? '—' }}</dd></div>
             </dl>
         </section>

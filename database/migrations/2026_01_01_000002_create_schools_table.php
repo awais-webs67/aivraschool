@@ -1,23 +1,17 @@
 <?php
 
-declare(strict_types=1);
-
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateTenantsTable extends Migration
+return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
-        Schema::create('tenants', function (Blueprint $table) {
-            $table->string('id')->primary();
-
+        Schema::create('schools', function (Blueprint $table) {
+            $table->id();
             $table->string('name');
-            $table->string('subdomain')->unique();
+            $table->string('slug', 60)->unique();
             $table->string('email')->nullable();
             $table->string('phone', 30)->nullable();
             $table->string('city')->nullable();
@@ -31,17 +25,12 @@ class CreateTenantsTable extends Migration
             $table->timestamp('suspended_at')->nullable();
             $table->string('suspension_reason')->nullable();
             $table->text('notes')->nullable();
-
             $table->timestamps();
-            $table->json('data')->nullable();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::dropIfExists('tenants');
+        Schema::dropIfExists('schools');
     }
-}
+};

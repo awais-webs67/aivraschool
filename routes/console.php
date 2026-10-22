@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\User;
+use App\Models\PlatformUser;
 use App\Services\SubscriptionManager;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule;
@@ -10,7 +10,7 @@ Artisan::command('skooline:create-admin {email} {--name=Super Admin}', function 
     $password = $this->secret('Password (min 10 characters)');
 
     $validator = Validator::make(['email' => $email, 'password' => $password], [
-        'email' => ['required', 'email', 'unique:users,email'],
+        'email' => ['required', 'email', 'unique:platform_users,email'],
         'password' => ['required', 'min:10'],
     ]);
 
@@ -22,7 +22,7 @@ Artisan::command('skooline:create-admin {email} {--name=Super Admin}', function 
         return 1;
     }
 
-    User::create([
+    PlatformUser::create([
         'name' => $this->option('name'),
         'email' => strtolower($email),
         'password' => $password,
@@ -38,4 +38,12 @@ Artisan::command('skooline:expire-subscriptions', function (SubscriptionManager 
     $this->info("{$count} school(s) moved to expired.");
 })->purpose('Expire schools whose trial or subscription (plus grace period) has ended');
 
-Schedule::command('skooline:expire-subscriptions')->dailyAt('00:10');
+// Runs from the single cron entry: * * * * * php artisan schedule:run
+Schedule::call(fn (SubscriptionManager $manager) => $manager->expireOverdue())
+    ->name('skooline:expire-subscriptions')
+    ->dailyAt('00:10');
+
+// Shared hosting has no long-running queue worker: drain the database queue every minute.
+Schedule::command('queue:work --stop-when-empty --max-time=50 --tries=3')
+    ->everyMinute()
+    ->withoutOverlapping();

@@ -33,11 +33,11 @@
 
         {{-- School login finder: schools sign in on their own address --}}
         <div id="school-finder" hidden class="border-t border-line bg-canvas">
-            <form class="container-x flex flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:px-6 lg:px-8" data-school-finder data-domain="{{ config('skooline.school_domain') }}" data-base="{{ config('app.url') }}">
-                <label for="finder-subdomain" class="text-sm font-medium text-ink">Your school's address</label>
+            <form class="container-x flex flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:px-6 lg:px-8" data-school-finder data-base="{{ rtrim(config('app.url'), '/') }}">
+                <label for="finder-slug" class="text-sm font-medium text-ink">Your school's address</label>
                 <div class="flex flex-1 sm:max-w-md">
-                    <input id="finder-subdomain" class="input rounded-r-none" placeholder="yourschool" autocomplete="off" spellcheck="false" required>
-                    <span class="inline-flex items-center rounded-r border border-l-0 border-line-strong bg-white px-3 text-sm text-muted">.{{ config('skooline.school_domain') }}</span>
+                    <span class="inline-flex max-w-[50%] items-center truncate rounded-l border border-r-0 border-line-strong bg-white px-3 text-sm text-muted">{{ preg_replace('#^https?://#', '', rtrim(config('app.url'), '/')) }}/</span>
+                    <input id="finder-slug" class="input min-w-0 rounded-l-none" placeholder="yourschool" autocomplete="off" spellcheck="false" required>
                 </div>
                 <button class="btn btn-dark">Go to login <x-icon name="arrow-right" size="4" /></button>
             </form>

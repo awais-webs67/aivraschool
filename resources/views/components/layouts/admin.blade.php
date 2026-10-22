@@ -34,7 +34,7 @@
             </button>
             <form action="{{ route('admin.schools.index') }}" method="GET" class="relative hidden max-w-md flex-1 sm:block" role="search">
                 <x-icon name="search" size="4" class="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-muted" />
-                <input type="search" name="q" value="{{ request('q') }}" placeholder="Search schools by name, subdomain or city" class="input py-2 pl-9" aria-label="Search schools">
+                <input type="search" name="q" value="{{ request('q') }}" placeholder="Search schools by name, address or city" class="input py-2 pl-9" aria-label="Search schools">
             </form>
             <div class="ml-auto flex items-center gap-2">
                 <a href="{{ route('admin.schools.create') }}" class="btn btn-primary btn-sm"><x-icon name="plus" size="4" /> <span>Add school</span></a>

@@ -56,7 +56,7 @@ SCHOOL (Tenant)  — may have multiple Branches/Campuses
 - **Custom roles**: school admin can clone a role and tick/untick permissions (e.g. "Senior Accountant").
 - **Scope limits**: per-branch, per-class, per-section (a class teacher only sees own section).
 - **Super Admin impersonation**: "Login as school admin" for support, with full audit log + school's consent setting.
-- **Data isolation**: each school has its own database (database-per-tenant); records also carry `branch_id` for multi-campus schools.
+- **Data isolation**: one shared database; every school-owned row carries `school_id` and is filtered automatically (fail-closed global scope). Records also carry `branch_id` for multi-campus schools.
 - **2FA** (OTP SMS / email / authenticator) mandatory for Super Admin, optional per school role.
 - **Session/device management**: see active devices, force logout, IP allow-list for admin roles.
 
@@ -73,7 +73,7 @@ SCHOOL (Tenant)  — may have multiple Branches/Campuses
 - System health: queue status, failed jobs, error rate, backup status
 
 ### 3.2 School (Tenant) Management
-- Add school wizard: name, logo, address, city, contact, owner info, **subdomain** (`schoolname.skooline.com`), optional **custom domain**
+- Add school wizard: name, logo, address, city, contact, owner info, **portal address** (`skooline.com/schoolname`), optional custom domain later
 - Auto-create school admin account + send welcome credentials (SMS/WhatsApp/email)
 - Assign plan, trial days, branches limit, student limit
 - Enable/disable individual modules per school (feature flags)
@@ -318,7 +318,7 @@ All apps are published under the single **Skooline** brand; each school's logo/n
 
 ## 6. Non-Functional Requirements (production level)
 
-- **Multi-tenancy:** database-per-school (stancl/tenancy) + central DB for platform/billing; subdomain per school.
+- **Multi-tenancy:** one database, `school_id` on every school table, school resolved from the URL path. Runs on cPanel/hPanel shared hosting.
 - **Security:** OWASP top-10, encrypted passwords (argon2/bcrypt), encryption at rest for sensitive docs, signed URLs for files, rate limiting, audit logs, 2FA.
 - **Performance:** paginated APIs, caching (Redis), background jobs for bulk SMS/vouchers/report cards, CDN for files.
 - **Reliability:** daily automated backups + point-in-time recovery, per-tenant restore, monitoring & alerting (Sentry, uptime).
@@ -335,7 +335,7 @@ All apps are published under the single **Skooline** brand; each school's logo/n
 | Layer | Choice | Why |
 |---|---|---|
 | Language / Framework | **PHP 8.3+ / Laravel 13** | Mature, huge PK talent pool, fast to build ERP CRUD |
-| Multi-tenancy | **stancl/tenancy** (database-per-tenant) | Each school's data in its own DB → strongest isolation, easy per-school backup/restore/export; subdomain per school (`school.skooline.com`) |
+| Multi-tenancy | Own `Support/Tenancy` layer (one DB + `school_id`) | Installs on any PHP host; isolation enforced by a fail-closed global scope and tests |
 | Central DB | MySQL 8 / MariaDB (or PostgreSQL) | Plans, tenants, subscriptions, platform invoices |
 | Auth & RBAC | Laravel Sanctum (API/mobile) + **spatie/laravel-permission** | Roles, permissions, scopes |
 | Feature flags / plan limits | Laravel Pennant + custom plan-limit middleware | Turn modules on/off per subscription |
@@ -354,7 +354,7 @@ All apps are published under the single **Skooline** brand; each school's logo/n
 | Quality | Pest tests, Larastan (PHPStan), Laravel Pint, GitHub Actions CI | Production-grade code |
 | Monitoring | Sentry, Laravel Pulse/Telescope (staging), UptimeRobot | |
 
-**Tenancy notes:** queued jobs, cache, storage and scheduled tasks must be tenant-scoped (stancl/tenancy bootstrappers handle DB, cache, filesystem, queue). Schema changes run as tenant migrations across all school DBs.
+**Tenancy notes:** queued jobs must carry the school id and run inside `$school->run(...)`; files go under `storage/app/schools/{id}`; one set of migrations covers everything.
 
 ## 8. Core Data Model (high level)
 
@@ -424,7 +424,7 @@ Add-ons: SMS bundles, WhatsApp API, GPS, extra storage, data migration.
 ## 12. Decisions Made
 - Brand: single product **Skooline** by AivraSol, sold directly — no resellers, no white-label.
 - Each subscribed school gets admin credentials; module access follows its plan.
-- Stack: PHP / Laravel, database-per-school.
+- Stack: PHP / Laravel, one database with `school_id` (see ARCHITECTURE.md).
 - Theme: AivraSol brand palette (§13).
 
 ### Still open

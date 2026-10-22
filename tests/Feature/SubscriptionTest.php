@@ -73,10 +73,10 @@ class SubscriptionTest extends TestCase
     {
         config(['skooline.grace_days' => 7]);
 
-        $trialOver = $this->createSchool('trialover', adminEmail: 'a@a.test');
+        $trialOver = $this->createSchool('trial-over', adminEmail: 'a@a.test');
         $trialOver->update(['trial_ends_at' => now()->subDay()]);
 
-        $inGrace = $this->createSchool('ingrace', adminEmail: 'b@b.test');
+        $inGrace = $this->createSchool('in-grace', adminEmail: 'b@b.test');
         $inGrace->update(['status' => SchoolStatus::Active, 'subscription_ends_at' => now()->subDays(2)]);
 
         $overdue = $this->createSchool('overdue', adminEmail: 'c@c.test');

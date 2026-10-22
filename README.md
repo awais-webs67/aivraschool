@@ -2,7 +2,8 @@
 
 Multi-tenant, subscription-based **school management system (School ERP)**.
 AivraSol (Super Admin) adds schools on subscription; every school gets its own portal
-(`{school}.skooline.com`) and its **own separate database**, while all schools run on one platform.
+(`skooline.com/{school}`). All schools share one database, and every school's data is kept apart by `school_id`.
+Installs on **cPanel / hPanel** like any PHP script: upload, import `database/skooline.sql`, edit `.env`.
 
 - Product & feature spec: [`docs/SCHOOL_ERP_FEATURES.md`](docs/SCHOOL_ERP_FEATURES.md)
 - Capacity & build plan: [`docs/BUILD_PLAN.md`](docs/BUILD_PLAN.md)
@@ -16,16 +17,17 @@ AivraSol (Super Admin) adds schools on subscription; every school gets its own p
 | Public website (home, modules, pricing from DB, FAQ, demo request form) | ✅ |
 | Super Admin login (throttled, inactive users blocked) | ✅ |
 | Super Admin dashboard (schools by status, MRR, collections, renewals due, leads) | ✅ |
-| Schools: add (auto database + subdomain + admin login), list/search/filter, edit, suspend/reactivate, extend trial, reset admin password, delete (drops DB) | ✅ |
+| Schools: add (portal address + admin login + subscription in one step), list/search/filter, edit, suspend/reactivate, extend trial, reset admin password, delete (removes all its data) | ✅ |
 | Plans: monthly / quarterly / half-yearly / yearly / lifetime / per-student, limits, modules per plan | ✅ |
 | Subscriptions: assign/renew, custom amount & dates, payment status, mark paid, daily auto-expiry with grace period | ✅ |
-| School portal: login on own subdomain, dashboard showing plan modules, blocked when suspended/expired | ✅ |
+| School portal: login at `/{school}`, dashboard showing plan modules, blocked when suspended/expired | ✅ |
+| Install without SSH: SQL file import, first-run Super Admin setup, auto app key, one-click database updates (Super Admin → System) | ✅ |
 | School modules (students, attendance, fees, exams…) | Next — see build plan |
 
 ## Tech stack
 
-Laravel 13 (PHP 8.3+), [stancl/tenancy](https://tenancyforlaravel.com) (database per school),
-Blade + Tailwind CSS 4 + small vanilla JS, MySQL 8 in production (SQLite for local dev/tests).
+Laravel 13 (PHP 8.3+), one MySQL/MariaDB database with `school_id` scoping (`app/Support/Tenancy`),
+Blade + Tailwind CSS 4 + small vanilla JS (built assets committed). SQLite for local dev/tests.
 
 ## Local setup
 
@@ -41,18 +43,16 @@ php artisan serve
 
 - Website: http://localhost:8000
 - Super Admin: http://localhost:8000/admin
-- A school created with subdomain `greenfield`: http://greenfield.localhost:8000/login
-  (`*.localhost` resolves to your machine in modern browsers)
+- A school created with address `greenfield`: http://localhost:8000/greenfield
 
 Create more Super Admins with `php artisan skooline:create-admin you@aivrasol.com`.
 
-## Production notes
+## Hosting (cPanel / hPanel)
 
-- Point `skooline.com` **and** `*.skooline.com` (wildcard DNS + wildcard SSL) to the server.
-- `CENTRAL_DOMAINS=skooline.com` and `APP_URL=https://skooline.com`.
-- Use MySQL; the DB user must be allowed to `CREATE DATABASE` / `DROP DATABASE` (one DB per school).
-- Run the scheduler (`* * * * * php artisan schedule:run`) — it expires overdue subscriptions daily.
-- Use Redis for cache/queue/session at scale.
+See [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md). In short: upload `skooline-<version>.zip`
+(built by `bash scripts/make-release.sh` or the *Release ZIP* GitHub Action), import
+`database/skooline.sql` in phpMyAdmin, set `APP_URL` and `DB_*` in `.env`, open `/admin`,
+and add one cron job (`php artisan schedule:run` every minute).
 
 ## Tests
 

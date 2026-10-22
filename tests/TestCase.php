@@ -3,9 +3,10 @@
 namespace Tests;
 
 use App\Models\Plan;
+use App\Models\PlatformUser;
 use App\Models\School;
-use App\Models\User;
 use App\Services\SchoolProvisioner;
+use App\Support\Tenancy\CurrentSchool;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 
 abstract class TestCase extends BaseTestCase
@@ -17,37 +18,29 @@ abstract class TestCase extends BaseTestCase
         $this->withoutVite();
     }
 
-    protected function tearDown(): void
+    protected function superAdmin(array $attributes = []): PlatformUser
     {
-        if (tenancy()->initialized) {
-            tenancy()->end();
-        }
-
-        // Each provisioned school gets its own SQLite file; remove them between tests.
-        foreach (glob(database_path('testing_skooline_*')) as $file) {
-            @unlink($file);
-        }
-
-        parent::tearDown();
+        return PlatformUser::factory()->create($attributes + ['role' => 'super_admin']);
     }
 
-    protected function superAdmin(array $attributes = []): User
-    {
-        return User::factory()->create($attributes + ['role' => 'super_admin']);
-    }
-
-    protected function createSchool(string $subdomain = 'greenfield', ?Plan $plan = null, array $billing = ['mode' => 'trial'], string $adminEmail = 'admin@greenfield.test'): School
+    protected function createSchool(string $slug = 'greenfield', ?Plan $plan = null, array $billing = ['mode' => 'trial'], string $adminEmail = 'admin@greenfield.test'): School
     {
         return app(SchoolProvisioner::class)->create(
-            school: ['name' => ucfirst($subdomain).' School', 'subdomain' => $subdomain],
+            school: ['name' => ucfirst($slug).' School', 'slug' => $slug],
             plan: $plan ?? Plan::factory()->create(),
             admin: ['name' => 'School Admin', 'email' => $adminEmail, 'password' => 'secret-pass-1'],
             billing: $billing,
         );
     }
 
-    protected function schoolUrl(string $subdomain, string $path = ''): string
+    protected function schoolUrl(string $slug, string $path = ''): string
     {
-        return "http://{$subdomain}.localhost/".ltrim($path, '/');
+        return "http://localhost/{$slug}".($path !== '' ? '/'.ltrim($path, '/') : '');
+    }
+
+    /** Each test request starts with no current school, like a fresh PHP request. */
+    protected function forgetCurrentSchool(): void
+    {
+        app(CurrentSchool::class)->set(null);
     }
 }

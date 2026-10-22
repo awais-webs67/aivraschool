@@ -8,7 +8,6 @@ use App\Http\Requests\Admin\StoreSchoolRequest;
 use App\Http\Requests\Admin\UpdateSchoolRequest;
 use App\Models\Plan;
 use App\Models\School;
-use App\Models\School\User as SchoolUser;
 use App\Services\SchoolProvisioner;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -30,7 +29,7 @@ class SchoolController extends Controller
             ->with('plan')
             ->when($filters['q'] ?? null, function ($query, $q) {
                 $query->where(fn ($w) => $w->where('name', 'like', "%{$q}%")
-                    ->orWhere('subdomain', 'like', "%{$q}%")
+                    ->orWhere('slug', 'like', "%{$q}%")
                     ->orWhere('city', 'like', "%{$q}%")
                     ->orWhere('email', 'like', "%{$q}%"));
             })
@@ -86,12 +85,9 @@ class SchoolController extends Controller
 
     public function show(School $school): View
     {
-        $school->load(['plan', 'domains', 'subscriptions.creator']);
+        $school->load(['plan', 'subscriptions.creator']);
 
-        // Read everything we need inside the school's context: tenant models must not be used
-        // after run() returns, because the "tenant" connection no longer exists then.
-        $admins = $school->run(fn () => SchoolUser::query()->where('role', 'admin')->orderBy('id')->get()
-            ->map(fn (SchoolUser $user) => (object) $user->only(['id', 'name', 'email', 'last_login_at'])));
+        $admins = $school->users()->where('role', 'admin')->orderBy('id')->get();
 
         return view('admin.schools.show', [
             'school' => $school,
@@ -115,13 +111,13 @@ class SchoolController extends Controller
     public function destroy(Request $request, School $school): RedirectResponse
     {
         $request->validate([
-            'confirm_subdomain' => ['required', Rule::in([$school->subdomain])],
+            'confirm_slug' => ['required', Rule::in([$school->slug])],
         ], [
-            'confirm_subdomain.in' => 'Type the exact subdomain to confirm deletion.',
+            'confirm_slug.in' => 'Type the exact school address to confirm deletion.',
         ]);
 
         $name = $school->name;
-        $school->delete(); // also drops the school's database
+        $school->delete(); // cascades to the school's users and subscriptions
 
         return redirect()->route('admin.schools.index')->with('success', "{$name} and all of its data were deleted.");
     }
@@ -175,12 +171,9 @@ class SchoolController extends Controller
         $data = $request->validate(['user_id' => ['required', 'integer']]);
         $password = Str::password(12, symbols: false);
 
-        $email = $school->run(function () use ($data, $password) {
-            $user = SchoolUser::findOrFail($data['user_id']);
-            $user->update(['password' => $password]);
-
-            return $user->email;
-        });
+        $user = $school->users()->findOrFail($data['user_id']);
+        $user->update(['password' => $password]);
+        $email = $user->email;
 
         return back()->with('credentials', [
             'url' => $school->url('login'),
