@@ -334,7 +334,7 @@ All apps are published under the single **Skooline** brand; each school's logo/n
 
 | Layer | Choice | Why |
 |---|---|---|
-| Language / Framework | **PHP 8.3+ / Laravel 12** (LTS-track) | Mature, huge PK talent pool, fast to build ERP CRUD |
+| Language / Framework | **PHP 8.3+ / Laravel 13** | Mature, huge PK talent pool, fast to build ERP CRUD |
 | Multi-tenancy | **stancl/tenancy** (database-per-tenant) | Each school's data in its own DB → strongest isolation, easy per-school backup/restore/export; subdomain per school (`school.skooline.com`) |
 | Central DB | MySQL 8 / MariaDB (or PostgreSQL) | Plans, tenants, subscriptions, platform invoices |
 | Auth & RBAC | Laravel Sanctum (API/mobile) + **spatie/laravel-permission** | Roles, permissions, scopes |

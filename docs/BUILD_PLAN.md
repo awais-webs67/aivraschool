@@ -1,7 +1,7 @@
 # Skooline by AivraSol — Capacity Plan & Build Plan
 
 Companion to [`SCHOOL_ERP_FEATURES.md`](SCHOOL_ERP_FEATURES.md).
-Stack: **Laravel 12 (PHP 8.3+) + MySQL 8**, database-per-school (stancl/tenancy), Redis, Horizon, Livewire + Tailwind, Flutter apps.
+Stack: **Laravel 13 (PHP 8.3+) + MySQL 8**, database-per-school (stancl/tenancy), Redis, Horizon, Livewire + Tailwind, Flutter apps.
 
 ---
 
@@ -68,7 +68,7 @@ Assumed team: 2 Laravel developers, 1 frontend (Livewire/Tailwind), 1 Flutter de
 ### Phase 0 — Foundation (Sprints 1–2, weeks 1–4)
 | # | Task | Output |
 |---|---|---|
-| 0.1 | Laravel 12 project, Git flow, `.env` per environment (local / staging / production) | Repo skeleton |
+| 0.1 | Laravel 13 project, Git flow, `.env` per environment (local / staging / production) | Repo skeleton |
 | 0.2 | CI: GitHub Actions running Pest tests, Larastan, Pint on every push | Quality gate |
 | 0.3 | **stancl/tenancy** setup: central DB + tenant DB per school, subdomain routing `{school}.skooline.com` | Multi-tenant core |
 | 0.4 | Auth: login, logout, forgot password (OTP via SMS/email), 2FA, rate limiting, device sessions | Secure login |
@@ -155,7 +155,7 @@ AI pack (remarks, question papers, at-risk students, WhatsApp assistant) · GPS 
 ---
 
 ## Part C — What we build THIS WEEK (Sprint 1 start)
-1. Create Laravel 12 project in this repo, push to `main` via PR
+1. Create Laravel 13 project in this repo, push to `main` via PR
 2. Install & configure: stancl/tenancy, spatie/laravel-permission, spatie/laravel-activitylog, Livewire 3, Tailwind, Pest, Larastan, Pint
 3. Central DB migrations: `plans`, `plan_features`, `tenants`, `domains`, `subscriptions`, `platform_users`
 4. Tailwind theme with AivraSol tokens + Skooline app layout (sidebar/top bar) + login page
