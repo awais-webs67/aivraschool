@@ -1,7 +1,9 @@
-# AivraSchool ERP — Product Research & Full Feature Specification
+# AivraSchool — Product Research & Full Feature Specification
 
-> Multi-tenant, subscription-based School Management SaaS by **Aivrasol**.
-> One platform → many schools. Aivrasol is the **Super Admin**; every school gets its own isolated workspace managed by its own Principal/Admin.
+> Multi-tenant, subscription-based School Management SaaS by **AivraSol** (aivrasol.com).
+> One product, one brand (**AivraSchool**). AivraSol is the **Super Admin** and sells subscriptions directly to schools — no resellers, no white-label.
+> Each subscribing school receives its own credentials and an isolated workspace; what it can access is decided by its subscription plan.
+> Stack: **PHP (Laravel)**. UI theme: AivraSol brand colors (see §13).
 
 ---
 
@@ -15,7 +17,8 @@
 | **Classe365** | Global | LMS + CRM + SIS in one | Expensive (USD), not localized for PK |
 | **PowerSchool / Blackbaud** | US | Enterprise-grade SIS, analytics | Unaffordable & irrelevant for South Asia |
 | **OpenEduCat / Gibbon** | Open-source | Free, extensible | Needs technical staff, no SaaS billing |
-| **Local PK tools** (various desktop / small SaaS) | Pakistan | Cheap, Urdu-friendly, bank challans | Mostly single-tenant, desktop-era UX, no real parent app, no WhatsApp/AI |
+| **Local PK SaaS** (e.g. Skoo, StudentCare.pk, Schooli) | Pakistan | JazzCash/EasyPaisa, 1Bill/1GO challans, WhatsApp alerts, parent app, low price | Mostly fee/attendance-centric; weak accounts/HR/LMS depth, limited report-card customization, little AI |
+| **Local desktop tools** | Pakistan | Cheap, offline | Single-school, dated UX, no apps |
 
 **Common market pain points (from reviews / sales conversations in this segment):**
 1. Fee collection & defaulters is the #1 reason schools buy software.
@@ -34,8 +37,7 @@
 ```
 AIVRASOL (Platform)
 └── Super Admin  (owner of the platform – full access to everything)
-    ├── Platform Staff roles: Sales, Support, Finance, Onboarding (limited, customizable)
-    └── Resellers / Partners (optional – manage only their own schools)
+    └── Platform Staff roles: Sales, Support, Finance, Onboarding (limited, customizable)
 
 SCHOOL (Tenant)  — may have multiple Branches/Campuses
 └── School Owner / Chairman   (all branches, financial overview)
@@ -54,7 +56,7 @@ SCHOOL (Tenant)  — may have multiple Branches/Campuses
 - **Custom roles**: school admin can clone a role and tick/untick permissions (e.g. "Senior Accountant").
 - **Scope limits**: per-branch, per-class, per-section (a class teacher only sees own section).
 - **Super Admin impersonation**: "Login as school admin" for support, with full audit log + school's consent setting.
-- **Data isolation**: every record carries `tenant_id` (+ `branch_id`); enforced at DB level (Postgres Row-Level Security) not just in code.
+- **Data isolation**: each school has its own database (database-per-tenant); records also carry `branch_id` for multi-campus schools.
 - **2FA** (OTP SMS / email / authenticator) mandatory for Super Admin, optional per school role.
 - **Session/device management**: see active devices, force logout, IP allow-list for admin roles.
 
@@ -116,7 +118,7 @@ SCHOOL (Tenant)  — may have multiple Branches/Campuses
 - Email/SMS/WhatsApp template manager (global defaults; schools can override)
 - SMS gateway & WhatsApp Business API provider config, credit pricing & resale
 - Global master data: countries, cities, boards (Federal, Punjab, Sindh, KPK boards, Cambridge, Aga Khan), religions, blood groups, etc.
-- Platform staff & reseller management with commission tracking
+- Platform staff management (AivraSol team accounts with limited permissions)
 - Audit logs (who did what, when, from which IP) across platform
 - Backup & restore per tenant, data export (GDPR-style "download all my data")
 - Release notes / changelog, maintenance-mode scheduler
@@ -161,7 +163,7 @@ Every module below is toggleable by plan. ✅ = MVP, 🔷 = Phase 2, 🔶 = Phas
 - Student categories (scholarship, staff child, orphan, etc.)
 
 ### 4.4 Attendance ✅
-- Daily / period-wise student attendance (web + teacher app, one-tap "all present")
+- Daily / period-wise student attendance (web + teacher app, one-tap "all present", optional WhatsApp-bot attendance for teachers)
 - Statuses: Present, Absent, Late, Leave, Half-day, Holiday
 - **Auto SMS/WhatsApp/push to parents** on absence / late
 - Biometric / RFID card / QR / **face recognition** integration 🔷
@@ -200,7 +202,8 @@ Every module below is toggleable by plan. ✅ = MVP, 🔷 = Phase 2, 🔶 = Phas
 - Fee heads (tuition, admission, annual, exam, lab, transport, hostel, sports, fine…)
 - Fee structures per class / category, one-time vs. recurring (monthly/quarterly/yearly)
 - **Discounts & concessions**: sibling, staff child, merit scholarship, custom %, with approval
-- **Fee vouchers / challans**: bank-format 3-copy challan (bank/school/student), bulk generation, 1-Bill / bank barcode
+- **Fee vouchers / challans**: bank-format 3-copy challan (bank/school/student), bulk generation, **1Bill consumer number** (payable from JazzCash/EasyPaisa/any banking app → Corporate Payments → 1Bill), **1LINK 1GO QR** on challan, bank barcode
+- **Family / sibling statement**: one consolidated voucher & ledger per family
 - Due dates, **late fine** (fixed/per-day/slab), auto-apply
 - Partial payments, installments, advance payments, arrears carry-forward
 - Collection at counter (cash/cheque/bank/online) with instant receipt print (thermal + A4)
@@ -309,13 +312,13 @@ Every module below is toggleable by plan. ✅ = MVP, 🔷 = Phase 2, 🔶 = Phas
 | **Driver app** 🔶 | Start trip → GPS share, mark pickup/drop |
 | **Staff / Accountant** | Fee collection on mobile, receipts |
 
-All apps: white-label option (school's own name/logo in Play Store) as a premium add-on.
+All apps are published under the single **AivraSchool** brand; each school's logo/name is shown inside the app after login (no separate store apps per school).
 
 ---
 
 ## 6. Non-Functional Requirements (production level)
 
-- **Multi-tenancy:** shared DB + `tenant_id` + Postgres RLS (cost-efficient); option to move large schools to dedicated DB.
+- **Multi-tenancy:** database-per-school (stancl/tenancy) + central DB for platform/billing; subdomain per school.
 - **Security:** OWASP top-10, encrypted passwords (argon2/bcrypt), encryption at rest for sensitive docs, signed URLs for files, rate limiting, audit logs, 2FA.
 - **Performance:** paginated APIs, caching (Redis), background jobs for bulk SMS/vouchers/report cards, CDN for files.
 - **Reliability:** daily automated backups + point-in-time recovery, per-tenant restore, monitoring & alerting (Sentry, uptime).
@@ -327,24 +330,31 @@ All apps: white-label option (school's own name/logo in Play Store) as a premium
 
 ---
 
-## 7. Recommended Tech Stack
+## 7. Tech Stack (PHP)
 
 | Layer | Choice | Why |
 |---|---|---|
-| Backend | **NestJS (TypeScript)** or Laravel (PHP) | Modular, RBAC friendly, large talent pool in PK |
-| Database | **PostgreSQL** (+ RLS) | Multi-tenant isolation, reporting |
-| Cache / Queue | Redis + BullMQ | Bulk SMS, PDFs, reminders |
-| Web frontend | **Next.js + React + Tailwind + shadcn/ui** | Fast, SEO for school websites |
-| Mobile | **Flutter** or React Native (one codebase, Android + iOS) | Parent/Teacher apps |
-| Files | S3-compatible (AWS S3 / Cloudflare R2 / Wasabi) | Cheap storage |
-| PDFs | Puppeteer/Playwright HTML→PDF | Designer-friendly templates |
-| Auth | JWT + refresh tokens, OTP | Mobile + web |
-| Payments | JazzCash, EasyPaisa, Safepay/PayFast, Stripe | Local + international |
-| Messaging | Local SMS aggregator + Meta WhatsApp Cloud API + FCM | |
-| Infra | Docker, CI/CD (GitHub Actions), VPS/AWS | |
-| Monitoring | Sentry, Grafana/Prometheus, UptimeRobot | |
+| Language / Framework | **PHP 8.3+ / Laravel 12** (LTS-track) | Mature, huge PK talent pool, fast to build ERP CRUD |
+| Multi-tenancy | **stancl/tenancy** (database-per-tenant) | Each school's data in its own DB → strongest isolation, easy per-school backup/restore/export; subdomain per school (`school.aivraschool.com`) |
+| Central DB | MySQL 8 / MariaDB (or PostgreSQL) | Plans, tenants, subscriptions, platform invoices |
+| Auth & RBAC | Laravel Sanctum (API/mobile) + **spatie/laravel-permission** | Roles, permissions, scopes |
+| Feature flags / plan limits | Laravel Pennant + custom plan-limit middleware | Turn modules on/off per subscription |
+| Admin UI | **Blade + Livewire 3 + Alpine.js + Tailwind CSS** (or Filament 3 for Super Admin) | Fast server-rendered UI, no heavy SPA needed |
+| Queues & jobs | Redis + **Laravel Horizon** (tenant-aware jobs) | Bulk SMS/WhatsApp, voucher & report-card PDFs, reminders |
+| Scheduler | Laravel Scheduler (cron) | Subscription expiry, auto fines, daily reports |
+| PDFs | Browsershot (Chromium) or DomPDF/Snappy | Vouchers, report cards, ID cards, certificates |
+| Excel | **maatwebsite/excel** | Bulk import/export |
+| Audit log | spatie/laravel-activitylog | Who did what |
+| Backups | spatie/laravel-backup (per tenant DB → S3) | Daily + on-demand |
+| Files | S3-compatible (AWS S3 / Cloudflare R2 / Wasabi) | Photos, documents |
+| Mobile apps (Teacher / Parent / Student) | Flutter consuming the Laravel REST API | One codebase Android + iOS |
+| Payments | JazzCash, EasyPaisa, 1LINK 1Bill/1GO, Safepay/PayFast | Local collection + auto-reconcile |
+| Messaging | Local SMS aggregator API, Meta WhatsApp Cloud API, FCM push | |
+| Server | Nginx + PHP-FPM, Ubuntu VPS / AWS, Laravel Forge or Ploi, Cloudflare (wildcard SSL for subdomains) | |
+| Quality | Pest tests, Larastan (PHPStan), Laravel Pint, GitHub Actions CI | Production-grade code |
+| Monitoring | Sentry, Laravel Pulse/Telescope (staging), UptimeRobot | |
 
----
+**Tenancy notes:** queued jobs, cache, storage and scheduled tasks must be tenant-scoped (stancl/tenancy bootstrappers handle DB, cache, filesystem, queue). Schema changes run as tenant migrations across all school DBs.
 
 ## 8. Core Data Model (high level)
 
@@ -369,7 +379,7 @@ tenant:   branches, academic_sessions, classes, sections, subjects, class_subjec
           books, book_copies, issues, inventory_items, stock_moves
           documents, certificates, custom_fields, settings
 ```
-Every tenant table: `id, tenant_id, branch_id?, created_by, created_at, updated_at, deleted_at`.
+`platform` tables live in the central DB; `tenant` tables live in each school's own DB. Every tenant table: `id, branch_id?, created_by, created_at, updated_at, deleted_at` (soft deletes).
 
 ---
 
@@ -382,7 +392,7 @@ Super Admin (schools, plans, subscriptions, billing, impersonation) · School se
 Multi-branch · Timetable + substitution · Homework/LMS/quizzes · Accounts · HR & Payroll · Transport (basic) · Library · Inventory · Events/calendar/gallery · PTM booking · Student app · Biometric integration · Custom report builder
 
 ### Phase 3 — Market leader
-AI pack · GPS live tracking & driver app · Hostel · Website builder · Alumni · Health & discipline · White-label apps · Reseller program · Recruitment · Question paper generator · Face-recognition attendance
+AI pack · GPS live tracking & driver app · Hostel · Website builder · Alumni · Health & discipline · Recruitment · Question paper generator · Face-recognition attendance
 
 ---
 
@@ -393,9 +403,9 @@ AI pack · GPS live tracking & driver app · Hostel · Website builder · Alumni
 | Starter | PKR 3,000–5,000/mo up to 200 students | SIS, attendance, fees, exams, notices, parent app |
 | Standard | PKR 40–60 per student/mo | + timetable, homework, HR/payroll, accounts, library |
 | Premium | PKR 70–90 per student/mo | + transport, LMS, multi-branch, WhatsApp, custom report cards |
-| Enterprise / Lifetime | Custom (e.g. one-time + 15–20% yearly AMC) | Everything + white-label, dedicated DB, AI pack |
+| Enterprise / Lifetime | Custom (e.g. one-time + 15–20% yearly AMC) | Everything + dedicated DB, AI pack, priority support |
 
-Add-ons: SMS bundles, WhatsApp API, GPS, extra storage, white-label app, data migration.
+Add-ons: SMS bundles, WhatsApp API, GPS, extra storage, data migration.
 
 ---
 
@@ -411,10 +421,76 @@ Add-ons: SMS bundles, WhatsApp API, GPS, extra storage, white-label app, data mi
 
 ---
 
-## 12. Open Decisions (to finalize before development)
-1. Target market first: Pakistan only, or also Middle East / India?
-2. Backend: NestJS vs. Laravel? Mobile: Flutter vs. React Native?
-3. Shared DB with RLS for all, or dedicated DB for enterprise schools?
-4. Which SMS aggregator & WhatsApp BSP to partner with?
-5. Will we offer resellers/franchise partners in Phase 1?
-6. Branding: will parent app be "AivraSchool" or white-labeled per school by default?
+## 12. Decisions Made
+- Brand: single product **AivraSchool** by AivraSol, sold directly — no resellers, no white-label.
+- Each subscribed school gets admin credentials; module access follows its plan.
+- Stack: PHP / Laravel, database-per-school.
+- Theme: AivraSol brand palette (§13).
+
+### Still open
+1. Target market: Pakistan first, then UAE/UK/Australia (AivraSol's existing regions)?
+2. MySQL or PostgreSQL for tenant DBs?
+3. Which SMS aggregator & WhatsApp provider?
+4. Livewire-only admin, or Filament for Super Admin panel?
+
+---
+
+## 13. Brand & UI Design System (from aivrasol.com)
+
+Extracted from `aivrasol.com/assets/css/app.css` — AivraSchool uses the same family so it is recognisably an AivraSol product, with app-specific extensions for dashboards.
+
+### Core palette
+| Token | Hex | Use |
+|---|---|---|
+| `--primary` (AivraSol orange) | `#FF5B35` | Primary buttons, active nav, key highlights, charts series 1 |
+| `--primary-hover` | `#F04A22` | Button hover |
+| `--primary-pressed` | `#E0451F` | Active/pressed |
+| `--primary-text` | `#B8380F` | Orange text on white (AA contrast) |
+| `--primary-tint` | `#FFF1EC` / rgba(255,91,53,.08) | Selected rows, soft badges, alert backgrounds |
+| `--primary-soft` | `#FFD6C8` / `#FFB09C` | Borders of highlighted cards, progress tracks |
+| `--slate` | `#333F48` | **Sidebar background**, headings, secondary buttons |
+| `--ink` | `#191F24` | Main text, dark-mode surface |
+| `--body` | `#5F666B` | Body/secondary text |
+| `--muted` | `#636A6F` | Captions, placeholders |
+| `--line` | `#E1E3E5` | Table/card borders |
+| `--line-strong` | `#CFD3D6` | Input borders |
+| `--grey` | `#EBECED` | Disabled, chips |
+| `--grey-soft` | `#F6F7F8` | **App background** |
+| `--white` | `#FFFFFF` | Cards, top bar |
+| `--success` | `#1E7A4C` (tint `#E8F5EE`) | Paid, Present, Pass |
+| `--danger` | `#B3261E` (tint `#FCEDEC`) | Unpaid/defaulter, Absent, Fail |
+| `--warning` (new) | `#B7791F` (tint `#FFF0D6`) | Late, Partial payment, Leave |
+| `--info` (new) | `#0A66C2` (tint `#E7F0FA`) | Info notices, links |
+| WhatsApp | `#25D366` | WhatsApp send buttons only |
+
+### Typography
+- **Bebas Neue** — display only: dashboard KPI numbers, page titles, login hero (as on aivrasol.com).
+- **Inter** — everything else (tables, forms, body). Use tabular numerals for money & marks.
+- Urdu: **Noto Nastaliq Urdu** (RTL layouts).
+
+### Shape & elevation
+- Radius: 4px inputs/buttons, 8px cards, 12px modals (matches site: 2/4/8/12).
+- Shadows: card `0 1px 10px rgba(0,0,0,.08)`, popover `0 20px 25px -5px rgba(0,0,0,.12)`.
+
+### Layout ("a bit different" from the website)
+- Website is a marketing page; AivraSchool is an app, so: **dark slate (#333F48) left sidebar** with orange active indicator, white top bar with school logo + session switcher + search (Ctrl+K), light grey (#F6F7F8) workspace with white cards.
+- Super Admin panel uses the inverse accent (ink `#191F24` sidebar) so staff instantly know they are in the platform panel, not a school.
+- Dark mode: surface `#191F24`, cards `#232B31`, orange stays primary.
+- Status always = color **+ icon/text** (accessible; never color alone).
+
+---
+
+## 14. Product Name
+
+**Recommended: keep `AivraSchool`** — it carries the AivraSol brand, is self-explanatory to principals, and matches the repo/domain plan (`aivraschool.com`, subdomains `school.aivraschool.com`).
+Tagline ideas: *"AivraSchool — The Complete School ERP"* · *"Run your whole school from one screen."*
+
+Alternatives if a broader name is wanted later:
+| Name | Note |
+|---|---|
+| **AivraCampus** | Fits multi-branch schools, colleges later |
+| **AivraEdu** | Room to expand to colleges/academies/universities |
+| **Aivra SchoolOS** | Modern "operating system for schools" positioning |
+| **AivraLearn** | Leans LMS — less suited to an ERP |
+
+> Domain & trademark availability (aivraschool.com / .pk, IPO Pakistan trademark search) must be checked before final branding.
