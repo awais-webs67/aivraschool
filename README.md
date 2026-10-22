@@ -22,7 +22,8 @@ Installs on **cPanel / hPanel** like any PHP script: upload, import `database/sk
 | Subscriptions: assign/renew, custom amount & dates, payment status, mark paid, daily auto-expiry with grace period | ✅ |
 | School portal: login at `/{school}`, dashboard showing plan modules, blocked when suspended/expired | ✅ |
 | Install without SSH: SQL file import, first-run Super Admin setup, auto app key, one-click database updates (Super Admin → System) | ✅ |
-| School modules (students, attendance, fees, exams…) | Next — see build plan |
+| **Step 1 — School setup:** school profile + logo, academic sessions (one current), classes & sections (Playgroup–Class 10 in one click), subjects assigned to classes, setup checklist on the dashboard | ✅ |
+| Step 2 — Students & admissions | Next |
 
 ## Tech stack
 

@@ -148,9 +148,9 @@ AI pack (remarks, question papers, at-risk students, WhatsApp assistant) · GPS 
 
 ---
 
-## Part C — Next up
-1. **School setup:** academic sessions, classes, sections, subjects, school profile and logo
-2. **Students & admissions**
+## Part C — Step by step
+1. ✅ **School setup:** school profile and logo, academic sessions, classes and sections, subjects
+2. **Students & admissions** ← next
 3. **Attendance**
 4. **Fees & challans**
 

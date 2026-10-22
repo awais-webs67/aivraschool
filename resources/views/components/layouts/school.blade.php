@@ -25,7 +25,11 @@
             <button type="button" class="btn-ghost -ml-2 rounded p-2 lg:hidden" data-toggle="#mobile-nav" data-lock-scroll aria-label="Open menu" aria-expanded="false">
                 <x-icon name="menu" />
             </button>
+            <x-school-badge :school="$school" size="sm" class="hidden sm:grid lg:hidden" />
             <p class="truncate font-semibold text-ink">{{ $school->name }}</p>
+            @if ($session = \App\Models\AcademicSession::current())
+                <span class="badge badge-neutral hidden sm:inline-flex">Session {{ $session->name }}</span>
+            @endif
             <div class="ml-auto flex items-center gap-3">
                 <span class="hidden text-right sm:block">
                     <span class="block text-sm font-medium text-ink">{{ $user->name }}</span>
@@ -49,9 +53,14 @@
 
         <main class="px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
             @if ($heading)
-                <div class="mb-6">
-                    <h1 class="font-display text-4xl leading-none text-ink sm:text-[2.75rem]">{{ $heading }}</h1>
-                    @if ($subheading)<p class="mt-1.5 text-sm text-body">{{ $subheading }}</p>@endif
+                <div class="mb-6 flex flex-wrap items-end justify-between gap-4">
+                    <div class="min-w-0">
+                        <h1 class="font-display text-4xl leading-none text-ink sm:text-[2.75rem]">{{ $heading }}</h1>
+                        @if ($subheading)<p class="mt-1.5 text-sm text-body">{{ $subheading }}</p>@endif
+                    </div>
+                    @isset($actions)
+                        <div class="flex flex-wrap items-center gap-2">{{ $actions }}</div>
+                    @endisset
                 </div>
             @endif
             <div class="mb-6 space-y-3 empty:hidden"><x-flash /></div>

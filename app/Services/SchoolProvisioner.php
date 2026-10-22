@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Enums\SchoolStatus;
+use App\Models\AcademicSession;
 use App\Models\Plan;
 use App\Models\School;
 use App\Models\User;
@@ -10,8 +11,8 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 
 /**
- * Creates a new school: its record, the first school admin account, and the
- * trial or first subscription — all in one transaction, in the shared database.
+ * Creates a new school: its record, the first school admin account, the current
+ * academic session, and the trial or first subscription — all in one transaction, in the shared database.
  */
 class SchoolProvisioner
 {
@@ -36,12 +37,17 @@ class SchoolProvisioner
                 'trial_ends_at' => $isTrial ? now()->addDays($trialDays)->endOfDay() : null,
             ]);
 
-            $model->run(fn () => User::create([
-                'name' => $admin['name'],
-                'email' => strtolower($admin['email']),
-                'password' => $admin['password'],
-                'role' => 'admin',
-            ]));
+            $model->run(function () use ($admin) {
+                User::create([
+                    'name' => $admin['name'],
+                    'email' => strtolower($admin['email']),
+                    'password' => $admin['password'],
+                    'role' => 'admin',
+                ]);
+
+                // Start the school with this year's session so it can be used right away.
+                AcademicSession::create(AcademicSession::suggestFor(now()) + ['is_current' => true]);
+            });
 
             if (! $isTrial) {
                 $this->subscriptions->assign($model, $plan, [

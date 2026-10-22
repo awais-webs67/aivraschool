@@ -2,12 +2,28 @@
     <div class="flex h-16 items-center px-5">
         <a href="{{ route('school.dashboard') }}"><x-logo dark /></a>
     </div>
-    <div class="mx-4 mb-2 truncate rounded border border-white/10 bg-white/5 px-3 py-2 text-xs font-medium text-white/80" title="{{ $school->name }}">{{ $school->name }}</div>
+    <div class="mx-4 mb-2 flex items-center gap-2.5 rounded border border-white/10 bg-white/5 p-2" title="{{ $school->name }}">
+        <x-school-badge :school="$school" size="sm" />
+        <span class="truncate text-xs font-medium text-white/85">{{ $school->name }}</span>
+    </div>
     <nav class="flex-1 space-y-1 overflow-y-auto px-3 py-2" aria-label="Main">
         <a href="{{ route('school.dashboard') }}" class="nav-link" @if (request()->routeIs('school.dashboard')) aria-current="page" @endif>
             <x-icon name="home" /> Dashboard
         </a>
-        <p class="nav-section">Modules</p>
+        @if (in_array($user->role, ['admin', 'principal'], true))
+            <p class="nav-section">School setup</p>
+            @foreach ([
+                ['school.setup.profile', 'building', 'School profile'],
+                ['school.setup.sessions', 'calendar', 'Academic sessions'],
+                ['school.setup.classes', 'layers', 'Classes & sections'],
+                ['school.setup.subjects', 'book-open', 'Subjects'],
+            ] as [$route, $icon, $label])
+                <a href="{{ route($route) }}" class="nav-link" @if (request()->routeIs($route)) aria-current="page" @endif>
+                    <x-icon :name="$icon" /> {{ $label }}
+                </a>
+            @endforeach
+        @endif
+        <p class="nav-section">Coming next</p>
         @foreach (config('skooline.modules') as $key => $module)
             @if ($school->hasModule($key))
                 <span class="nav-link cursor-default opacity-60" title="Coming soon">

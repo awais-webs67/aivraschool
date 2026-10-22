@@ -1,12 +1,15 @@
 <x-layouts.auth>
     <x-slot:aside>
+        @if ($school->logo_path)
+            <x-school-badge :school="$school" size="lg" class="mb-6" />
+        @endif
         <p class="eyebrow text-brand">School portal</p>
         <h2 class="font-display mt-3 text-6xl leading-[0.95]">{{ $school->name }}</h2>
         <p class="mt-5 text-white/70">Sign in to manage students, attendance, fees, exams and everything else at your school.</p>
     </x-slot:aside>
 
     <div class="mb-6 flex items-center gap-3 lg:hidden">
-        <span class="font-display grid size-11 place-items-center rounded-md bg-ink text-2xl text-white">{{ strtoupper(substr($school->name, 0, 1)) }}</span>
+        <x-school-badge :school="$school" />
         <p class="font-semibold text-ink">{{ $school->name }}</p>
     </div>
 

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\EnsureSchoolRole;
 use App\Http\Middleware\IdentifySchool;
 use Illuminate\Contracts\Auth\Middleware\AuthenticatesRequests;
 use Illuminate\Foundation\Application;
@@ -19,6 +20,8 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         // The school must be known before authentication looks up the user.
         $middleware->prependToPriorityList(AuthenticatesRequests::class, IdentifySchool::class);
+
+        $middleware->alias(['school.role' => EnsureSchoolRole::class]);
 
         $isPlatform = fn (Request $request) => $request->is('admin', 'admin/*');
 
