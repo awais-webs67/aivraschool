@@ -49,7 +49,7 @@ Create more Super Admins with `php artisan skooline:create-admin you@aivrasol.co
 
 ## Hosting (cPanel / hPanel)
 
-See [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md). In short: upload `skooline-<version>.zip`
+See [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md). Recommended: **git push to `main` deploys automatically** (tests → SSH → `scripts/deploy.sh`) once the `DEPLOY_*` secrets are set. Without SSH: upload `skooline-<version>.zip`
 (built by `bash scripts/make-release.sh` or the *Release ZIP* GitHub Action), import
 `database/skooline.sql` in phpMyAdmin, set `APP_URL` and `DB_*` in `.env`, open `/admin`,
 and add one cron job (`php artisan schedule:run` every minute).

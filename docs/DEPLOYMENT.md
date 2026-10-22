@@ -1,4 +1,70 @@
-# Installing Skooline — cPanel / hPanel and Localhost
+# Installing & Updating Skooline — cPanel / hPanel and Localhost
+
+Skooline is **SaaS**: AivraSol runs **one** installation, and every school uses it through its own address
+(`yourdomain.com/greenfield`). Schools never install anything. When we update the code, every school gets the update at once.
+
+| Method | Use it for |
+|---|---|
+| **A. Git + automatic deploy** (recommended) | Our live server. `git push` to `main` → tests run → server updates itself. |
+| **B. ZIP upload + SQL import** | Hosting without SSH, or a quick demo install. Works like any CodeCanyon PHP script. |
+| **C. Localhost** | Development and testing on your own computer. |
+
+---
+
+## A. Recommended: Git + automatic deploy (Hostinger / cPanel with SSH)
+
+Hostinger Premium/Business/Cloud and most cPanel hosts include SSH, Git and Composer.
+
+### One-time server setup
+1. **Database:** create one MySQL database + user in the panel. You don't need to import the SQL file here; migrations create the tables.
+2. **SSH in** (hPanel → Advanced → SSH Access shows host, port and user) and run:
+   ```bash
+   cd ~/domains/yourdomain.com                 # cPanel: cd ~
+   git clone https://github.com/awais-webs67/aivraschool.git skooline
+   cd skooline
+   composer2 install --no-dev --optimize-autoloader   # or "composer" on cPanel
+   cp .env.example .env && nano .env           # APP_ENV=production, APP_DEBUG=false, APP_URL, DB_*
+   php artisan key:generate
+   php artisan migrate --force && php artisan db:seed --class=PlanSeeder --force
+   ```
+   For a private repo, add the server's public key (`ssh-keygen -t ed25519`, then `cat ~/.ssh/id_ed25519.pub`) to GitHub → repo → **Settings → Deploy keys**, and clone with `git@github.com:awais-webs67/aivraschool.git`.
+3. **Point the website at `skooline/public`:**
+   - hPanel main domain: `mv public_html public_html_old && ln -s skooline/public public_html`
+   - cPanel: Domains → set the document root to `skooline/public`
+4. Open `https://yourdomain.com/admin` → **Create Super Admin**.
+5. Add the cron job (Step 6 below).
+
+### Turn on automatic deploys
+1. On your computer, create a key pair just for deploys: `ssh-keygen -t ed25519 -f skooline-deploy -N ""`.
+   Add `skooline-deploy.pub` to the server: hPanel → **SSH Access → SSH keys**, or append it to `~/.ssh/authorized_keys` on cPanel.
+2. GitHub → repo → **Settings → Secrets and variables → Actions → New secret**:
+
+   | Secret | Value |
+   |---|---|
+   | `DEPLOY_HOST` | server IP / host from the SSH page |
+   | `DEPLOY_PORT` | SSH port (Hostinger shows it on the SSH page; often `65002`) |
+   | `DEPLOY_USER` | SSH username (e.g. `u123456789`) |
+   | `DEPLOY_PATH` | full project path, e.g. `/home/u123456789/domains/yourdomain.com/skooline` |
+   | `DEPLOY_KEY` | contents of the private key file `skooline-deploy` |
+
+From now on, every `git push` to `main` does this automatically (`.github/workflows/deploy.yml` → `scripts/deploy.sh`):
+1. Runs all tests. If any test fails, **nothing is deployed**.
+2. Puts the site in maintenance mode for a few seconds.
+3. Pulls the new code and installs packages.
+4. Applies database changes with migrations. **Existing schools' data is kept.**
+5. Refreshes caches and brings the site back.
+
+You can also run it by hand on the server: `bash scripts/deploy.sh`.
+
+### Rules that keep updates safe
+- Work on a branch, open a PR, merge into `main` only when CI is green. `main` is always what's live.
+- Never edit files on the server. Every change goes through Git.
+- Database changes are **always new migration files**, never edits to old ones, so every update applies on top of real data.
+- Before risky releases, back up the database (see "Backups" below).
+
+---
+
+## B. ZIP upload + SQL import (no SSH)
 
 Skooline installs like any PHP script: **upload files → create one MySQL database → import the SQL file → edit `.env` → open `/admin`.**
 No SSH, Composer or Node.js is needed on the server.
@@ -6,8 +72,6 @@ No SSH, Composer or Node.js is needed on the server.
 **Requirements:** PHP **8.3+** with `pdo_mysql`, `mbstring`, `openssl`, `intl`, `gd`, `zip`, `fileinfo` (all standard on cPanel/hPanel) and MySQL 5.7+/8 or MariaDB 10.4+.
 
 ---
-
-## 1. cPanel / hPanel (shared hosting)
 
 ### Step 1 — Get the upload package
 Download **`skooline-<version>.zip`**. It already contains `vendor/` and `database/skooline.sql`.
@@ -69,14 +133,16 @@ It expires overdue trials and subscriptions every night and sends queued message
 
 Schools need **no** subdomains or DNS changes. Each one opens at its own path.
 
-### Updating to a new version
+### Updating a ZIP install
 1. Back up the database (phpMyAdmin → Export) and your `.env`.
 2. Upload the new ZIP and extract it over the old files. Keep your `.env` and the `storage/` folder.
 3. Open **Super Admin → System → Run updates**. This applies any database changes; existing data is kept.
 
 ---
 
-## 2. Localhost (Windows, macOS, Linux)
+---
+
+## C. Localhost (Windows, macOS, Linux)
 
 Install **PHP 8.3+, Composer and Git**. On Windows the easiest option is [Laravel Herd](https://herd.laravel.com/windows) (PHP + Composer included). XAMPP/Laragon with PHP 8.3+ also work.
 
@@ -100,16 +166,25 @@ Change styles or scripts? Run `npm install && npm run build` (Node 22) and commi
 
 ---
 
-## 3. With SSH (optional, any server)
-```bash
-git clone https://github.com/awais-webs67/aivraschool.git skooline && cd skooline
-composer install --no-dev --optimize-autoloader
-cp .env.example .env            # set APP_URL and DB_* as in Step 4
-php artisan key:generate
-php artisan migrate --force     # instead of importing the SQL file
-php artisan config:cache
-```
-Later updates: `bash scripts/deploy.sh` (pulls code, installs packages, runs migrations, caches config).
+## Backups
+
+Everything Skooline knows lives in **two places**: the **database** and the **`storage/` folder** (uploaded files). Plus your **`.env`** (settings and passwords).
+- Turn on the host's automatic daily backups (Hostinger and most cPanel hosts include them).
+- Before big updates: phpMyAdmin → select database → **Export** → Quick → SQL. Also download `.env`.
+
+---
+
+## Moving to a new host (e.g. after a year)
+
+Nothing in Skooline is tied to one hosting company. Moving takes about an hour, and schools' URLs stay the same if the domain stays the same.
+
+1. **Old host:** turn on maintenance mode (`php artisan down`, or just do it at night).
+2. **Export the database:** phpMyAdmin → Export → SQL. This one file holds **all schools, users, plans and subscriptions**.
+3. **Download** `.env` and the `storage/app` folder (uploaded files).
+4. **New host:** install with method **A** (git clone) or **B** (ZIP). **Skip** `database/skooline.sql`, and instead **import your exported SQL** into the new empty database.
+5. Put your old `.env` in place and change only the `DB_*` lines to the new database's details. **Keep the same `APP_KEY`.**
+6. Upload `storage/app` back. Add the cron job. If using auto-deploy, update the `DEPLOY_*` secrets in GitHub.
+7. Change the domain's DNS (or nameservers) to the new host and turn on SSL. Done: every school opens at the same address with all its data.
 
 ---
 

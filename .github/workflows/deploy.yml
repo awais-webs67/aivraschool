@@ -1,0 +1,50 @@
+name: Deploy
+
+# Every push to main: run the tests, then update the live server over SSH.
+# One-time setup (GitHub → Settings → Secrets and variables → Actions):
+#   DEPLOY_HOST   server host or IP          DEPLOY_PORT  SSH port (Hostinger: 65002)
+#   DEPLOY_USER   SSH user                   DEPLOY_PATH  project folder on the server
+#   DEPLOY_KEY    private SSH key whose public key is added to the server
+# Until DEPLOY_HOST is set, the deploy step is skipped.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, pdo_sqlite, sqlite3, intl
+          coverage: none
+      - run: composer install --no-interaction --prefer-dist --no-progress
+      - run: cp .env.example .env && php artisan key:generate
+      - run: php artisan test
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    env:
+      HAS_SERVER: ${{ secrets.DEPLOY_HOST != '' }}
+    steps:
+      - name: Skip (no server configured yet)
+        if: env.HAS_SERVER != 'true'
+        run: echo "Add the DEPLOY_* secrets to enable automatic deploys."
+
+      - name: Update live server
+        if: env.HAS_SERVER == 'true'
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          port: ${{ secrets.DEPLOY_PORT }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_KEY }}
+          script: cd "${{ secrets.DEPLOY_PATH }}" && bash scripts/deploy.sh
