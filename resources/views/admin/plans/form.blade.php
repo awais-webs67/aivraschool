@@ -27,7 +27,7 @@
                 <div class="card-header"><h2 class="card-title">Pricing</h2></div>
                 <div class="card-body grid gap-5 sm:grid-cols-2">
                     <x-form.select name="billing_model" label="Billing model" :options="$billingOptions" :value="$plan->billing_model" required class="sm:col-span-2" />
-                    <x-form.input name="price" type="number" step="0.01" min="0" label="Price ({{ config('skooline.currency') }})" :value="$plan->price ?? 0" required
+                    <x-form.input name="price" type="number" step="0.01" min="0" label="Price ({{ \App\Models\Setting::currency() }})" :value="$plan->price ?? 0" required
                         hint="Per cycle. For per-student plans this is an optional base fee; for lifetime it's the one-time price." />
                     <div data-show-when="billing_model=per_student">
                         <x-form.input name="price_per_student" type="number" step="0.01" min="0" label="Price per student / month" :value="$plan->price_per_student" />

@@ -10,7 +10,7 @@
             <span class="mx-auto grid size-14 place-items-center rounded-full {{ $suspended ? 'bg-danger-tint text-danger' : 'bg-warning-tint text-warning' }}">
                 <x-icon :name="$suspended ? 'ban' : 'clock'" size="7" />
             </span>
-            <h1 class="font-display mt-5 text-4xl leading-none text-ink">{{ $suspended ? 'Account suspended' : 'Subscription expired' }}</h1>
+            <h1 class="font-display mt-5 text-3xl text-ink">{{ $suspended ? 'Account suspended' : 'Subscription expired' }}</h1>
             <p class="mt-3 text-sm text-body">
                 The Skooline portal for <span class="font-semibold text-ink">{{ $school->name }}</span>
                 {{ $suspended ? 'has been temporarily suspended.' : 'is unavailable because its subscription has ended.' }}

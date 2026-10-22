@@ -11,9 +11,12 @@
             </a>
         @endforeach
         <p class="nav-section">Account</p>
-    <a href="{{ route('admin.system') }}" class="nav-link" @if (request()->routeIs('admin.system')) aria-current="page" @endif>
-        <x-icon name="cube" /> System
-    </a>
+        <a href="{{ route('admin.settings') }}" class="nav-link" @if (request()->routeIs('admin.settings')) aria-current="page" @endif>
+            <x-icon name="banknotes" /> Currencies
+        </a>
+        <a href="{{ route('admin.system') }}" class="nav-link" @if (request()->routeIs('admin.system')) aria-current="page" @endif>
+            <x-icon name="cube" /> System
+        </a>
         <a href="{{ route('admin.account') }}" class="nav-link" @if (request()->routeIs('admin.account')) aria-current="page" @endif>
             <x-icon name="sliders" /> Account settings
         </a>

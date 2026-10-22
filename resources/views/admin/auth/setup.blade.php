@@ -1,11 +1,11 @@
 <x-layouts.auth :home-url="route('home')">
     <x-slot:aside>
         <p class="eyebrow text-brand">First-time setup</p>
-        <h2 class="font-display mt-3 text-6xl leading-[0.95]">Welcome to <span class="text-brand">Skooline</span>.</h2>
+        <h2 class="font-display mt-3 text-4xl leading-tight xl:text-5xl">Welcome to <span class="text-brand">Skooline</span>.</h2>
         <p class="mt-5 text-white/70">The database is ready. Create the Super Admin account that will manage schools, plans and subscriptions.</p>
     </x-slot:aside>
 
-    <h1 class="font-display text-5xl leading-none">Create Super Admin</h1>
+    <h1 class="font-display text-3xl">Create Super Admin</h1>
     <p class="mt-2 text-sm text-body">This page works only once, while no Super Admin exists.</p>
 
     <form method="POST" action="{{ route('admin.setup.store') }}" class="mt-8 space-y-5">

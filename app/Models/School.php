@@ -25,7 +25,7 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $subscription_ends_at
  */
 #[Fillable([
-    'name', 'slug', 'email', 'phone', 'city', 'address', 'principal_name', 'logo_path', 'status',
+    'name', 'slug', 'email', 'phone', 'city', 'country', 'currency', 'address', 'principal_name', 'logo_path', 'status',
     'plan_id', 'trial_ends_at', 'subscription_ends_at', 'suspended_at', 'suspension_reason', 'notes',
 ])]
 class School extends Model
@@ -67,6 +67,12 @@ class School extends Model
     public function url(string $path = ''): string
     {
         return url($this->slug.($path !== '' ? '/'.ltrim($path, '/') : ''));
+    }
+
+    /** The currency this school's fees are charged in. */
+    public function currencyCode(): string
+    {
+        return $this->currency ?: Setting::currency();
     }
 
     /** Address shown to people, e.g. "skooline.com/greenfield". */

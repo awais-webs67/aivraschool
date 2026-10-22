@@ -17,6 +17,8 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('robots.txt', [HomeController::class, 'robots']);
+Route::get('sitemap.xml', [HomeController::class, 'sitemap']);
 Route::post('/demo-request', [HomeController::class, 'requestDemo'])->name('demo-request');
 
 Route::prefix('admin')->name('admin.')->group(function () {
@@ -51,6 +53,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::get('system', [Admin\SystemController::class, 'index'])->name('system');
         Route::post('system/migrate', [Admin\SystemController::class, 'migrate'])->name('system.migrate');
+
+        Route::get('settings', [Admin\SettingsController::class, 'edit'])->name('settings');
+        Route::put('settings', [Admin\SettingsController::class, 'update'])->name('settings.update');
 
         Route::get('account', [Admin\AccountController::class, 'edit'])->name('account');
         Route::put('account/password', [Admin\AccountController::class, 'updatePassword'])->name('account.password');

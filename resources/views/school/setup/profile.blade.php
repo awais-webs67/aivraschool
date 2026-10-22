@@ -11,6 +11,8 @@
                 <x-form.input name="phone" label="Phone" :value="$school->phone" />
                 <x-form.input name="email" type="email" label="Email" :value="$school->email" />
                 <x-form.input name="city" label="City" :value="$school->city" />
+                <x-form.input name="country" label="Country" :value="$school->country" />
+                <x-form.select name="currency" label="Fee currency" required :value="$school->currencyCode()" :options="collect(config('currencies'))->mapWithKeys(fn ($c, $code) => [$code => $code.' — '.$c[0]])->all()" hint="Used for fees, invoices and receipts." />
                 <x-form.input name="address" label="Address" :value="$school->address" class="sm:col-span-2" />
             </div>
         </section>

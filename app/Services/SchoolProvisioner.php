@@ -19,7 +19,7 @@ class SchoolProvisioner
     public function __construct(protected SubscriptionManager $subscriptions) {}
 
     /**
-     * @param  array{name:string, slug:string, email?:?string, phone?:?string, city?:?string, address?:?string, principal_name?:?string, notes?:?string}  $school
+     * @param  array{name:string, slug:string, email?:?string, phone?:?string, city?:?string, country?:?string, currency?:?string, address?:?string, principal_name?:?string, notes?:?string}  $school
      * @param  array{name:string, email:string, password:string}  $admin
      * @param  array{mode:string, trial_days?:?int, starts_at?:?string, amount?:?float, student_count?:?int, payment_status?:?string}  $billing
      */
@@ -30,7 +30,7 @@ class SchoolProvisioner
 
         return DB::transaction(function () use ($school, $plan, $admin, $billing, $createdBy, $isTrial, $trialDays) {
             $model = School::create(Arr::only($school, [
-                'name', 'slug', 'email', 'phone', 'city', 'address', 'principal_name', 'notes',
+                'name', 'slug', 'email', 'phone', 'city', 'country', 'currency', 'address', 'principal_name', 'notes',
             ]) + [
                 'plan_id' => $plan->id,
                 'status' => $isTrial ? SchoolStatus::Trial : SchoolStatus::Active,

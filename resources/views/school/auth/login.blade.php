@@ -4,7 +4,7 @@
             <x-school-badge :school="$school" size="lg" class="mb-6" />
         @endif
         <p class="eyebrow text-brand">School portal</p>
-        <h2 class="font-display mt-3 text-6xl leading-[0.95]">{{ $school->name }}</h2>
+        <h2 class="font-display mt-3 text-4xl leading-tight xl:text-5xl">{{ $school->name }}</h2>
         <p class="mt-5 text-white/70">Sign in to manage students, attendance, fees, exams and everything else at your school.</p>
     </x-slot:aside>
 
@@ -13,7 +13,7 @@
         <p class="font-semibold text-ink">{{ $school->name }}</p>
     </div>
 
-    <h1 class="font-display text-5xl leading-none">Welcome back</h1>
+    <h1 class="font-display text-3xl">Welcome back</h1>
     <p class="mt-2 text-sm text-body">Sign in to your school account.</p>
 
     <form method="POST" action="{{ route('school.login.store') }}" class="mt-8 space-y-5">

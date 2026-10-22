@@ -190,7 +190,7 @@ CREATE TABLE `migrations` (
   `migration` varchar(255) NOT NULL,
   `batch` int(11) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 /*!40000 ALTER TABLE `migrations` DISABLE KEYS */;
@@ -205,7 +205,8 @@ INSERT INTO `migrations` VALUES
 (8,'2026_01_01_000005_create_demo_requests_table',1),
 (9,'2026_02_01_000001_create_academic_sessions_table',1),
 (10,'2026_02_01_000002_create_classes_and_sections_tables',1),
-(11,'2026_02_01_000003_create_subjects_tables',1);
+(11,'2026_02_01_000003_create_subjects_tables',1),
+(12,'2026_03_01_000001_add_settings_and_school_currency',1);
 /*!40000 ALTER TABLE `migrations` ENABLE KEYS */;
 DROP TABLE IF EXISTS `password_reset_tokens`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -253,10 +254,10 @@ CREATE TABLE `plans` (
 
 /*!40000 ALTER TABLE `plans` DISABLE KEYS */;
 INSERT INTO `plans` VALUES
-(1,'Starter','starter','For small schools getting started',NULL,'monthly',4000.00,0.00,0.00,14,200,25,1,5,500,'[\"students\",\"admissions\",\"attendance\",\"fees\",\"exams\",\"communication\",\"certificates\",\"reports\"]',1,1,0,1,'2026-10-22 13:47:49','2026-10-22 13:47:49'),
-(2,'Standard','standard','Pay only for active students',NULL,'per_student',0.00,50.00,0.00,14,NULL,150,1,20,2000,'[\"students\",\"admissions\",\"attendance\",\"fees\",\"exams\",\"communication\",\"certificates\",\"reports\",\"timetable\",\"homework\",\"hr_payroll\",\"accounts\",\"library\",\"mobile_apps\"]',1,1,1,2,'2026-10-22 13:47:49','2026-10-22 13:47:49'),
-(3,'Premium','premium','Everything, for multi-campus schools',NULL,'yearly',150000.00,0.00,0.00,14,NULL,NULL,5,100,10000,'[\"students\",\"admissions\",\"attendance\",\"fees\",\"exams\",\"timetable\",\"homework\",\"lms\",\"communication\",\"hr_payroll\",\"accounts\",\"library\",\"transport\",\"hostel\",\"inventory\",\"certificates\",\"reports\",\"multi_branch\",\"mobile_apps\",\"ai\"]',1,1,0,3,'2026-10-22 13:47:49','2026-10-22 13:47:49'),
-(4,'Lifetime','lifetime','One-time license with yearly support',NULL,'lifetime',450000.00,0.00,0.00,14,NULL,NULL,3,50,0,'[\"students\",\"admissions\",\"attendance\",\"fees\",\"exams\",\"timetable\",\"homework\",\"lms\",\"communication\",\"hr_payroll\",\"accounts\",\"library\",\"transport\",\"hostel\",\"inventory\",\"certificates\",\"reports\",\"multi_branch\",\"mobile_apps\",\"ai\"]',1,0,0,4,'2026-10-22 13:47:49','2026-10-22 13:47:49');
+(1,'Starter','starter','For small schools getting started',NULL,'monthly',4000.00,0.00,0.00,14,200,25,1,5,500,'[\"students\",\"admissions\",\"attendance\",\"fees\",\"exams\",\"communication\",\"certificates\",\"reports\"]',1,1,0,1,'2026-10-22 15:59:20','2026-10-22 15:59:20'),
+(2,'Standard','standard','Pay only for active students',NULL,'per_student',0.00,50.00,0.00,14,NULL,150,1,20,2000,'[\"students\",\"admissions\",\"attendance\",\"fees\",\"exams\",\"communication\",\"certificates\",\"reports\",\"timetable\",\"homework\",\"hr_payroll\",\"accounts\",\"library\",\"mobile_apps\"]',1,1,1,2,'2026-10-22 15:59:20','2026-10-22 15:59:20'),
+(3,'Premium','premium','Everything, for multi-campus schools',NULL,'yearly',150000.00,0.00,0.00,14,NULL,NULL,5,100,10000,'[\"students\",\"admissions\",\"attendance\",\"fees\",\"exams\",\"timetable\",\"homework\",\"lms\",\"communication\",\"hr_payroll\",\"accounts\",\"library\",\"transport\",\"hostel\",\"inventory\",\"certificates\",\"reports\",\"multi_branch\",\"mobile_apps\",\"ai\"]',1,1,0,3,'2026-10-22 15:59:20','2026-10-22 15:59:20'),
+(4,'Lifetime','lifetime','One-time license with yearly support',NULL,'lifetime',450000.00,0.00,0.00,14,NULL,NULL,3,50,0,'[\"students\",\"admissions\",\"attendance\",\"fees\",\"exams\",\"timetable\",\"homework\",\"lms\",\"communication\",\"hr_payroll\",\"accounts\",\"library\",\"transport\",\"hostel\",\"inventory\",\"certificates\",\"reports\",\"multi_branch\",\"mobile_apps\",\"ai\"]',1,0,0,4,'2026-10-22 15:59:20','2026-10-22 15:59:20');
 /*!40000 ALTER TABLE `plans` ENABLE KEYS */;
 DROP TABLE IF EXISTS `platform_users`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -290,6 +291,8 @@ CREATE TABLE `schools` (
   `email` varchar(255) DEFAULT NULL,
   `phone` varchar(30) DEFAULT NULL,
   `city` varchar(255) DEFAULT NULL,
+  `country` varchar(80) DEFAULT NULL,
+  `currency` char(3) DEFAULT NULL,
   `address` varchar(255) DEFAULT NULL,
   `principal_name` varchar(255) DEFAULT NULL,
   `logo_path` varchar(255) DEFAULT NULL,
@@ -352,6 +355,20 @@ CREATE TABLE `sessions` (
 
 /*!40000 ALTER TABLE `sessions` DISABLE KEYS */;
 /*!40000 ALTER TABLE `sessions` ENABLE KEYS */;
+DROP TABLE IF EXISTS `settings`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `settings` (
+  `key` varchar(80) NOT NULL,
+  `value` text DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+/*!40000 ALTER TABLE `settings` DISABLE KEYS */;
+/*!40000 ALTER TABLE `settings` ENABLE KEYS */;
 DROP TABLE IF EXISTS `subjects`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8mb4 */;

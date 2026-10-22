@@ -68,7 +68,7 @@
             <div class="card-body flex flex-col items-center py-14 text-center">
                 <span class="grid size-14 place-items-center rounded-full bg-brand-tint text-brand-text"><x-icon name="building" size="7" /></span>
                 <p class="mt-4 text-lg font-semibold text-ink">Add your first school</p>
-                <p class="mt-1 max-w-sm text-sm text-muted">Create a school, pick a plan and Skooline sets up its own database and admin login automatically.</p>
+                <p class="mt-1 max-w-sm text-sm text-muted">Create a school, pick a plan and Skooline sets up its portal and admin login automatically.</p>
                 <a href="{{ route('admin.schools.create') }}" class="btn btn-primary mt-5"><x-icon name="plus" size="4" /> Add school</a>
             </div>
         @else

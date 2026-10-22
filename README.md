@@ -23,6 +23,9 @@ Installs on **cPanel / hPanel** like any PHP script: upload, import `database/sk
 | School portal: login at `/{school}`, dashboard showing plan modules, blocked when suspended/expired | ✅ |
 | Install without SSH: SQL file import, first-run Super Admin setup, auto app key, one-click database updates (Super Admin → System) | ✅ |
 | **Step 1 — School setup:** school profile + logo, academic sessions (one current), classes & sections (Playgroup–Class 10 in one click), subjects assigned to classes, setup checklist on the dashboard | ✅ |
+| New design: logo, animations, slide-in mobile menus, every page checked at phone to desktop widths | ✅ |
+| Currencies: billing currency, fee currency per school, currency switcher on website pricing (Super Admin → Currencies) | ✅ |
+| SEO: titles, descriptions, canonical, Open Graph image, structured data, `robots.txt`, `sitemap.xml`, private pages `noindex` | ✅ |
 | Step 2 — Students & admissions | Next |
 
 ## Tech stack

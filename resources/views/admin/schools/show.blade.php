@@ -5,10 +5,10 @@
 <x-layouts.admin :title="$school->name">
     <div class="mb-6 flex flex-wrap items-start justify-between gap-4">
         <div class="flex min-w-0 items-start gap-4">
-            <span class="font-display grid size-14 shrink-0 place-items-center rounded-md bg-ink text-3xl text-white">{{ strtoupper(substr($school->name, 0, 1)) }}</span>
+            <span class="font-display grid size-14 shrink-0 place-items-center rounded-lg bg-ink text-2xl text-white">{{ strtoupper(substr($school->name, 0, 1)) }}</span>
             <div class="min-w-0">
                 <a href="{{ route('admin.schools.index') }}" class="text-xs font-medium text-muted hover:text-ink">← Schools</a>
-                <h1 class="font-display truncate text-4xl leading-none text-ink sm:text-[2.75rem]">{{ $school->name }}</h1>
+                <h1 class="page-title truncate">{{ $school->name }}</h1>
                 <div class="mt-2 flex flex-wrap items-center gap-2 text-sm">
                     @include('admin.partials.school-status')
                     <a href="{{ $school->url('login') }}" target="_blank" rel="noopener" class="inline-flex items-center gap-1 font-medium text-brand-text hover:underline">{{ $school->displayUrl() }} <x-icon name="external" size="3" /></a>
@@ -68,7 +68,7 @@
                     <x-form.input name="starts_at" type="date" label="Start date" required :value="($school->subscription_ends_at && $school->subscription_ends_at->isFuture() ? $school->subscription_ends_at->copy()->addDay() : now())->toDateString()" />
                     <x-form.input name="ends_at" type="date" label="End date" hint="Blank = calculated from the plan (lifetime has no end)." />
                     <x-form.input name="student_count" type="number" min="0" label="Students" :value="$latest?->student_count" hint="For per-student pricing." />
-                    <x-form.input name="amount" type="number" min="0" step="0.01" label="Amount ({{ config('skooline.currency') }})" hint="Blank = plan price." />
+                    <x-form.input name="amount" type="number" min="0" step="0.01" label="Amount ({{ \App\Models\Setting::currency() }})" hint="Blank = plan price." />
                     <x-form.select name="payment_status" label="Payment status" required :options="['unpaid' => 'Unpaid', 'paid' => 'Paid', 'partial' => 'Partially paid', 'waived' => 'Waived']" value="unpaid" />
                     <x-form.select name="payment_method" label="Payment method" :options="$methods" placeholder="—" />
                     <x-form.input name="payment_reference" label="Reference / transaction ID" class="sm:col-span-2" />
@@ -186,7 +186,7 @@
             <section class="card">
                 <div class="card-header"><h2 class="card-title">Details</h2></div>
                 <dl class="card-body space-y-3 text-sm">
-                    @foreach (['Principal / owner' => $school->principal_name, 'Email' => $school->email, 'Phone' => $school->phone, 'City' => $school->city, 'Address' => $school->address, 'Created' => $school->created_at->format('d M Y, h:i A'), 'School ID' => $school->id] as $label => $value)
+                    @foreach (['Principal / owner' => $school->principal_name, 'Email' => $school->email, 'Phone' => $school->phone, 'City' => collect([$school->city, $school->country])->filter()->join(', '), 'Fee currency' => $school->currencyCode(), 'Address' => $school->address, 'Created' => $school->created_at->format('d M Y, h:i A'), 'School ID' => $school->id] as $label => $value)
                         <div class="grid grid-cols-[7.5rem_1fr] gap-2">
                             <dt class="text-muted">{{ $label }}</dt>
                             <dd class="break-words text-ink">{{ $value ?: '—' }}</dd>

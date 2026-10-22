@@ -63,7 +63,7 @@ class SchoolSetupTest extends TestCase
         Storage::fake('local');
 
         $this->put($this->url('profile'), [
-            'name' => 'Greenfield Grammar School',
+            'name' => 'Greenfield Grammar School', 'currency' => 'USD',
             'phone' => '042-111222',
             'address' => 'Johar Town, Lahore',
             'logo' => UploadedFile::fake()->image('logo.png', 200, 200),
@@ -76,7 +76,7 @@ class SchoolSetupTest extends TestCase
 
         $this->get($this->schoolUrl('greenfield', 'logo'))->assertOk();
 
-        $this->put($this->url('profile'), ['name' => 'Greenfield Grammar School', 'remove_logo' => '1']);
+        $this->put($this->url('profile'), ['name' => 'Greenfield Grammar School', 'currency' => 'USD', 'remove_logo' => '1']);
         $this->assertNull($this->school->fresh()->logo_path);
     }
 

@@ -1,13 +1,20 @@
 <?php
 
 use App\Models\School;
+use App\Models\Setting;
 use App\Support\Tenancy\CurrentSchool;
 
 if (! function_exists('money')) {
-    /** Format an amount in the platform currency, e.g. "PKR 4,500". */
-    function money(float|int|string|null $amount, bool $decimals = false): string
+    /**
+     * Format an amount, e.g. "USD 4,500". Uses the given currency, else the current
+     * school's currency inside a school portal, else the platform billing currency.
+     */
+    function money(float|int|string|null $amount, bool $decimals = false, ?string $currency = null): string
     {
-        return config('skooline.currency').' '.number_format((float) $amount, $decimals ? 2 : 0);
+        $currency ??= current_school()?->currencyCode() ?? Setting::currency();
+        $places = $decimals ? (config("currencies.$currency.1") ?? 2) : 0;
+
+        return $currency.' '.number_format((float) $amount, $places);
     }
 }
 

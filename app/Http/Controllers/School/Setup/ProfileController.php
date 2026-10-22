@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -26,6 +27,8 @@ class ProfileController extends Controller
             'email' => ['nullable', 'email', 'max:150'],
             'phone' => ['nullable', 'string', 'max:30'],
             'city' => ['nullable', 'string', 'max:80'],
+            'country' => ['nullable', 'string', 'max:80'],
+            'currency' => ['required', Rule::in(array_keys(config('currencies')))],
             'address' => ['nullable', 'string', 'max:255'],
             'logo' => ['nullable', 'image', 'mimes:png,jpg,jpeg,webp', 'max:1024'],
             'remove_logo' => ['boolean'],

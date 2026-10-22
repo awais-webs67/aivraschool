@@ -1,4 +1,4 @@
-<x-layouts.admin heading="Schools" subheading="Every school subscribed to Skooline. Each one runs on its own database.">
+<x-layouts.admin heading="Schools" subheading="Every school subscribed to Skooline. Each one has its own portal and fully separate data.">
     <x-slot:actions>
         <a href="{{ route('admin.schools.create') }}" class="btn btn-primary"><x-icon name="plus" size="4" /> Add school</a>
     </x-slot:actions>

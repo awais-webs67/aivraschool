@@ -17,7 +17,7 @@
                     <div class="card-body flex-1">
                         <div class="flex items-start justify-between gap-3">
                             <div>
-                                <h2 class="font-display text-3xl leading-none text-ink">{{ $plan->name }}</h2>
+                                <h2 class="font-display text-xl text-ink">{{ $plan->name }}</h2>
                                 <p class="mt-1 text-sm text-muted">{{ $plan->tagline }}</p>
                             </div>
                             <div class="flex flex-wrap justify-end gap-1">
@@ -28,10 +28,10 @@
                         </div>
                         <p class="mt-4 flex items-baseline gap-1">
                             @if ($plan->isPerStudent())
-                                <span class="font-display tabular text-4xl text-ink">{{ money($plan->price_per_student) }}</span>
+                                <span class="font-display tabular text-3xl text-ink">{{ money($plan->price_per_student) }}</span>
                                 <span class="text-sm text-muted">{{ $plan->priceUnit() }}{{ (float) $plan->price ? ' + '.money($plan->price).' base' : '' }}</span>
                             @else
-                                <span class="font-display tabular text-4xl text-ink">{{ money($plan->price) }}</span>
+                                <span class="font-display tabular text-3xl text-ink">{{ money($plan->price) }}</span>
                                 <span class="text-sm text-muted">{{ $plan->priceUnit() }}</span>
                             @endif
                         </p>

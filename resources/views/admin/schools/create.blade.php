@@ -26,8 +26,10 @@
                     </div>
                     <x-form.input name="principal_name" label="Principal / owner name" />
                     <x-form.input name="email" type="email" label="School email" />
-                    <x-form.input name="phone" label="Phone" placeholder="03xx-xxxxxxx" />
+                    <x-form.input name="phone" type="tel" label="Phone" placeholder="Include country code" />
                     <x-form.input name="city" label="City" />
+                    <x-form.input name="country" label="Country" />
+                    <x-form.select name="currency" label="Fee currency" :value="\App\Models\Setting::currency()" :options="collect(config('currencies'))->mapWithKeys(fn ($c, $code) => [$code => $code.' — '.$c[0]])->all()" hint="The school can change this later in its profile." />
                     <x-form.input name="address" label="Address" class="sm:col-span-2" />
                 </div>
             </section>
@@ -67,7 +69,7 @@
                     <div data-show-when="billing_mode=paid" class="space-y-5">
                         <x-form.input name="starts_at" type="date" label="Start date" :value="now()->toDateString()" />
                         <x-form.input name="student_count" type="number" label="Number of students" min="0" hint="Used for per-student plans." />
-                        <x-form.input name="amount" type="number" step="0.01" min="0" label="Amount ({{ config('skooline.currency') }})" hint="Leave blank to use the plan price." />
+                        <x-form.input name="amount" type="number" step="0.01" min="0" label="Amount ({{ \App\Models\Setting::currency() }})" hint="Leave blank to use the plan price." />
                         <x-form.select name="payment_status" label="Payment" :options="['unpaid' => 'Unpaid', 'paid' => 'Paid', 'partial' => 'Partially paid', 'waived' => 'Waived']" value="unpaid" />
                     </div>
                 </div>
