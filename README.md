@@ -6,6 +6,8 @@ AivraSol (Super Admin) adds schools on subscription; every school gets its own p
 
 - Product & feature spec: [`docs/SCHOOL_ERP_FEATURES.md`](docs/SCHOOL_ERP_FEATURES.md)
 - Capacity & build plan: [`docs/BUILD_PLAN.md`](docs/BUILD_PLAN.md)
+- Architecture & request flow: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)
+- Hosting (localhost, cPanel/hPanel): [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md)
 
 ## What's built so far
 
