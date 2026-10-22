@@ -168,7 +168,45 @@ These logins are for localhost only.
 | Start over with fresh demo data | `composer run reset-demo` (deletes all local data) |
 | Run the tests | `php artisan test` |
 
-Localhost uses SQLite (no database server needed). To use MySQL locally instead (XAMPP/Laragon), create a database, import `database/skooline.sql`, and set the `DB_*` lines in `.env` as in Step 4.
+### Localhost with XAMPP (htdocs + phpMyAdmin)
+
+The project can live in `C:\xampp\htdocs\aivraschool` and open at `http://localhost/aivraschool`. The root `index.php` + `.htaccess` make it work from a subfolder.
+
+1. **PHP must be 8.3 or newer.** XAMPP Control Panel → **Shell** → `php -v`. If it shows 8.2 or lower, install a newer XAMPP, or use Laragon/Herd.
+2. Install **[Composer for Windows](https://getcomposer.org/Composer-Setup.exe)**. When it asks for PHP, choose `C:\xampp\php\php.exe`.
+3. Start **Apache** and **MySQL** in the XAMPP Control Panel.
+4. **phpMyAdmin** (`http://localhost/phpmyadmin`) → **New** → database name `skooline`, collation `utf8mb4_unicode_ci` → **Create**. Then **Import** → `database/skooline.sql` → **Go**.
+5. In the XAMPP **Shell**:
+   ```bash
+   cd C:\xampp\htdocs\aivraschool
+   composer install
+   copy .env.example .env
+   ```
+   If Composer says an extension is missing, open `C:\xampp\php\php.ini`, remove the `;` before `extension=intl` / `extension=zip`, and restart Apache.
+6. Open `.env` in a text editor and set:
+   ```dotenv
+   APP_URL=http://localhost/aivraschool
+   DB_CONNECTION=mysql
+   DB_HOST=127.0.0.1
+   DB_PORT=3306
+   DB_DATABASE=skooline
+   DB_USERNAME=root
+   DB_PASSWORD=
+   ```
+7. Open **http://localhost/aivraschool/admin** → **Create Super Admin**.
+   Optional demo schools: `php artisan db:seed --class=DemoSeeder` (Greenfield and Riverside, password `password`).
+
+| Open | URL |
+|---|---|
+| Website | http://localhost/aivraschool |
+| Super Admin | http://localhost/aivraschool/admin |
+| Greenfield | http://localhost/aivraschool/greenfield |
+
+**Getting updates:** `git pull`, then `composer install`, then **Super Admin → System → Run updates** (or `php artisan migrate`).
+
+### Notes
+
+Localhost uses SQLite by default when set up with `composer run setup` (no database server needed). To use MySQL instead, create a database, import `database/skooline.sql`, and set the `DB_*` lines in `.env`.
 
 Change styles or scripts? Run `npm install && npm run build` (Node 22) and commit `public/build`.
 

@@ -1,14 +1,26 @@
-# Used only when the web server's document root is the project folder itself
-# (e.g. the repo cloned straight into Hostinger's public_html). Everything is
-# served from /public, so app code, .env and vendor are never reachable.
+# Used only when the web root is the project folder itself (public_html upload,
+# or XAMPP htdocs/<folder>). Everything goes through index.php; only the files in
+# public/ are served directly, so app code, .env and vendor are never reachable.
 <IfModule mod_rewrite.c>
+    Options -MultiViews -Indexes
     RewriteEngine On
 
-    RewriteCond %{REQUEST_URI} !^/public/
-    RewriteRule ^(.*)$ public/$1 [L]
+    # Pass the Authorization header through to PHP
+    RewriteCond %{HTTP:Authorization} .
+    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+    # Already-rewritten requests: stop
+    RewriteRule ^index\.php$ - [L]
+    RewriteRule ^public/ - [L]
+
+    # Public files (CSS/JS build, favicon, robots.txt) are served from public/
+    RewriteRule ^(build/.+|favicon\.svg|robots\.txt)$ public/$1 [L]
+
+    # Everything else goes to the app
+    RewriteRule ^ index.php [L]
 </IfModule>
 
 # Extra safety in case mod_rewrite is unavailable
-<FilesMatch "^\.">
+<FilesMatch "^\.|\.(env|json|lock|md|sql|sqlite|sh|xml|yml|yaml)$">
     Require all denied
 </FilesMatch>
