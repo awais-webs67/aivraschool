@@ -45,3 +45,24 @@
         </section>
     @endif
 @endif
+
+@if ($viewer->allows('discipline'))
+    @php $records = \App\Models\Incident::query()->where('student_id', $student->id)->latest('date')->limit(5)->get(); @endphp
+    <section class="card">
+        <div class="card-header">
+            <h2 class="card-title">Behaviour</h2>
+            <a href="{{ route('school.discipline.index', ['student' => $student->id]) }}" class="btn btn-secondary btn-sm"><x-icon name="plus" size="4" /> Add / view all</a>
+        </div>
+        <ul class="divide-y divide-line">
+            @forelse ($records as $r)
+                <li class="flex flex-wrap items-center gap-x-3 px-5 py-2.5 text-sm">
+                    <span class="badge {{ $r->badge() }}">{{ $r->kind === 'merit' ? 'Merit' : \App\Models\Incident::SEVERITIES[$r->severity] }}</span>
+                    <span class="min-w-0 flex-1 truncate text-ink">{{ $r->category }}: {{ $r->description }}</span>
+                    <span class="text-xs text-muted">{{ $r->date->format('d M Y') }}</span>
+                </li>
+            @empty
+                <li class="px-5 py-4 text-sm text-muted">Nothing recorded.</li>
+            @endforelse
+        </ul>
+    </section>
+@endif

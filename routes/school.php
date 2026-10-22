@@ -4,6 +4,7 @@ use App\Http\Controllers\School;
 use App\Http\Controllers\School\Academics;
 use App\Http\Controllers\School\Daily;
 use App\Http\Controllers\School\Money;
+use App\Http\Controllers\School\Office;
 use App\Http\Controllers\School\People;
 use App\Http\Controllers\School\Setup;
 use App\Http\Middleware\EnsureDatabaseIsUpToDate;
@@ -69,6 +70,32 @@ Route::prefix('{school}')
                 Route::post('support', [School\SupportController::class, 'store'])->name('support.store');
                 Route::get('support/{ticket}', [School\SupportController::class, 'show'])->name('support.show');
                 Route::post('support/{ticket}/reply', [School\SupportController::class, 'reply'])->name('support.reply');
+            });
+
+            // Step 9: discipline, observations, certificates & ID cards, front office
+            Route::middleware('school.can:discipline')->group(function () {
+                Route::get('discipline', [Office\DisciplineController::class, 'index'])->name('discipline.index');
+                Route::post('discipline', [Office\DisciplineController::class, 'store'])->name('discipline.store');
+                Route::delete('discipline/{incident}', [Office\DisciplineController::class, 'destroy'])->name('discipline.destroy');
+            });
+            Route::middleware('school.can:observations')->group(function () {
+                Route::get('observations', [Office\ObservationController::class, 'index'])->name('observations.index');
+                Route::post('observations', [Office\ObservationController::class, 'store'])->name('observations.store');
+                Route::delete('observations/{observation}', [Office\ObservationController::class, 'destroy'])->name('observations.destroy');
+            });
+            Route::middleware('school.can:certificates')->group(function () {
+                Route::get('certificates', [Office\CertificateController::class, 'index'])->name('certificates.index');
+                Route::get('certificates/id-cards', [Office\CertificateController::class, 'idCards'])->name('certificates.id-cards');
+                Route::post('certificates/students/{student}', [Office\CertificateController::class, 'issue'])->name('certificates.issue');
+                Route::get('certificates/{certificate}', [Office\CertificateController::class, 'print'])->name('certificates.print');
+            });
+            Route::middleware('school.can:front_office')->group(function () {
+                Route::get('front-office', [Office\FrontOfficeController::class, 'visitors'])->name('visitors.index');
+                Route::post('front-office/visitors', [Office\FrontOfficeController::class, 'storeVisitor'])->name('visitors.store');
+                Route::post('front-office/visitors/{visitor}/out', [Office\FrontOfficeController::class, 'checkout'])->name('visitors.out');
+                Route::get('front-office/complaints', [Office\FrontOfficeController::class, 'complaints'])->name('visitors.complaints');
+                Route::post('front-office/complaints', [Office\FrontOfficeController::class, 'storeComplaint'])->name('visitors.complaints.store');
+                Route::put('front-office/complaints/{complaint}', [Office\FrontOfficeController::class, 'updateComplaint'])->name('visitors.complaints.update');
             });
 
             // Step 8: exams, marks, results and report cards
