@@ -4,6 +4,8 @@ namespace Tests\Feature;
 
 use App\Models\DemoRequest;
 use App\Models\Plan;
+use App\Models\School;
+use Database\Seeders\DemoSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -49,9 +51,9 @@ class HomePageTest extends TestCase
 
     public function test_demo_seeder_creates_two_schools_that_can_sign_in(): void
     {
-        $this->seed(\Database\Seeders\DemoSeeder::class);
+        $this->seed(DemoSeeder::class);
 
-        $this->assertSame(2, \App\Models\School::count());
+        $this->assertSame(2, School::count());
         $this->post('http://localhost/greenfield/login', ['email' => 'admin@greenfield.test', 'password' => 'password'])
             ->assertRedirect('http://localhost/greenfield/dashboard');
     }
