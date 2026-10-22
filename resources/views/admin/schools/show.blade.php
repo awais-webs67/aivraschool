@@ -5,7 +5,11 @@
 <x-layouts.admin :title="$school->name">
     <div class="mb-6 flex flex-wrap items-start justify-between gap-4">
         <div class="flex min-w-0 items-start gap-4">
-            <span class="font-display grid size-14 shrink-0 place-items-center rounded-lg bg-ink text-2xl text-white">{{ strtoupper(substr($school->name, 0, 1)) }}</span>
+            @if ($school->photo_path)
+                <img src="{{ route('admin.schools.photo', [$school, 'school']) }}" alt="{{ $school->name }}" class="size-14 shrink-0 rounded-lg object-cover ring-1 ring-line">
+            @else
+                <span class="font-display grid size-14 shrink-0 place-items-center rounded-lg bg-ink text-2xl text-white">{{ strtoupper(mb_substr($school->name, 0, 1)) }}</span>
+            @endif
             <div class="min-w-0">
                 <a href="{{ route('admin.schools.index') }}" class="text-xs font-medium text-muted hover:text-ink">← Schools</a>
                 <h1 class="page-title truncate">{{ $school->name }}</h1>
@@ -213,9 +217,24 @@
             </section>
 
             <section class="card">
+                <div class="card-header"><h2 class="card-title">Principal</h2></div>
+                <div class="card-body flex gap-4">
+                    @if ($school->principal_photo_path)
+                        <img src="{{ route('admin.schools.photo', [$school, 'principal']) }}" alt="{{ $school->principal_name }}" class="size-16 shrink-0 rounded-lg object-cover ring-1 ring-line">
+                    @endif
+                    <dl class="min-w-0 flex-1 space-y-2 text-sm">
+                        @foreach (['Name' => $school->principal_name, 'Phone' => $school->principal_phone, 'Email' => $school->principal_email, 'National ID' => $school->principal_national_id, 'Qualification' => $school->principal_qualification, 'Address' => $school->principal_address] as $label => $value)
+                            <div class="grid grid-cols-[6.5rem_1fr] gap-2"><dt class="text-muted">{{ $label }}</dt><dd class="break-words text-ink">{{ $value ?: '—' }}</dd></div>
+                        @endforeach
+                    </dl>
+                </div>
+                @if ($school->principal_bio)<p class="border-t border-line px-5 py-4 text-sm whitespace-pre-line text-body">{{ $school->principal_bio }}</p>@endif
+            </section>
+
+            <section class="card">
                 <div class="card-header"><h2 class="card-title">Details</h2></div>
                 <dl class="card-body space-y-3 text-sm">
-                    @foreach (['Principal / owner' => $school->principal_name, 'Email' => $school->email, 'Phone' => $school->phone, 'City' => collect([$school->city, $school->country])->filter()->join(', '), 'Fee currency' => $school->currencyCode(), 'Address' => $school->address, 'Created' => $school->created_at->format('d M Y, h:i A'), 'School ID' => $school->id] as $label => $value)
+                    @foreach (['Email' => $school->email, 'Phone' => $school->phone, 'City' => collect([$school->city, $school->country])->filter()->join(', '), 'Fee currency' => $school->currencyCode(), 'Address' => $school->address, 'Created' => $school->created_at->format('d M Y, h:i A'), 'School ID' => $school->id] as $label => $value)
                         <div class="grid grid-cols-[7.5rem_1fr] gap-2">
                             <dt class="text-muted">{{ $label }}</dt>
                             <dd class="break-words text-ink">{{ $value ?: '—' }}</dd>

@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Admin;
 
+use App\Models\Plan;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -49,6 +50,10 @@ class PlanRequest extends FormRequest
             'show_on_website' => ['boolean'],
             'is_featured' => ['boolean'],
             'sort_order' => ['nullable', 'integer', 'min:0', 'max:1000'],
+            'cta_mode' => ['nullable', Rule::in(array_keys(Plan::CTA_MODES))],
+            'cta_label' => ['nullable', 'string', 'max:60'],
+            'prices' => ['array'],
+            'prices.*' => ['nullable', 'numeric', 'min:0', 'max:99999999'],
         ];
     }
 
@@ -60,6 +65,13 @@ class PlanRequest extends FormRequest
         foreach (['price_per_student', 'setup_fee', 'sms_credits', 'sort_order'] as $key) {
             $data[$key] = $data[$key] ?? 0;
         }
+
+        $data['cta_mode'] ??= 'trial';
+        // Keep only filled prices for known currencies, e.g. ["USD" => 29.0].
+        $data['prices'] = collect($data['prices'] ?? [])
+            ->filter(fn ($v, $code) => $v !== null && $v !== '' && isset(config('currencies')[$code]))
+            ->map(fn ($v) => (float) $v)
+            ->all() ?: null;
 
         return $data;
     }

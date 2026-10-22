@@ -18,6 +18,9 @@ return Application::configure(basePath: dirname(__DIR__))
         then: fn () => Route::middleware('web')->group(base_path('routes/school.php')),
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Stripe signs its webhook calls instead of sending a CSRF token.
+        $middleware->validateCsrfTokens(except: ['stripe/webhook']);
+
         // The school must be known before authentication looks up the user.
         $middleware->prependToPriorityList(AuthenticatesRequests::class, IdentifySchool::class);
 

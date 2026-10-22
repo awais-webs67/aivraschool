@@ -206,7 +206,8 @@ if ('IntersectionObserver' in window) {
  */
 const currencyData = document.getElementById('currency-data');
 if (currencyData) {
-    const { base, currencies } = JSON.parse(currencyData.textContent);
+    // base: billing currency; currencies: [{code, name, rate, decimals}]; default: "auto" or a code
+    const { base, currencies, default: preferred = 'auto' } = JSON.parse(currencyData.textContent);
     const byCode = Object.fromEntries(currencies.map((c) => [c.code, c]));
     const regionCurrency = {
         US: 'USD', GB: 'GBP', CA: 'CAD', AU: 'AUD', NZ: 'NZD', IN: 'INR', PK: 'PKR', BD: 'BDT', LK: 'LKR', NP: 'NPR',
@@ -215,21 +216,26 @@ if (currencyData) {
         DE: 'EUR', FR: 'EUR', IT: 'EUR', ES: 'EUR', NL: 'EUR', IE: 'EUR', BE: 'EUR', AT: 'EUR', PT: 'EUR', FI: 'EUR', GR: 'EUR',
     };
 
-    const format = (amount, code) => {
+    const formatAmount = (value, code) => {
         const c = byCode[code];
-        const value = amount * c.rate;
-        const digits = value > 0 && value < 10 ? Math.min(2, c.decimals) : 0;
+        const digits = value > 0 && value < 10 && !Number.isInteger(value) ? Math.min(2, c.decimals) : 0;
         try {
             return new Intl.NumberFormat('en', { style: 'currency', currency: code, currencyDisplay: 'code', minimumFractionDigits: digits, maximumFractionDigits: digits })
-                .format(value).replace(/ /g, ' ');
+                .format(value).replace(/\u00a0/g, ' ');
         } catch {
             return `${code} ${value.toFixed(digits)}`;
         }
     };
 
+    // A plan's own price for that currency (data-price-usd="29") wins over converting with the rate.
+    const priceFor = (el, code) => {
+        const fixed = el.dataset[`price${code.charAt(0)}${code.slice(1).toLowerCase()}`];
+        return fixed !== undefined && fixed !== '' ? parseFloat(fixed) : parseFloat(el.dataset.price) * byCode[code].rate;
+    };
+
     const apply = (code) => {
         if (!byCode[code]) code = base;
-        document.querySelectorAll('[data-price]').forEach((el) => (el.textContent = format(parseFloat(el.dataset.price), code)));
+        document.querySelectorAll('[data-price]').forEach((el) => (el.textContent = formatAmount(priceFor(el, code), code)));
         document.querySelectorAll('[data-currency-label]').forEach((el) => (el.textContent = code));
         document.querySelectorAll('[data-currency]').forEach((el) => el.setAttribute('aria-checked', String(el.dataset.currency === code)));
         document.querySelectorAll('[data-currency-note]').forEach((el) => el.toggleAttribute('hidden', code === base));
@@ -237,9 +243,13 @@ if (currencyData) {
 
     let saved = null;
     try { saved = localStorage.getItem('skooline.currency'); } catch {}
-    if (!saved) {
-        const region = (navigator.language || '').split('-')[1];
-        saved = regionCurrency[region] && byCode[regionCurrency[region]] ? regionCurrency[region] : base;
+    if (!saved || !byCode[saved]) {
+        if (preferred !== 'auto' && byCode[preferred]) {
+            saved = preferred;
+        } else {
+            const region = (navigator.language || '').split('-')[1];
+            saved = regionCurrency[region] && byCode[regionCurrency[region]] ? regionCurrency[region] : base;
+        }
     }
     apply(saved);
 
@@ -250,6 +260,40 @@ if (currencyData) {
         try { localStorage.setItem('skooline.currency', option.dataset.currency); } catch {}
     });
 }
+
+/* ------------------------------------------------------------------ Saved secrets
+ * <button data-reveal-secret="STRIPE_SECRET" data-url="..."> asks for the PIN and shows the full
+ * value for 30 seconds next to it (<code data-secret-value="STRIPE_SECRET">).
+ */
+document.addEventListener('click', async (event) => {
+    const button = event.target.closest('[data-reveal-secret]');
+    if (!button) return;
+
+    const name = button.dataset.revealSecret;
+    const output = document.querySelector(`[data-secret-value="${name}"]`);
+    const pin = window.prompt('Enter your PIN to show this value');
+    if (!pin || !output) return;
+
+    try {
+        const response = await fetch(button.dataset.url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Accept: 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content },
+            body: JSON.stringify({ name, pin }),
+        });
+        const data = await response.json();
+        if (!response.ok) return window.alert(data.error || data.message || 'Could not show the value.');
+
+        const masked = output.textContent;
+        output.textContent = data.value;
+        output.classList.add('select-all');
+        setTimeout(() => {
+            output.textContent = masked;
+            output.classList.remove('select-all');
+        }, 30000);
+    } catch {
+        window.alert('Could not reach the server. Try again.');
+    }
+});
 
 /* ------------------------------------------------------------------ Forms */
 
@@ -297,6 +341,43 @@ if (conditionalBlocks.length) {
     document.addEventListener('change', refreshConditional);
     refreshConditional();
 }
+
+// Photo inputs: show the chosen image straight away: <input type="file" data-photo-input="name">
+document.addEventListener('change', (event) => {
+    const input = event.target.closest('[data-photo-input]');
+    const file = input?.files?.[0];
+    if (!file) return;
+    const name = input.dataset.photoInput;
+    const preview = document.querySelector(`[data-photo-preview="${name}"]`);
+    preview.src = URL.createObjectURL(file);
+    preview.classList.remove('hidden');
+    document.querySelector(`[data-photo-placeholder="${name}"]`)?.classList.add('hidden');
+    const label = document.querySelector(`[data-photo-name="${name}"]`);
+    if (label) label.textContent = `${file.name} · ${(file.size / 1024 / 1024).toFixed(1)} MB${file.size > 2 * 1024 * 1024 ? ' — too large (max 2 MB)' : ''}`;
+});
+
+// Portal address availability while typing: <input data-address-check="/register/check-address">
+document.querySelectorAll('[data-address-check]').forEach((input) => {
+    const status = input.closest('div').parentElement.querySelector('[data-address-status]');
+    if (!status) return;
+    let timer;
+    const check = () => {
+        clearTimeout(timer);
+        const slug = input.value.trim();
+        if (slug.length < 3) return;
+        timer = setTimeout(async () => {
+            try {
+                const response = await fetch(`${input.dataset.addressCheck}?slug=${encodeURIComponent(slug)}`, { headers: { Accept: 'application/json' } });
+                const { available } = await response.json();
+                status.textContent = available ? `✓ ${slug} is available` : `✗ ${slug} is taken or not allowed — try another`;
+                status.className = available ? 'hint font-medium text-success' : 'hint font-medium text-danger';
+            } catch {
+                /* offline: the server checks again on submit */
+            }
+        }, 350);
+    };
+    ['input', 'change'].forEach((e) => input.addEventListener(e, check));
+});
 
 // Website "School login": send visitors to {APP_URL}/{school}/login
 document.querySelectorAll('[data-school-finder]').forEach((form) => {

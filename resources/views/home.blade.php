@@ -20,8 +20,13 @@
                     Admissions, attendance, fees, exams, staff and parent communication in one secure system. Every school gets its own private portal that works on any device.
                 </p>
                 <div data-reveal style="--delay: 240ms" class="mt-8 flex flex-col gap-3 sm:flex-row">
-                    <a href="#demo" class="btn btn-primary btn-lg">Book a free demo <x-icon name="arrow-right" size="4" /></a>
-                    <a href="#pricing" class="btn btn-secondary btn-lg">See pricing</a>
+                    @if (\App\Services\RegistrationService::enabled())
+                        <a href="{{ route('register') }}" class="btn btn-primary btn-lg">Register your school <x-icon name="arrow-right" size="4" /></a>
+                        <a href="#demo" class="btn btn-secondary btn-lg">Book a free demo</a>
+                    @else
+                        <a href="#demo" class="btn btn-primary btn-lg">Book a free demo <x-icon name="arrow-right" size="4" /></a>
+                        <a href="#pricing" class="btn btn-secondary btn-lg">See pricing</a>
+                    @endif
                 </div>
                 <ul data-reveal style="--delay: 320ms" class="mt-8 flex flex-wrap gap-x-6 gap-y-3 text-sm text-body">
                     @foreach (['Free trial on every plan', 'No installation needed', 'Works on phone & laptop'] as $point)
@@ -275,7 +280,7 @@
                 <p class="mt-10 text-center text-body">Pricing is tailored to each school. <a href="#demo" class="font-semibold text-brand-text underline">Contact us</a> for a quote.</p>
             @else
                 @if (count($currencies) > 1)
-                    <script type="application/json" id="currency-data">{!! json_encode(['base' => $currencies[0]['code'], 'currencies' => $currencies], JSON_HEX_TAG) !!}</script>
+                    <script type="application/json" id="currency-data">{!! json_encode(['base' => $currencies[0]['code'], 'currencies' => $currencies, 'default' => \App\Models\Setting::get('website_default_currency', 'auto')], JSON_HEX_TAG) !!}</script>
                     <div class="mt-8 flex flex-col items-center gap-2">
                         <div class="relative">
                             <button type="button" class="btn btn-secondary" data-menu="#currency-menu" aria-haspopup="true" aria-expanded="false">
@@ -289,13 +294,17 @@
                                 @endforeach
                             </div>
                         </div>
-                        <p data-currency-note hidden class="text-xs text-muted">Approximate conversion. You are billed in {{ $currencies[0]['code'] }}.</p>
+                        <p data-currency-note hidden class="text-xs text-muted">Prices shown in your currency.</p>
                     </div>
                 @endif
 
                 <div class="mx-auto mt-12 grid max-w-6xl gap-6 md:grid-cols-2 {{ $plans->count() >= 3 ? 'lg:grid-cols-3' : '' }}">
                     @foreach ($plans as $plan)
-                        @php $amount = $plan->isPerStudent() ? $plan->price_per_student : $plan->price; @endphp
+                        @php
+                            $amount = $plan->headlinePrice();
+                            // Where the button goes: the registration form, or the demo form for "contact" plans.
+                            $ctaUrl = $plan->cta_mode !== 'contact' && \App\Services\RegistrationService::enabled() ? route('register', ['plan' => $plan->slug]) : '#demo';
+                        @endphp
                         <article data-reveal style="--delay: {{ $loop->index * 90 }}ms" class="relative flex flex-col rounded-xl border bg-white p-6 transition duration-300 hover:-translate-y-1 sm:p-8 {{ $plan->is_featured ? 'border-brand shadow-pop ring-4 ring-brand/10' : 'border-line shadow-card hover:shadow-lift' }}">
                             @if ($plan->is_featured)
                                 <span class="absolute -top-3 left-6 rounded-full bg-gradient-to-r from-brand to-brand-light px-3 py-1 text-xs font-semibold text-white shadow-brand">Most popular</span>
@@ -303,7 +312,7 @@
                             <h3 class="font-display text-2xl text-ink">{{ $plan->name }}</h3>
                             <p class="mt-2 min-h-10 text-sm text-body">{{ $plan->tagline }}</p>
                             <p class="mt-6 flex flex-wrap items-baseline gap-x-1.5 gap-y-1">
-                                <span class="font-display tabular text-3xl text-ink sm:text-4xl" data-price="{{ (float) $amount }}">{{ money($amount) }}</span>
+                                <span class="font-display tabular text-3xl text-ink sm:text-4xl" data-price="{{ (float) $amount }}" @foreach ($plan->prices ?? [] as $code => $fixed) @if ($fixed !== null && $fixed !== '') data-price-{{ strtolower($code) }}="{{ (float) $fixed }}" @endif @endforeach>{{ money($amount) }}</span>
                                 <span class="text-sm text-muted">{{ $plan->priceUnit() }}</span>
                             </p>
                             <p class="mt-2 text-xs text-muted">
@@ -320,7 +329,7 @@
                                     <li class="pl-6.5 text-muted">+ {{ count($plan->modules) - 8 }} more modules</li>
                                 @endif
                             </ul>
-                            <a href="#demo" class="btn mt-8 w-full {{ $plan->is_featured ? 'btn-primary' : 'btn-dark' }}">Start {{ $plan->trial_days }}-day free trial</a>
+                            <a href="{{ $ctaUrl }}" class="btn mt-8 w-full {{ $plan->is_featured ? 'btn-primary' : 'btn-dark' }}">{{ $plan->ctaLabel() }}</a>
                         </article>
                     @endforeach
                 </div>

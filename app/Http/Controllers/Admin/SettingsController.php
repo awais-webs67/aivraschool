@@ -55,6 +55,35 @@ class SettingsController extends Controller
         return back()->with('success', 'Settings saved.');
     }
 
+    public function registration(): View
+    {
+        return view('admin.settings.registration', [
+            'enabled' => (bool) Setting::get('registration_enabled', true),
+            'autoApprove' => (bool) Setting::get('registration_auto_approve', false),
+            'notifyEmail' => Setting::get('registration_notify_email'),
+            'defaultCurrency' => Setting::get('website_default_currency', 'auto'),
+            'currencies' => Setting::websiteCurrencies(),
+        ]);
+    }
+
+    public function updateRegistration(Request $request): RedirectResponse
+    {
+        $codes = array_column(Setting::websiteCurrencies(), 'code');
+
+        $data = $request->validate([
+            'registration_notify_email' => ['nullable', 'email', 'max:150'],
+            'website_default_currency' => ['required', Rule::in(array_merge(['auto'], $codes))],
+        ]);
+
+        Setting::put($data + [
+            'registration_enabled' => $request->boolean('registration_enabled'),
+            'registration_auto_approve' => $request->boolean('registration_auto_approve'),
+        ]);
+        Activity::log('settings.registration', 'Updated website registration settings ('.($request->boolean('registration_enabled') ? 'open' : 'closed').')');
+
+        return back()->with('success', 'Registration settings saved.');
+    }
+
     public function edit(): View
     {
         return view('admin.settings.currencies', [

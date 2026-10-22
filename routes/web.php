@@ -4,6 +4,8 @@ use App\Http\Controllers\Admin;
 use App\Http\Controllers\Auth\AdminLoginController;
 use App\Http\Controllers\Auth\SetupController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\RegistrationController;
+use App\Http\Controllers\StripeWebhookController;
 use App\Http\Middleware\EnsureDatabaseIsUpToDate;
 use App\Http\Middleware\EnsurePlatformUserIsActive;
 use Illuminate\Support\Facades\Route;
@@ -22,6 +24,14 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('robots.txt', [HomeController::class, 'robots']);
 Route::get('sitemap.xml', [HomeController::class, 'sitemap']);
 Route::post('/demo-request', [HomeController::class, 'requestDemo'])->name('demo-request');
+
+// "Register your school" (can be switched off in Super Admin → Settings → Registration)
+Route::get('register', [RegistrationController::class, 'create'])->name('register');
+Route::post('register', [RegistrationController::class, 'store'])->name('register.store');
+Route::get('register/check-address', [RegistrationController::class, 'checkAddress'])->middleware('throttle:60,1')->name('register.check');
+Route::get('register/status/{registration}', [RegistrationController::class, 'thanks'])->name('register.thanks');
+Route::get('register/pay/{registration}', [RegistrationController::class, 'pay'])->middleware('signed')->name('register.pay');
+Route::post('stripe/webhook', StripeWebhookController::class)->name('stripe.webhook');
 
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::middleware('guest:web')->group(function () {
@@ -50,10 +60,21 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('schools/{school}/extend-trial', [Admin\SchoolController::class, 'extendTrial'])->name('schools.extend-trial');
             Route::post('schools/{school}/reset-password', [Admin\SchoolController::class, 'resetAdminPassword'])->name('schools.reset-password');
         });
+        // Website sign-ups
+        Route::middleware('can:schools.manage')->group(function () {
+            Route::get('registrations', [Admin\RegistrationController::class, 'index'])->name('registrations.index');
+            Route::get('registrations/{registration}', [Admin\RegistrationController::class, 'show'])->name('registrations.show');
+            Route::patch('registrations/{registration}', [Admin\RegistrationController::class, 'update'])->name('registrations.update');
+            Route::post('registrations/{registration}/approve', [Admin\RegistrationController::class, 'approve'])->name('registrations.approve');
+            Route::post('registrations/{registration}/reject', [Admin\RegistrationController::class, 'reject'])->name('registrations.reject');
+            Route::get('registrations/{registration}/photo/{kind}', [Admin\RegistrationController::class, 'photo'])->whereIn('kind', ['school', 'principal'])->name('registrations.photo');
+        });
+
         Route::middleware('can:schools.view')->group(function () {
             Route::get('schools', [Admin\SchoolController::class, 'index'])->name('schools.index');
             Route::get('schools/export', [Admin\ExportController::class, 'schools'])->name('schools.export');
             Route::get('schools/{school}', [Admin\SchoolController::class, 'show'])->name('schools.show');
+            Route::get('schools/{school}/photo/{kind}', [Admin\SchoolController::class, 'photo'])->whereIn('kind', ['school', 'principal'])->name('schools.photo');
         });
         Route::post('schools/{school}/impersonate', [Admin\ImpersonationController::class, 'start'])->middleware('can:impersonate')->name('schools.impersonate');
 
@@ -104,8 +125,20 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::middleware('can:settings')->group(function () {
             Route::get('settings', [Admin\SettingsController::class, 'general'])->name('settings');
             Route::put('settings', [Admin\SettingsController::class, 'updateGeneral'])->name('settings.update');
+            Route::get('settings/registration', [Admin\SettingsController::class, 'registration'])->name('settings.registration');
+            Route::put('settings/registration', [Admin\SettingsController::class, 'updateRegistration'])->name('settings.registration.update');
             Route::get('settings/currencies', [Admin\SettingsController::class, 'edit'])->name('settings.currencies');
             Route::put('settings/currencies', [Admin\SettingsController::class, 'update'])->name('settings.currencies.update');
+
+            Route::get('settings/email', [Admin\IntegrationController::class, 'email'])->name('settings.email');
+            Route::put('settings/email', [Admin\IntegrationController::class, 'updateEmail'])->name('settings.email.update');
+            Route::post('settings/email/test', [Admin\IntegrationController::class, 'testEmail'])->name('settings.email.test');
+            Route::get('settings/payments', [Admin\IntegrationController::class, 'payments'])->name('settings.payments');
+            Route::put('settings/payments', [Admin\IntegrationController::class, 'updatePayments'])->name('settings.payments.update');
+            Route::post('settings/payments/test', [Admin\IntegrationController::class, 'testStripe'])->name('settings.payments.test');
+            Route::get('settings/security', [Admin\IntegrationController::class, 'security'])->name('settings.security');
+            Route::put('settings/security/pin', [Admin\IntegrationController::class, 'updatePin'])->name('settings.pin');
+            Route::post('settings/reveal', [Admin\IntegrationController::class, 'reveal'])->middleware('throttle:20,1')->name('settings.reveal');
         });
         Route::middleware('can:system')->group(function () {
             Route::get('system', [Admin\SystemController::class, 'index'])->name('system');

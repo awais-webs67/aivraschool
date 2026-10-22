@@ -17,11 +17,14 @@ use App\Models\SupportTicket;
 use App\Models\User;
 use App\Services\SchoolProvisioner;
 use App\Support\Activity;
+use App\Support\Uploads;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\Response;
 
 class SchoolController extends Controller
 {
@@ -82,6 +85,8 @@ class SchoolController extends Controller
     public function store(StoreSchoolRequest $request, SchoolProvisioner $provisioner): RedirectResponse
     {
         $data = $request->validated();
+        $data['photo_path'] = Uploads::store($request->file('school_photo'), 'schools');
+        $data['principal_photo_path'] = Uploads::store($request->file('principal_photo'), 'schools');
         $plan = Plan::findOrFail($data['plan_id']);
         $password = ($data['admin_password'] ?? null) ?: Str::password(12, symbols: false);
 
@@ -147,7 +152,12 @@ class SchoolController extends Controller
 
     public function update(UpdateSchoolRequest $request, School $school): RedirectResponse
     {
-        $school->update($request->validated());
+        $data = $request->validated();
+        $data['photo_path'] = Uploads::replace($request->file('school_photo'), $school->photo_path, 'schools');
+        $data['principal_photo_path'] = Uploads::replace($request->file('principal_photo'), $school->principal_photo_path, 'schools');
+        unset($data['school_photo'], $data['principal_photo']);
+
+        $school->update($data);
         Activity::log('school.updated', "Updated details of {$school->name}", $school);
 
         return redirect()->route('admin.schools.show', $school)->with('success', 'School details updated.');
@@ -215,6 +225,16 @@ class SchoolController extends Controller
         Activity::log('school.trial', "Extended {$school->name}'s trial by {$data['days']} days", $school);
 
         return back()->with('success', "Trial extended by {$data['days']} days.");
+    }
+
+    /** School or principal photo (stored privately). */
+    public function photo(School $school, string $kind): Response
+    {
+        $path = $kind === 'principal' ? $school->principal_photo_path : $school->photo_path;
+
+        abort_unless($path && Storage::exists($path), 404);
+
+        return Storage::response($path);
     }
 
     public function resetAdminPassword(Request $request, School $school): RedirectResponse

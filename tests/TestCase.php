@@ -8,6 +8,7 @@ use App\Models\School;
 use App\Models\Setting;
 use App\Services\SchoolProvisioner;
 use App\Support\DatabaseStatus;
+use App\Support\EnvFile;
 use App\Support\Tenancy\CurrentSchool;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 
@@ -21,7 +22,22 @@ abstract class TestCase extends BaseTestCase
         DatabaseStatus::forget();
         Setting::flushMemory();
 
+        // Integration settings write to .env: give every test its own copy so the real file is never touched.
+        $this->envFile = tempnam(sys_get_temp_dir(), 'skooline-env');
+        copy(base_path('.env.example'), $this->envFile);
+        EnvFile::usePath($this->envFile);
+
         $this->withoutVite();
+    }
+
+    protected string $envFile;
+
+    protected function tearDown(): void
+    {
+        EnvFile::usePath(null);
+        @unlink($this->envFile);
+
+        parent::tearDown();
     }
 
     protected function superAdmin(array $attributes = []): PlatformUser

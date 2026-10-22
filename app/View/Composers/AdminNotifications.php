@@ -5,6 +5,7 @@ namespace App\View\Composers;
 use App\Enums\SchoolStatus;
 use App\Models\DemoRequest;
 use App\Models\School;
+use App\Models\SchoolRegistration;
 use App\Models\Subscription;
 use App\Models\SupportTicket;
 use App\Support\DatabaseStatus;
@@ -27,6 +28,10 @@ class AdminNotifications
         }
 
         $items = [];
+
+        if ($user->can('schools.manage')) {
+            $items[] = ['icon' => 'clipboard', 'count' => SchoolRegistration::query()->where('status', 'pending')->count(), 'label' => 'school registrations to review', 'route' => route('admin.registrations.index', ['status' => 'pending']), 'key' => 'registrations'];
+        }
 
         if ($user->can('leads')) {
             $new = DemoRequest::query()->where('status', 'new')->count();

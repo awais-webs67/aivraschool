@@ -1,12 +1,17 @@
-@props(['title' => null, 'description' => null])
+@props(['title' => null, 'description' => null, 'index' => true])
 @php
-    $links = ['#features' => 'Features', '#modules' => 'Modules', '#pricing' => 'Pricing', '#security' => 'Security', '#faq' => 'FAQ'];
+    // Section links point back to the home page when shown on other pages (e.g. /register).
+    $home = request()->routeIs('home') ? '' : route('home');
+    $links = collect(['#features' => 'Features', '#modules' => 'Modules', '#pricing' => 'Pricing', '#security' => 'Security', '#faq' => 'FAQ'])
+        ->mapWithKeys(fn ($label, $hash) => [$home.$hash => $label])->all();
+    $demo = $home.'#demo';
+    $registerOn = \App\Services\RegistrationService::enabled();
     $appHost = preg_replace('#^https?://#', '', rtrim(config('app.url'), '/'));
 @endphp
 <!DOCTYPE html>
 <html lang="en" class="scroll-pt-20">
 <head>
-    @include('partials.head', ['title' => $title, 'description' => $description, 'index' => true])
+    @include('partials.head', ['title' => $title, 'description' => $description, 'index' => $index])
     @stack('head')
 </head>
 <body class="overflow-x-hidden bg-white">
@@ -29,7 +34,11 @@
                 <button type="button" class="btn btn-ghost" data-toggle="#school-finder" aria-expanded="false" aria-controls="school-finder">
                     <x-icon name="key" size="4" /> School login
                 </button>
-                <a href="#demo" class="btn btn-primary">Book a free demo</a>
+                @if ($registerOn)
+                    <a href="{{ route('register') }}" class="btn btn-primary">Register your school</a>
+                @else
+                    <a href="{{ $demo }}" class="btn btn-primary">Book a free demo</a>
+                @endif
             </div>
 
             <button type="button" class="hamburger ml-auto lg:hidden" data-drawer-open="#mobile-menu" aria-controls="mobile-menu" aria-expanded="false" aria-label="Menu">
@@ -59,7 +68,7 @@
                 <button type="button" class="drawer-close text-ink hover:bg-chip" data-drawer-close aria-label="Close menu"><x-icon name="x" size="6" /></button>
             </div>
             <nav class="flex-1 overflow-y-auto p-3" aria-label="Mobile">
-                @foreach ($links + ['#demo' => 'Contact'] as $href => $label)
+                @foreach ($links + [$demo => 'Contact'] as $href => $label)
                     <a href="{{ $href }}" class="flex items-center justify-between rounded-md px-3 py-3.5 text-base font-semibold text-ink transition hover:bg-canvas">
                         {{ $label }} <x-icon name="chevron-right" size="4" class="text-muted" />
                     </a>
@@ -75,8 +84,9 @@
                     <button class="btn btn-dark mt-3 w-full">Go to login <x-icon name="arrow-right" size="4" /></button>
                 </form>
             </nav>
-            <div class="shrink-0 border-t border-line p-4">
-                <a href="#demo" class="btn btn-primary btn-lg w-full">Book a free demo</a>
+            <div class="shrink-0 space-y-2 border-t border-line p-4">
+                @if ($registerOn)<a href="{{ route('register') }}" class="btn btn-primary btn-lg w-full">Register your school</a>@endif
+                <a href="{{ $demo }}" class="btn {{ $registerOn ? 'btn-secondary' : 'btn-primary btn-lg' }} w-full">Book a free demo</a>
             </div>
         </div>
     </div>

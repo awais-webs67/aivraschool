@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Models\PlatformUser;
 use App\Models\Setting;
+use App\Support\MailSettings;
 use App\Support\Tenancy\CurrentSchool;
 use App\View\Composers\AdminNotifications;
 use Illuminate\Support\Facades\Gate;
@@ -44,6 +45,9 @@ class AppServiceProvider extends ServiceProvider
         }
 
         View::composer('components.layouts.admin', AdminNotifications::class);
+
+        // SMTP settings saved from the Super Admin panel.
+        MailSettings::apply();
     }
 
     /**

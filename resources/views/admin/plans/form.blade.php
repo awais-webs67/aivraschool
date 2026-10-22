@@ -35,6 +35,25 @@
                     <x-form.input name="setup_fee" type="number" step="0.01" min="0" label="One-time setup fee" :value="$plan->setup_fee" />
                     <x-form.input name="trial_days" type="number" min="0" max="365" label="Free trial (days)" :value="$plan->trial_days" required />
                 </div>
+                @php $others = collect(\App\Models\Setting::websiteCurrencies())->pluck('code')->push(\App\Models\Setting::get('stripe_currency', 'USD'))->push('USD')->unique()->reject(fn ($c) => $c === \App\Models\Setting::currency()); @endphp
+                <div class="border-t border-line px-5 py-4">
+                    <p class="text-sm font-semibold text-ink">Prices in other currencies <span class="font-normal text-muted">(optional)</span></p>
+                    <p class="mt-0.5 text-xs text-muted">Set an exact price, e.g. USD 29. Left blank, the website converts with your rates (Settings → Currencies).</p>
+                    <div class="mt-3 grid gap-3 sm:grid-cols-3">
+                        @foreach ($others as $code)
+                            <x-form.input :name="'prices['.$code.']'" :id="'price-'.$code" type="number" step="0.01" min="0" :label="$code.' price'" :value="old('prices.'.$code, $plan->prices[$code] ?? null)" />
+                        @endforeach
+                    </div>
+                </div>
+            </section>
+
+            <section class="card">
+                <div class="card-header"><h2 class="card-title">Website button</h2></div>
+                <div class="card-body grid gap-5 sm:grid-cols-2">
+                    <x-form.select name="cta_mode" label="When a visitor clicks the plan's button" :options="\App\Models\Plan::CTA_MODES" :value="$plan->cta_mode ?? 'trial'" class="sm:col-span-2"
+                        hint="Stripe needs Settings → Payments to be set up; otherwise the school registers and you send the invoice." />
+                    <x-form.input name="cta_label" label="Button text (optional)" :value="$plan->cta_label" maxlength="60" placeholder="e.g. Start free trial, Buy now" class="sm:col-span-2" />
+                </div>
             </section>
 
             <section class="card">

@@ -110,7 +110,7 @@ CREATE TABLE `cache` (
 
 /*!40000 ALTER TABLE `cache` DISABLE KEYS */;
 INSERT INTO `cache` VALUES
-('skooline-cache-platform-settings','a:0:{}',2108047118);
+('skooline-cache-platform-settings','a:0:{}',2108054396);
 /*!40000 ALTER TABLE `cache` ENABLE KEYS */;
 DROP TABLE IF EXISTS `cache_locks`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -252,7 +252,7 @@ CREATE TABLE `migrations` (
   `migration` varchar(255) NOT NULL,
   `batch` int(11) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 /*!40000 ALTER TABLE `migrations` DISABLE KEYS */;
@@ -269,7 +269,8 @@ INSERT INTO `migrations` VALUES
 (10,'2026_02_01_000002_create_classes_and_sections_tables',1),
 (11,'2026_02_01_000003_create_subjects_tables',1),
 (12,'2026_03_01_000001_add_settings_and_school_currency',1),
-(13,'2026_04_01_000001_add_super_admin_tools',1);
+(13,'2026_04_01_000001_add_super_admin_tools',1),
+(14,'2026_05_01_000001_add_school_registration',1);
 /*!40000 ALTER TABLE `migrations` ENABLE KEYS */;
 DROP TABLE IF EXISTS `password_reset_tokens`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -296,8 +297,11 @@ CREATE TABLE `plans` (
   `billing_model` varchar(20) NOT NULL,
   `price` decimal(12,2) NOT NULL DEFAULT 0.00,
   `price_per_student` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `prices` text DEFAULT NULL,
   `setup_fee` decimal(12,2) NOT NULL DEFAULT 0.00,
   `trial_days` smallint(5) unsigned NOT NULL DEFAULT 14,
+  `cta_mode` varchar(20) NOT NULL DEFAULT 'trial',
+  `cta_label` varchar(60) DEFAULT NULL,
   `max_students` int(10) unsigned DEFAULT NULL,
   `max_staff` int(10) unsigned DEFAULT NULL,
   `max_branches` smallint(5) unsigned NOT NULL DEFAULT 1,
@@ -317,10 +321,10 @@ CREATE TABLE `plans` (
 
 /*!40000 ALTER TABLE `plans` DISABLE KEYS */;
 INSERT INTO `plans` VALUES
-(1,'Starter','starter','For small schools getting started',NULL,'monthly',4000.00,0.00,0.00,14,200,25,1,5,500,'[\"students\",\"admissions\",\"attendance\",\"fees\",\"exams\",\"communication\",\"certificates\",\"reports\"]',1,1,0,1,'2026-10-22 16:38:39','2026-10-22 16:38:39'),
-(2,'Standard','standard','Pay only for active students',NULL,'per_student',0.00,50.00,0.00,14,NULL,150,1,20,2000,'[\"students\",\"admissions\",\"attendance\",\"fees\",\"exams\",\"communication\",\"certificates\",\"reports\",\"timetable\",\"homework\",\"hr_payroll\",\"accounts\",\"library\",\"mobile_apps\"]',1,1,1,2,'2026-10-22 16:38:39','2026-10-22 16:38:39'),
-(3,'Premium','premium','Everything, for multi-campus schools',NULL,'yearly',150000.00,0.00,0.00,14,NULL,NULL,5,100,10000,'[\"students\",\"admissions\",\"attendance\",\"fees\",\"exams\",\"timetable\",\"homework\",\"lms\",\"communication\",\"hr_payroll\",\"accounts\",\"library\",\"transport\",\"hostel\",\"inventory\",\"certificates\",\"reports\",\"multi_branch\",\"mobile_apps\",\"ai\"]',1,1,0,3,'2026-10-22 16:38:39','2026-10-22 16:38:39'),
-(4,'Lifetime','lifetime','One-time license with yearly support',NULL,'lifetime',450000.00,0.00,0.00,14,NULL,NULL,3,50,0,'[\"students\",\"admissions\",\"attendance\",\"fees\",\"exams\",\"timetable\",\"homework\",\"lms\",\"communication\",\"hr_payroll\",\"accounts\",\"library\",\"transport\",\"hostel\",\"inventory\",\"certificates\",\"reports\",\"multi_branch\",\"mobile_apps\",\"ai\"]',1,0,0,4,'2026-10-22 16:38:39','2026-10-22 16:38:39');
+(1,'Starter','starter','For small schools getting started',NULL,'monthly',4000.00,0.00,NULL,0.00,14,'trial',NULL,200,25,1,5,500,'[\"students\",\"admissions\",\"attendance\",\"fees\",\"exams\",\"communication\",\"certificates\",\"reports\"]',1,1,0,1,'2026-10-22 18:39:56','2026-10-22 18:39:56'),
+(2,'Standard','standard','Pay only for active students',NULL,'per_student',0.00,50.00,NULL,0.00,14,'trial',NULL,NULL,150,1,20,2000,'[\"students\",\"admissions\",\"attendance\",\"fees\",\"exams\",\"communication\",\"certificates\",\"reports\",\"timetable\",\"homework\",\"hr_payroll\",\"accounts\",\"library\",\"mobile_apps\"]',1,1,1,2,'2026-10-22 18:39:56','2026-10-22 18:39:56'),
+(3,'Premium','premium','Everything, for multi-campus schools',NULL,'yearly',150000.00,0.00,NULL,0.00,14,'trial',NULL,NULL,NULL,5,100,10000,'[\"students\",\"admissions\",\"attendance\",\"fees\",\"exams\",\"timetable\",\"homework\",\"lms\",\"communication\",\"hr_payroll\",\"accounts\",\"library\",\"transport\",\"hostel\",\"inventory\",\"certificates\",\"reports\",\"multi_branch\",\"mobile_apps\",\"ai\"]',1,1,0,3,'2026-10-22 18:39:56','2026-10-22 18:39:56'),
+(4,'Lifetime','lifetime','One-time license with yearly support',NULL,'lifetime',450000.00,0.00,NULL,0.00,14,'trial',NULL,NULL,NULL,3,50,0,'[\"students\",\"admissions\",\"attendance\",\"fees\",\"exams\",\"timetable\",\"homework\",\"lms\",\"communication\",\"hr_payroll\",\"accounts\",\"library\",\"transport\",\"hostel\",\"inventory\",\"certificates\",\"reports\",\"multi_branch\",\"mobile_apps\",\"ai\"]',1,0,0,4,'2026-10-22 18:39:56','2026-10-22 18:39:56');
 /*!40000 ALTER TABLE `plans` ENABLE KEYS */;
 DROP TABLE IF EXISTS `platform_users`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -345,6 +349,60 @@ CREATE TABLE `platform_users` (
 
 /*!40000 ALTER TABLE `platform_users` DISABLE KEYS */;
 /*!40000 ALTER TABLE `platform_users` ENABLE KEYS */;
+DROP TABLE IF EXISTS `school_registrations`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `school_registrations` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `status` varchar(20) NOT NULL DEFAULT 'pending',
+  `school_name` varchar(150) NOT NULL,
+  `slug` varchar(60) NOT NULL,
+  `school_email` varchar(150) DEFAULT NULL,
+  `school_phone` varchar(30) DEFAULT NULL,
+  `school_address` varchar(255) DEFAULT NULL,
+  `city` varchar(80) DEFAULT NULL,
+  `country` varchar(80) DEFAULT NULL,
+  `currency` char(3) DEFAULT NULL,
+  `students` int(10) unsigned DEFAULT NULL,
+  `school_photo_path` varchar(255) DEFAULT NULL,
+  `principal_name` varchar(120) NOT NULL,
+  `principal_email` varchar(150) NOT NULL,
+  `principal_phone` varchar(30) NOT NULL,
+  `principal_national_id` varchar(40) DEFAULT NULL,
+  `principal_qualification` varchar(150) DEFAULT NULL,
+  `principal_address` varchar(255) DEFAULT NULL,
+  `principal_bio` text DEFAULT NULL,
+  `principal_photo_path` varchar(255) DEFAULT NULL,
+  `admin_password` varchar(255) NOT NULL,
+  `plan_id` bigint(20) unsigned DEFAULT NULL,
+  `billing_choice` varchar(20) NOT NULL DEFAULT 'trial',
+  `amount` decimal(12,2) DEFAULT NULL,
+  `amount_currency` char(3) DEFAULT NULL,
+  `payment_status` varchar(20) NOT NULL DEFAULT 'none',
+  `stripe_session_id` varchar(255) DEFAULT NULL,
+  `paid_at` timestamp NULL DEFAULT NULL,
+  `school_id` bigint(20) unsigned DEFAULT NULL,
+  `reviewed_by` bigint(20) unsigned DEFAULT NULL,
+  `reviewed_at` timestamp NULL DEFAULT NULL,
+  `rejection_reason` varchar(255) DEFAULT NULL,
+  `admin_notes` text DEFAULT NULL,
+  `ip_address` varchar(45) DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `school_registrations_plan_id_foreign` (`plan_id`),
+  KEY `school_registrations_school_id_foreign` (`school_id`),
+  KEY `school_registrations_reviewed_by_foreign` (`reviewed_by`),
+  KEY `school_registrations_status_index` (`status`),
+  KEY `school_registrations_stripe_session_id_index` (`stripe_session_id`),
+  CONSTRAINT `school_registrations_plan_id_foreign` FOREIGN KEY (`plan_id`) REFERENCES `plans` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `school_registrations_reviewed_by_foreign` FOREIGN KEY (`reviewed_by`) REFERENCES `platform_users` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `school_registrations_school_id_foreign` FOREIGN KEY (`school_id`) REFERENCES `schools` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+/*!40000 ALTER TABLE `school_registrations` DISABLE KEYS */;
+/*!40000 ALTER TABLE `school_registrations` ENABLE KEYS */;
 DROP TABLE IF EXISTS `schools`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8mb4 */;
@@ -357,9 +415,18 @@ CREATE TABLE `schools` (
   `city` varchar(255) DEFAULT NULL,
   `country` varchar(80) DEFAULT NULL,
   `currency` char(3) DEFAULT NULL,
+  `student_count` int(10) unsigned DEFAULT NULL,
   `address` varchar(255) DEFAULT NULL,
   `principal_name` varchar(255) DEFAULT NULL,
+  `principal_email` varchar(150) DEFAULT NULL,
+  `principal_phone` varchar(30) DEFAULT NULL,
+  `principal_national_id` varchar(40) DEFAULT NULL,
+  `principal_qualification` varchar(150) DEFAULT NULL,
+  `principal_address` varchar(255) DEFAULT NULL,
+  `principal_bio` text DEFAULT NULL,
+  `principal_photo_path` varchar(255) DEFAULT NULL,
   `logo_path` varchar(255) DEFAULT NULL,
+  `photo_path` varchar(255) DEFAULT NULL,
   `status` varchar(20) NOT NULL DEFAULT 'trial',
   `plan_id` bigint(20) unsigned DEFAULT NULL,
   `trial_ends_at` timestamp NULL DEFAULT NULL,

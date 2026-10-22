@@ -20,8 +20,8 @@ class SchoolProvisioner
 
     /**
      * @param  array{name:string, slug:string, email?:?string, phone?:?string, city?:?string, country?:?string, currency?:?string, address?:?string, principal_name?:?string, notes?:?string}  $school
-     * @param  array{name:string, email:string, password:string}  $admin
-     * @param  array{mode:string, trial_days?:?int, starts_at?:?string, amount?:?float, student_count?:?int, payment_status?:?string}  $billing
+     * @param  array{name:string, email:string, password:string}  $admin  password may be plain or already hashed (registrations)
+     * @param  array{mode:string, trial_days?:?int, starts_at?:?string, amount?:?float, student_count?:?int, payment_status?:?string, payment_method?:?string, payment_reference?:?string}  $billing
      */
     public function create(array $school, Plan $plan, array $admin, array $billing, ?int $createdBy = null): School
     {
@@ -30,7 +30,9 @@ class SchoolProvisioner
 
         return DB::transaction(function () use ($school, $plan, $admin, $billing, $createdBy, $isTrial, $trialDays) {
             $model = School::create(Arr::only($school, [
-                'name', 'slug', 'email', 'phone', 'city', 'country', 'currency', 'address', 'principal_name', 'notes',
+                'name', 'slug', 'email', 'phone', 'city', 'country', 'currency', 'address', 'notes', 'photo_path', 'student_count',
+                'principal_name', 'principal_email', 'principal_phone', 'principal_national_id', 'principal_qualification',
+                'principal_address', 'principal_bio', 'principal_photo_path',
             ]) + [
                 'plan_id' => $plan->id,
                 'status' => $isTrial ? SchoolStatus::Trial : SchoolStatus::Active,
@@ -55,6 +57,8 @@ class SchoolProvisioner
                     'student_count' => $billing['student_count'] ?? null,
                     'amount' => $billing['amount'] ?? null,
                     'payment_status' => $billing['payment_status'] ?? 'unpaid',
+                    'payment_method' => $billing['payment_method'] ?? null,
+                    'payment_reference' => $billing['payment_reference'] ?? null,
                 ], $createdBy);
             }
 

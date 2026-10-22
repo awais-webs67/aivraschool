@@ -30,7 +30,7 @@ return [
         'admin', 'login', 'logout', 'register', 'setup', 'install', 'demo-request', 'up', 'build',
         'storage', 'assets', 'api', 'app', 'www', 'mail', 'support', 'help', 'docs', 'blog',
         'status', 'billing', 'dashboard', 'demo', 'pricing', 'about', 'contact', 'terms', 'privacy',
-        'favicon', 'robots', 'skooline', 'aivrasol', 'test', 'staging', 'dev',
+        'favicon', 'robots', 'skooline', 'aivrasol', 'test', 'staging', 'dev', 'stripe', 'sitemap', 'images', 'fonts',
     ],
 
     /*

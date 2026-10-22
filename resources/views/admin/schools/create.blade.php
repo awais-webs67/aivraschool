@@ -8,7 +8,7 @@
         <div class="alert alert-info mb-6"><x-icon name="info" class="mt-px" /><p>Converting the lead from <span class="font-semibold">{{ $lead->name }}</span>. Check the details, then create the school.</p></div>
     @endif
 
-    <form method="POST" action="{{ route('admin.schools.store') }}" class="grid gap-6 xl:grid-cols-3">
+    <form method="POST" action="{{ route('admin.schools.store') }}" enctype="multipart/form-data" class="grid gap-6 xl:grid-cols-3">
         @csrf
         @if ($lead)<input type="hidden" name="lead_id" value="{{ $lead->id }}">@endif
         <div class="space-y-6 xl:col-span-2">
@@ -29,18 +29,25 @@
                             <p class="hint">School will sign in at <span class="font-medium text-ink">{{ $base }}<span data-preview-of="#slug" data-fallback="your-school"></span></span>. Lowercase letters, numbers and hyphens only.</p>
                         @enderror
                     </div>
-                    <x-form.input name="principal_name" label="Principal / owner name" />
                     <x-form.input name="email" type="email" label="School email" />
                     <x-form.input name="phone" type="tel" label="Phone" placeholder="Include country code" />
                     <x-form.input name="city" label="City" />
                     <x-form.input name="country" label="Country" />
                     <x-form.select name="currency" label="Fee currency" :value="\App\Models\Setting::currency()" :options="collect(config('currencies'))->mapWithKeys(fn ($c, $code) => [$code => $code.' — '.$c[0]])->all()" hint="The school can change this later in its profile." />
                     <x-form.input name="address" label="Address" class="sm:col-span-2" />
+                    <x-photo-input name="school_photo" label="School photo" hint="JPG, PNG or WebP, up to 2 MB." class="sm:col-span-2" />
                 </div>
             </section>
 
             <section class="card">
-                <div class="card-header"><h2 class="card-title">2. School admin login</h2></div>
+                <div class="card-header"><h2 class="card-title">2. Principal</h2></div>
+                <div class="card-body grid gap-5 sm:grid-cols-2">
+                    @include('admin.schools.partials.principal-fields', ['school' => null])
+                </div>
+            </section>
+
+            <section class="card">
+                <div class="card-header"><h2 class="card-title">3. School admin login</h2></div>
                 <div class="card-body grid gap-5 sm:grid-cols-2">
                     <x-form.input name="admin_name" label="Admin full name" required />
                     <x-form.input name="admin_email" type="email" label="Admin email (username)" required autocomplete="off" />
@@ -52,7 +59,7 @@
 
         <div class="space-y-6">
             <section class="card">
-                <div class="card-header"><h2 class="card-title">3. Plan & billing</h2></div>
+                <div class="card-header"><h2 class="card-title">4. Plan & billing</h2></div>
                 <div class="card-body space-y-5">
                     <x-form.select name="plan_id" label="Plan" required :options="$plans->mapWithKeys(fn ($p) => [$p->id => $p->name.' — '.$p->billingLabel()])" placeholder="Choose a plan" />
 

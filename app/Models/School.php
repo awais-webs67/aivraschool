@@ -25,7 +25,9 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $subscription_ends_at
  */
 #[Fillable([
-    'name', 'slug', 'email', 'phone', 'city', 'country', 'currency', 'address', 'principal_name', 'logo_path', 'status',
+    'name', 'slug', 'email', 'phone', 'city', 'country', 'currency', 'address', 'logo_path', 'photo_path', 'status', 'student_count',
+    'principal_name', 'principal_email', 'principal_phone', 'principal_national_id', 'principal_qualification',
+    'principal_address', 'principal_bio', 'principal_photo_path',
     'plan_id', 'trial_ends_at', 'subscription_ends_at', 'suspended_at', 'suspension_reason', 'notes',
 ])]
 class School extends Model

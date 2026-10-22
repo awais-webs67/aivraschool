@@ -6,6 +6,7 @@
         ],
         'Schools' => [
             ['admin.schools.index', 'admin.schools.*', 'building', 'Schools', 'schools.view'],
+            ['admin.registrations.index', 'admin.registrations.*', 'clipboard', 'Registrations', 'schools.manage'],
             ['admin.subscriptions.index', 'admin.subscriptions.*', 'credit-card', 'Billing & invoices', 'billing'],
             ['admin.plans.index', 'admin.plans.*', 'layers', 'Plans & pricing', 'plans'],
         ],
@@ -21,7 +22,7 @@
             ['admin.system', 'admin.system', 'cube', 'System', 'system'],
         ],
     ];
-    $badgeFor = ['admin.demo-requests.index' => 'leads', 'admin.tickets.index' => 'tickets'];
+    $badgeFor = ['admin.demo-requests.index' => 'leads', 'admin.tickets.index' => 'tickets', 'admin.registrations.index' => 'registrations'];
 @endphp
 <div class="flex h-full flex-col">
     <div class="flex h-16 shrink-0 items-center px-5">
