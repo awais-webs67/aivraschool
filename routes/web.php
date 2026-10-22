@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin;
 use App\Http\Controllers\Auth\AdminLoginController;
 use App\Http\Controllers\Auth\SetupController;
 use App\Http\Controllers\HomeController;
+use App\Http\Middleware\EnsureDatabaseIsUpToDate;
 use App\Http\Middleware\EnsurePlatformUserIsActive;
 use Illuminate\Support\Facades\Route;
 
@@ -32,7 +33,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('setup', [SetupController::class, 'store'])->name('setup.store');
     });
 
-    Route::middleware(['auth:web', EnsurePlatformUserIsActive::class])->group(function () {
+    Route::middleware(['auth:web', EnsurePlatformUserIsActive::class, EnsureDatabaseIsUpToDate::class])->group(function () {
         Route::post('logout', [AdminLoginController::class, 'destroy'])->name('logout');
 
         Route::get('/', Admin\DashboardController::class)->name('dashboard');

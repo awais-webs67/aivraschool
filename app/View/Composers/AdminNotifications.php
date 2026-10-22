@@ -7,6 +7,7 @@ use App\Models\DemoRequest;
 use App\Models\School;
 use App\Models\Subscription;
 use App\Models\SupportTicket;
+use App\Support\DatabaseStatus;
 use Illuminate\View\View;
 
 /**
@@ -18,7 +19,10 @@ class AdminNotifications
     {
         $user = auth('web')->user();
 
-        if (! $user) {
+        // Before "Run updates" the new tables may not exist yet; show no counts instead of crashing.
+        if (! $user || DatabaseStatus::isOutdated()) {
+            $view->with(['notifications' => [], 'notificationTotal' => 0, 'navBadges' => []]);
+
             return;
         }
 

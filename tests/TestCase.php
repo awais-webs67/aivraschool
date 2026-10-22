@@ -6,6 +6,7 @@ use App\Models\Plan;
 use App\Models\PlatformUser;
 use App\Models\School;
 use App\Services\SchoolProvisioner;
+use App\Support\DatabaseStatus;
 use App\Support\Tenancy\CurrentSchool;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 
@@ -14,6 +15,8 @@ abstract class TestCase extends BaseTestCase
     protected function setUp(): void
     {
         parent::setUp();
+
+        DatabaseStatus::forget(); // static per process; reset between tests
 
         $this->withoutVite();
     }

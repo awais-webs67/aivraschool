@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\School;
 use App\Http\Controllers\School\Setup;
+use App\Http\Middleware\EnsureDatabaseIsUpToDate;
 use App\Http\Middleware\EnsureSchoolCanAccess;
 use App\Http\Middleware\EnsureUserBelongsToSchool;
 use App\Http\Middleware\IdentifySchool;
@@ -19,7 +20,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::prefix('{school}')
     ->where(['school' => '[a-z0-9]+(?:-[a-z0-9]+)*'])
-    ->middleware([IdentifySchool::class, EnsureSchoolCanAccess::class, EnsureUserBelongsToSchool::class])
+    ->middleware([EnsureDatabaseIsUpToDate::class.':school', IdentifySchool::class, EnsureSchoolCanAccess::class, EnsureUserBelongsToSchool::class])
     ->name('school.')
     ->group(function () {
         Route::get('/', fn () => redirect()->route('school.dashboard'))->name('home');

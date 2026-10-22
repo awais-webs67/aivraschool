@@ -10,7 +10,9 @@ use App\Models\PlatformUser;
 use App\Models\Setting;
 use App\Models\Subscription;
 use App\Models\SupportTicket;
+use App\Support\DatabaseStatus;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 class SuperAdminToolsTest extends TestCase
@@ -230,5 +232,20 @@ class SuperAdminToolsTest extends TestCase
         Subscription::query()->update(['payment_status' => 'unpaid']);
 
         $this->get(route('admin.dashboard'))->assertSee('new demo requests')->assertSee('unpaid invoices');
+    }
+
+    public function test_outdated_database_sends_admin_to_run_updates(): void
+    {
+        $this->actingAs($this->superAdmin(), 'web');
+        $this->createSchool('greenfield');
+
+        // New code uploaded, newest migration not run yet.
+        DB::table('migrations')->orderByDesc('id')->limit(1)->delete();
+        DatabaseStatus::forget();
+
+        $this->get(route('admin.dashboard'))->assertRedirect(route('admin.system'));
+        $this->get(route('admin.schools.index'))->assertRedirect(route('admin.system'));
+        $this->get(route('admin.system'))->assertOk()->assertSee('Run updates');
+        $this->get($this->schoolUrl('greenfield', 'login'))->assertStatus(503)->assertSee('updating Skooline');
     }
 }
