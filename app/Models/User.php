@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Support\Facades\Schema;
 
 /**
  * A person using one school's portal (admin, principal, staff, teacher...).
@@ -60,6 +61,32 @@ class User extends Authenticatable
     public function allows(string $ability): bool
     {
         return SchoolAccess::allows($this, $ability);
+    }
+
+    /**
+     * Sections this user may take attendance / marks for: null means every section
+     * (principal, admin, vice principal); a teacher gets the sections they are class teacher of
+     * or teach in the timetable.
+     *
+     * @return list<int>|null
+     */
+    public function teachingSectionIds(): ?array
+    {
+        if ($this->allows('attendance.all')) {
+            return null;
+        }
+
+        $staffId = $this->staff?->id;
+        if (! $staffId) {
+            return [];
+        }
+
+        $ids = Section::query()->where('class_teacher_id', $staffId)->pluck('id');
+        if (class_exists(TimetableEntry::class) && Schema::hasTable('timetable_entries')) {
+            $ids = $ids->merge(TimetableEntry::query()->where('staff_id', $staffId)->pluck('section_id'));
+        }
+
+        return $ids->unique()->values()->all();
     }
 
     public function roleLabel(): string

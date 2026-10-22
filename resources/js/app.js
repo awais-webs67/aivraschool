@@ -521,6 +521,15 @@ if (conditionalBlocks.length) {
     refreshConditional();
 }
 
+// Attendance: <button data-set-all="present"> picks that status for every student in the form.
+document.addEventListener('click', (event) => {
+    const button = event.target.closest('[data-set-all]');
+    if (!button) return;
+    button.form?.querySelectorAll(`input[type="radio"][value="${button.dataset.setAll}"]`).forEach((radio) => {
+        radio.checked = true;
+    });
+});
+
 // "Tick all" box: <input type="checkbox" data-check-all="students[]"> ticks every box with that name in its form.
 document.addEventListener('change', (event) => {
     const master = event.target.closest('[data-check-all]');

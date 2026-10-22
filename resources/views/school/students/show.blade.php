@@ -50,7 +50,22 @@
         </div>
 
         <div class="space-y-6 xl:col-span-2">
-            @stack('student-summary')
+            <section class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Attendance</h2>
+                    <span class="text-xs text-muted">since {{ $attendance['since']->format('d M Y') }}</span>
+                </div>
+                <div class="card-body grid grid-cols-2 gap-4 text-center sm:grid-cols-4">
+                    <div><p class="font-display text-2xl {{ $attendance['percent'] !== null && $attendance['percent'] < 75 ? 'text-danger' : 'text-ink' }}">{{ $attendance['percent'] !== null ? $attendance['percent'].'%' : '—' }}</p><p class="text-xs text-muted">Attendance</p></div>
+                    <div><p class="font-display text-2xl text-success">{{ $attendance['present'] }}</p><p class="text-xs text-muted">Present</p></div>
+                    <div><p class="font-display text-2xl text-danger">{{ $attendance['absent'] }}</p><p class="text-xs text-muted">Absent</p></div>
+                    <div><p class="font-display text-2xl text-info">{{ $attendance['leave'] }}</p><p class="text-xs text-muted">Leave</p></div>
+                </div>
+                @if ($attendance['recentAbsences']->isNotEmpty())
+                    <p class="border-t border-line px-5 py-3 text-xs text-muted">Last absent: {{ $attendance['recentAbsences']->map(fn ($r) => $r->date->format('d M'))->join(', ') }}</p>
+                @endif
+            </section>
+            @includeIf('school.students._more', ['student' => $student])
 
             <section class="card">
                 <div class="card-header"><h2 class="card-title">Parents & guardian</h2></div>

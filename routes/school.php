@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\School;
+use App\Http\Controllers\School\Daily;
 use App\Http\Controllers\School\People;
 use App\Http\Controllers\School\Setup;
 use App\Http\Middleware\EnsureDatabaseIsUpToDate;
@@ -67,6 +68,22 @@ Route::prefix('{school}')
                 Route::get('support/{ticket}', [School\SupportController::class, 'show'])->name('support.show');
                 Route::post('support/{ticket}/reply', [School\SupportController::class, 'reply'])->name('support.reply');
             });
+
+            // Step 4: attendance and leave
+            Route::middleware('school.can:attendance.take')->group(function () {
+                Route::get('attendance', [Daily\AttendanceController::class, 'index'])->name('attendance.index');
+                Route::get('attendance/sections/{section}', [Daily\AttendanceController::class, 'mark'])->name('attendance.mark');
+                Route::post('attendance/sections/{section}', [Daily\AttendanceController::class, 'save'])->name('attendance.save');
+                Route::get('attendance/sections/{section}/register', [Daily\AttendanceController::class, 'register'])->name('attendance.register');
+            });
+            Route::middleware('school.can:staff.attendance')->group(function () {
+                Route::get('attendance/staff', [Daily\StaffAttendanceController::class, 'index'])->name('attendance.staff');
+                Route::post('attendance/staff', [Daily\StaffAttendanceController::class, 'save'])->name('attendance.staff.save');
+            });
+            Route::get('leave', [Daily\LeaveController::class, 'index'])->name('leave.index');
+            Route::post('leave', [Daily\LeaveController::class, 'store'])->name('leave.store');
+            Route::delete('leave/{leave}', [Daily\LeaveController::class, 'destroy'])->name('leave.destroy');
+            Route::post('leave/{leave}/review', [Daily\LeaveController::class, 'review'])->middleware('school.can:approvals')->name('leave.review');
 
             // Step 3: students and admissions
             Route::middleware('school.can:students.manage')->group(function () {

@@ -3,10 +3,13 @@
 namespace App\Http\Controllers\School\People;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\School\Daily\AttendanceController;
+use App\Models\AcademicSession;
 use App\Models\Enquiry;
 use App\Models\SchoolClass;
 use App\Models\Section;
 use App\Models\Student;
+use App\Models\StudentAttendance;
 use App\Support\Activity;
 use App\Support\Uploads;
 use Illuminate\Database\Eloquent\Builder;
@@ -95,9 +98,17 @@ class StudentController extends Controller
 
     public function show(Student $student): View
     {
+        $session = AcademicSession::current();
+        $since = $session?->starts_on ?? today()->subMonths(3);
+        $attendance = StudentAttendance::query()->where('student_id', $student->id)->whereDate('date', '>=', $since)->get();
+
         return view('school.students.show', [
             'student' => $student->load('schoolClass', 'section.classTeacher'),
             'siblings' => $student->siblings(),
+            'attendance' => AttendanceController::summarise($attendance) + [
+                'since' => $since,
+                'recentAbsences' => $attendance->where('status', 'absent')->sortByDesc('date')->take(5),
+            ],
         ]);
     }
 

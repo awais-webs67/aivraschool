@@ -1,6 +1,6 @@
 {
   "node_modules/qrcode-generator/qrcode.js": {
-    "file": "assets/qrcode-lym3vQ_f.js",
+    "file": "assets/qrcode-CgTSNu9Q.js",
     "name": "qrcode",
     "src": "node_modules/qrcode-generator/qrcode.js",
     "isDynamicEntry": true,
@@ -9,7 +9,7 @@
     ]
   },
   "resources/css/app.css": {
-    "file": "assets/app-CeWiGix0.css",
+    "file": "assets/app-BzAGLb6Q.css",
     "name": "app",
     "names": [
       "app.css"
@@ -90,7 +90,7 @@
     "src": "resources/fonts/plus-jakarta-sans-latin-ext-800-normal.woff2"
   },
   "resources/js/app.js": {
-    "file": "assets/app-Bsaj3zpn.js",
+    "file": "assets/app-r_dtsIGQ.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
