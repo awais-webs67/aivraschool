@@ -1,7 +1,7 @@
 # Skooline by AivraSol — Capacity Plan & Build Plan
 
 Companion to [`SCHOOL_ERP_FEATURES.md`](SCHOOL_ERP_FEATURES.md).
-Stack: **Laravel 13 (PHP 8.3+) + MySQL/MariaDB**, one database with `school_id` scoping (see [`ARCHITECTURE.md`](ARCHITECTURE.md)), Blade + Tailwind, database queue + cron on shared hosting (Redis/Horizon optional on a VPS), Flutter apps.
+Stack: **PHP 8.3 / Laravel 13 + MySQL**, one database with `school_id` (see [`ARCHITECTURE.md`](ARCHITECTURE.md)), Blade + Tailwind, database queue + one cron job. Runs on XAMPP and cPanel/hPanel.
 
 > **Update (v0.2):** the database-per-school design below was replaced by one shared database so Skooline installs on cPanel/hPanel. The capacity numbers still apply per school; at scale, large tables are partitioned by `school_id` and big schools can move to their own DB server.
 
@@ -38,9 +38,9 @@ An average school (300–500 students) creates roughly a third of this.
 
 | Stage | Schools | Setup | Est. cost/month |
 |---|---|---|---|
-| **Launch** | 1–50 | 1 app server (4 vCPU / 8 GB) + MySQL on a separate server (4 vCPU / 8 GB) + Redis. Files on R2/S3 | ~$60–120 |
+| **Launch** | 1–50 | Good cPanel/hPanel shared or cloud hosting plan | low |
 | **Growth** | 50–300 | 2 app servers behind a load balancer, dedicated queue worker server, MySQL 8 vCPU / 32 GB + read replica for reports | ~$250–500 |
-| **Scale** | 300–1,500 | 3+ app servers (auto-scale), 2–3 MySQL servers with schools distributed across them (stancl/tenancy lets each school point to a different DB host), Redis cluster | ~$800–2,000 |
+| **Scale** | 300–1,500 | 3+ app servers (auto-scale), bigger MySQL server, read replica for reports | ~$800–2,000 |
 | **Large** | 1,500+ | Same pattern: add MySQL servers. Big schools can get their own DB server (Enterprise plan) | scales with revenue |
 
 At launch, **one MySQL server can comfortably hold ~500–1,000 school databases** (with `table_open_cache` / `open_files_limit` tuned). After that, add another DB server. No code change is needed, only the tenant's DB host changes.
@@ -50,12 +50,12 @@ The estimated monthly costs are rough ballpark ranges and depend on the provider
 ### A.4 Rules that keep it fast (built in from day 1)
 1. **Indexes** on every foreign key and on common filters (`student_id + date`, `class_id + session_id`, `status + due_date`).
 2. **Pagination everywhere.** Never load "all students" into one page.
-3. **Heavy work in queues** (Horizon): bulk SMS/WhatsApp, 1,000 vouchers/report cards as PDF, Excel imports, reminders. The user never waits.
-4. **Caching** (Redis): dashboards, settings, permissions, timetables.
+3. **Heavy work in the background queue** (run by cron): bulk SMS/WhatsApp, 1,000 vouchers/report cards as PDF, Excel imports, reminders. The user never waits.
+4. **Caching** (database cache): dashboards, settings, permissions, timetables.
 5. **Reports on a read replica** once on the Growth stage.
 6. **Summary tables** for dashboards, e.g. daily attendance % per class and daily collection per head, updated by jobs. Dashboards don't re-count millions of rows.
 7. **Files on CDN** (Cloudflare R2/S3), signed URLs.
-8. **Monitoring**: Sentry for errors, slow-query log, Horizon metrics, uptime alerts.
+8. **Monitoring**: `storage/logs/laravel.log`, slow-query log, uptime alerts.
 9. **Backups**: nightly per-school DB dump to S3 (30-day retention) + binlog for point-in-time recovery.
 10. **Load test** before launch: simulate 200 schools × 50 concurrent users (k6 / JMeter).
 
@@ -65,26 +65,18 @@ The estimated monthly costs are rough ballpark ranges and depend on the provider
 
 **Principle:** build in the order that lets us **sell early**. The Super Admin and subscription system come first, because without them we can't onboard a school. Next come the modules a school pays for: students, fees, attendance and exams.
 
-Assumed team: 2 Laravel developers, 1 frontend (Livewire/Tailwind), 1 Flutter developer from Sprint 7, 1 QA (part-time), designer (part-time). 1 sprint = 2 weeks.
+Assumed team: 2 Laravel developers, 1 frontend (Blade/Tailwind), 1 QA (part-time), designer (part-time). 1 sprint = 2 weeks.
 
-### Phase 0 — Foundation (Sprints 1–2, weeks 1–4)
-| # | Task | Output |
-|---|---|---|
-| 0.1 | Laravel 13 project, Git flow, `.env` per environment (local / staging / production) | Repo skeleton |
-| 0.2 | CI: GitHub Actions running Pest tests, Larastan, Pint on every push | Quality gate |
-| 0.3 | **stancl/tenancy** setup: central DB + tenant DB per school, subdomain routing `{school}.skooline.com` | Multi-tenant core |
-| 0.4 | Auth: login, logout, forgot password (OTP via SMS/email), 2FA, rate limiting, device sessions | Secure login |
-| 0.5 | RBAC with spatie/laravel-permission: roles, permissions, custom roles | Access control |
-| 0.6 | **Design system**: Tailwind config with AivraSol tokens (`#FF5B35`, `#333F48`, `#191F24`…), Bebas Neue + Inter, components (buttons, inputs, tables, modals, cards, badges, alerts), app layout (sidebar, top bar, breadcrumbs) | UI kit |
-| 0.7 | Audit log (spatie/activitylog), file storage on S3/R2, queue + Horizon, Sentry | Infra |
-| 0.8 | Staging server + wildcard SSL (Cloudflare) | Live staging |
+### Phase 0 — Foundation ✅ done
+Laravel 13 project, one-database multi-school layer (`school_id`), platform and school logins, Skooline design system,
+SQL file for phpMyAdmin import, first-run Super Admin setup, CI (tests + Pint), Git auto-deploy, XAMPP and cPanel/hPanel support.
 
 ### Phase 1 — Super Admin & Subscriptions (Sprints 3–4, weeks 5–8)
 | # | Task |
 |---|---|
 | 1.1 | Super Admin panel layout (ink sidebar), dashboard: schools count, active/trial/expired, MRR, expiring soon |
 | 1.2 | **Plan builder**: name, price, billing cycle (monthly / quarterly / yearly / lifetime / per-student / hybrid), limits (students, staff, branches, storage, SMS), included modules |
-| 1.3 | **Add school wizard**: school info, logo, subdomain, plan, trial days → auto-create tenant DB, run migrations, seed defaults, create school admin, send credentials (email/SMS/WhatsApp) |
+| 1.3 | **Add school wizard**: school info, portal address, plan, trial days → create school, school admin and subscription; show credentials ✅ |
 | 1.4 | Module access middleware: a module not in the plan is hidden from the menu and its routes are blocked. Limits are enforced (e.g. can't add student #301 on a 300 plan) |
 | 1.5 | Subscription lifecycle: trial → active → grace period → read-only → suspended; renew, upgrade/downgrade with proration; scheduler for expiry + reminders |
 | 1.6 | Platform invoices & payments (manual bank/JazzCash entry first, online gateway later), invoice PDF, school ledger |
@@ -114,7 +106,7 @@ Assumed team: 2 Laravel developers, 1 frontend (Livewire/Tailwind), 1 Flutter de
 - Leave requests & approval
 - Absence alert job (SMS/WhatsApp/push to parent)
 - Reports: monthly register, class %, defaulters
-- **Flutter developer starts:** API (Sanctum) + Teacher app shell (login, attendance)
+- Teacher screens work well on phones (mobile-first attendance page)
 
 ### Phase 5 — Fees (Sprints 8–9, weeks 15–18) ★ most important for sales
 - Fee heads, fee structures per class, discounts (sibling, staff child, scholarship), approval
@@ -156,21 +148,17 @@ AI pack (remarks, question papers, at-risk students, WhatsApp assistant) · GPS 
 
 ---
 
-## Part C — What we build THIS WEEK (Sprint 1 start)
-1. Create Laravel 13 project in this repo, push to `main` via PR
-2. Install & configure: stancl/tenancy, spatie/laravel-permission, spatie/laravel-activitylog, Livewire 3, Tailwind, Pest, Larastan, Pint
-3. Central DB migrations: `plans`, `plan_features`, `tenants`, `domains`, `subscriptions`, `platform_users`
-4. Tailwind theme with AivraSol tokens + Skooline app layout (sidebar/top bar) + login page
-5. GitHub Actions CI
-6. Super Admin login + empty dashboard on staging
-
----
+## Part C — Next up
+1. **School setup:** academic sessions, classes, sections, subjects, school profile and logo
+2. **Students & admissions**
+3. **Attendance**
+4. **Fees & challans**
 
 ## Part D — Definition of Done (every feature)
 - Permission checked (policy) + module/plan check
 - Validated input (Form Requests), no raw SQL with user input
 - Tenant-safe (queued jobs/files scoped to the school)
-- Pest feature test for the happy path + permission denial
+- PHPUnit feature test for the happy path, permission denial and cross-school isolation
 - Works on mobile width, uses design-system components
 - Audit-logged if it changes money, marks or attendance
 - Code reviewed + CI green before merge

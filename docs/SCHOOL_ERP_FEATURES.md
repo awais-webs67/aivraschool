@@ -275,7 +275,7 @@ Every module below is toggleable by plan. ✅ = MVP, 🔷 = Phase 2, 🔶 = Phas
 - Photo/video gallery per event (parent app)
 
 ### 4.18 School Website & Online Presence 🔶
-- Built-in website builder (templates) on subdomain/custom domain
+- Built-in website builder (templates) on the school's Skooline address
 - Auto-sync: news, events, gallery, admissions form, results lookup
 
 ### 4.19 Alumni 🔶
@@ -320,8 +320,8 @@ All apps are published under the single **Skooline** brand; each school's logo/n
 
 - **Multi-tenancy:** one database, `school_id` on every school table, school resolved from the URL path. Runs on cPanel/hPanel shared hosting.
 - **Security:** OWASP top-10, encrypted passwords (argon2/bcrypt), encryption at rest for sensitive docs, signed URLs for files, rate limiting, audit logs, 2FA.
-- **Performance:** paginated APIs, caching (Redis), background jobs for bulk SMS/vouchers/report cards, CDN for files.
-- **Reliability:** daily automated backups + point-in-time recovery, per-tenant restore, monitoring & alerting (Sentry, uptime).
+- **Performance:** pagination, database indexes starting with `school_id`, database-backed cache, background jobs (via cron) for bulk SMS/vouchers/report cards.
+- **Reliability:** the hosting's daily backups plus phpMyAdmin exports before updates; error log in `storage/logs`.
 - **Offline/Weak internet:** PWA + mobile apps with offline attendance/marks sync.
 - **Localization:** English + Urdu (RTL), PKR first, multi-currency later.
 - **Printing:** pixel-accurate PDFs (vouchers, report cards, ID cards, certificates).
@@ -330,31 +330,23 @@ All apps are published under the single **Skooline** brand; each school's logo/n
 
 ---
 
-## 7. Tech Stack (PHP)
+## 7. Tech Stack (PHP + MySQL only)
 
-| Layer | Choice | Why |
-|---|---|---|
-| Language / Framework | **PHP 8.3+ / Laravel 13** | Mature, huge PK talent pool, fast to build ERP CRUD |
-| Multi-tenancy | Own `Support/Tenancy` layer (one DB + `school_id`) | Installs on any PHP host; isolation enforced by a fail-closed global scope and tests |
-| Central DB | MySQL 8 / MariaDB (or PostgreSQL) | Plans, tenants, subscriptions, platform invoices |
-| Auth & RBAC | Laravel Sanctum (API/mobile) + **spatie/laravel-permission** | Roles, permissions, scopes |
-| Feature flags / plan limits | Laravel Pennant + custom plan-limit middleware | Turn modules on/off per subscription |
-| Admin UI | **Blade + Livewire 3 + Alpine.js + Tailwind CSS** (or Filament 3 for Super Admin) | Fast server-rendered UI, no heavy SPA needed |
-| Queues & jobs | Redis + **Laravel Horizon** (tenant-aware jobs) | Bulk SMS/WhatsApp, voucher & report-card PDFs, reminders |
-| Scheduler | Laravel Scheduler (cron) | Subscription expiry, auto fines, daily reports |
-| PDFs | Browsershot (Chromium) or DomPDF/Snappy | Vouchers, report cards, ID cards, certificates |
-| Excel | **maatwebsite/excel** | Bulk import/export |
-| Audit log | spatie/laravel-activitylog | Who did what |
-| Backups | spatie/laravel-backup (per tenant DB → S3) | Daily + on-demand |
-| Files | S3-compatible (AWS S3 / Cloudflare R2 / Wasabi) | Photos, documents |
-| Mobile apps (Teacher / Parent / Student) | Flutter consuming the Laravel REST API | One codebase Android + iOS |
-| Payments | JazzCash, EasyPaisa, 1LINK 1Bill/1GO, Safepay/PayFast | Local collection + auto-reconcile |
-| Messaging | Local SMS aggregator API, Meta WhatsApp Cloud API, FCM push | |
-| Server | Nginx + PHP-FPM, Ubuntu VPS / AWS, Laravel Forge or Ploi, Cloudflare (wildcard SSL for subdomains) | |
-| Quality | Pest tests, Larastan (PHPStan), Laravel Pint, GitHub Actions CI | Production-grade code |
-| Monitoring | Sentry, Laravel Pulse/Telescope (staging), UptimeRobot | |
+Rule: everything must run on **XAMPP (localhost)** and **cPanel / hPanel shared hosting** with no extra services.
 
-**Tenancy notes:** queued jobs must carry the school id and run inside `$school->run(...)`; files go under `storage/app/schools/{id}`; one set of migrations covers everything.
+| Layer | Choice |
+|---|---|
+| Language / framework | **PHP 8.3+ / Laravel 13** |
+| Database | **One MySQL / MariaDB database**, school data separated by `school_id` (see `ARCHITECTURE.md`) |
+| Screens | **Blade templates + Tailwind CSS** (CSS is pre-built and committed) + a little plain JavaScript |
+| Login & roles | Laravel's built-in auth (separate login for Super Admin and for each school), roles stored in the database |
+| Background work | Database queue, run by **one cron job** (`php artisan schedule:run` every minute) |
+| PDFs (vouchers, report cards, ID cards) | **DomPDF** (pure PHP) |
+| Excel import/export | **PhpSpreadsheet** (pure PHP) |
+| Files | `storage/` folder on the same hosting |
+| Payments, SMS, WhatsApp | Called over HTTP from PHP (JazzCash, EasyPaisa, SMS gateway, WhatsApp Cloud API) |
+| Phones | The same website, mobile-friendly (installable as a web app). Native apps are a later, separate decision. |
+| Quality | PHPUnit tests + Laravel Pint, run by GitHub Actions on every push |
 
 ## 8. Core Data Model (high level)
 
@@ -431,7 +423,6 @@ Add-ons: SMS bundles, WhatsApp API, GPS, extra storage, data migration.
 1. Target market: Pakistan first, then UAE/UK/Australia (AivraSol's existing regions)?
 2. MySQL or PostgreSQL for tenant DBs?
 3. Which SMS aggregator & WhatsApp provider?
-4. Livewire-only admin, or Filament for Super Admin panel?
 
 ---
 
