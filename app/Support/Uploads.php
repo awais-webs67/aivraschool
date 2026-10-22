@@ -15,6 +15,9 @@ class Uploads
     /** Validation rules for a photo: JPG, PNG or WebP up to 2 MB. */
     public const PHOTO_RULES = ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'];
 
+    /** Validation rules for an attachment: PDF, Office files or images up to 5 MB. */
+    public const FILE_RULES = ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png,webp,doc,docx,xls,xlsx,ppt,pptx,txt', 'max:5120'];
+
     public static function store(?UploadedFile $file, string $folder): ?string
     {
         return $file ? $file->storeAs($folder, Str::random(32).'.'.$file->extension()) : null;

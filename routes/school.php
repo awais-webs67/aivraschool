@@ -71,6 +71,20 @@ Route::prefix('{school}')
                 Route::post('support/{ticket}/reply', [School\SupportController::class, 'reply'])->name('support.reply');
             });
 
+            // Step 7: homework / diary and notices
+            Route::middleware('school.can:homework')->group(function () {
+                Route::get('homework', [Academics\HomeworkController::class, 'index'])->name('homework.index');
+                Route::post('homework', [Academics\HomeworkController::class, 'store'])->name('homework.store');
+                Route::delete('homework/{homework}', [Academics\HomeworkController::class, 'destroy'])->name('homework.destroy');
+                Route::get('homework/{homework}/file', [Academics\HomeworkController::class, 'attachment'])->name('homework.file');
+            });
+            Route::get('notices', [Academics\NoticeController::class, 'index'])->name('notices.index');
+            Route::get('notices/{notice}/file', [Academics\NoticeController::class, 'attachment'])->name('notices.file');
+            Route::middleware('school.can:notices')->group(function () {
+                Route::post('notices', [Academics\NoticeController::class, 'store'])->name('notices.store');
+                Route::delete('notices/{notice}', [Academics\NoticeController::class, 'destroy'])->name('notices.destroy');
+            });
+
             // Step 6: timetable and substitution
             Route::get('timetable', [Academics\TimetableController::class, 'index'])->middleware('school.can:timetable.view')->name('timetable.index');
             Route::prefix('timetable')->name('timetable.')->middleware('school.can:timetable.manage')->group(function () {
