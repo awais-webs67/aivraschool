@@ -31,21 +31,17 @@ Blade + Tailwind CSS 4 + small vanilla JS (built assets committed). SQLite for l
 
 ## Local setup
 
+**XAMPP (htdocs + phpMyAdmin):** clone into `htdocs/aivraschool`, run `composer install`, import
+`database/skooline.sql` in phpMyAdmin, copy `.env.example` to `.env` and set `APP_URL` + `DB_*`,
+then open `http://localhost/aivraschool/admin`.
+
+**Or with PHP's built-in server (SQLite, no database setup):**
 ```bash
-composer install
-cp .env.example .env
-php artisan key:generate
-touch database/database.sqlite
-php artisan migrate --seed          # default plans + first Super Admin (password printed)
-npm install && npm run build
-php artisan serve
+composer run setup      # .env, database, plans, Super Admin and 2 demo schools
+php artisan serve       # http://localhost:8000
 ```
 
-- Website: http://localhost:8000
-- Super Admin: http://localhost:8000/admin
-- A school created with address `greenfield`: http://localhost:8000/greenfield
-
-Create more Super Admins with `php artisan skooline:create-admin you@aivrasol.com`.
+Step-by-step guide with logins: [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md#c-localhost-windows-macos-linux).
 
 ## Hosting (cPanel / hPanel)
 
