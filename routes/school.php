@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\School;
 use App\Http\Controllers\School\Daily;
+use App\Http\Controllers\School\Money;
 use App\Http\Controllers\School\People;
 use App\Http\Controllers\School\Setup;
 use App\Http\Middleware\EnsureDatabaseIsUpToDate;
@@ -67,6 +68,26 @@ Route::prefix('{school}')
                 Route::post('support', [School\SupportController::class, 'store'])->name('support.store');
                 Route::get('support/{ticket}', [School\SupportController::class, 'show'])->name('support.show');
                 Route::post('support/{ticket}/reply', [School\SupportController::class, 'reply'])->name('support.reply');
+            });
+
+            // Step 5: fees
+            Route::prefix('fees')->name('fees.')->middleware('school.can:fees.manage')->group(function () {
+                Route::get('/', [Money\FeeController::class, 'index'])->name('index');
+                Route::get('setup', [Money\FeeController::class, 'setup'])->name('setup');
+                Route::put('setup', [Money\FeeController::class, 'saveSetup'])->name('setup.save');
+                Route::post('heads', [Money\FeeController::class, 'storeHead'])->name('heads.store');
+                Route::delete('heads/{head}', [Money\FeeController::class, 'destroyHead'])->name('heads.destroy');
+                Route::get('generate', [Money\FeeController::class, 'generateForm'])->name('generate');
+                Route::post('generate', [Money\FeeController::class, 'generate'])->name('generate.store');
+                Route::get('vouchers', [Money\FeeController::class, 'invoices'])->name('invoices');
+                Route::get('vouchers/print', [Money\FeeController::class, 'print'])->name('print');
+                Route::post('vouchers/{invoice}/cancel', [Money\StudentFeeController::class, 'cancel'])->name('cancel');
+                Route::get('defaulters', [Money\FeeController::class, 'defaulters'])->name('defaulters');
+                Route::get('collect', [Money\StudentFeeController::class, 'search'])->name('search');
+                Route::get('students/{student}', [Money\StudentFeeController::class, 'show'])->name('student');
+                Route::post('students/{student}/collect', [Money\StudentFeeController::class, 'collect'])->name('collect');
+                Route::post('students/{student}/voucher', [Money\StudentFeeController::class, 'custom'])->name('custom');
+                Route::get('receipts/{receipt}', [Money\StudentFeeController::class, 'receipt'])->name('receipt');
             });
 
             // Step 4: attendance and leave

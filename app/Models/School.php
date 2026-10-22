@@ -28,7 +28,7 @@ use Illuminate\Support\Carbon;
     'name', 'slug', 'email', 'phone', 'city', 'country', 'currency', 'address', 'logo_path', 'photo_path', 'status', 'student_count',
     'principal_name', 'principal_email', 'principal_phone', 'principal_national_id', 'principal_qualification',
     'principal_address', 'principal_bio', 'principal_photo_path', 'ai_requests_limit',
-    'plan_id', 'trial_ends_at', 'subscription_ends_at', 'suspended_at', 'suspension_reason', 'notes', 'expiry_reminded_for',
+    'plan_id', 'trial_ends_at', 'subscription_ends_at', 'suspended_at', 'suspension_reason', 'notes', 'expiry_reminded_for', 'settings',
 ])]
 class School extends Model
 {
@@ -42,6 +42,7 @@ class School extends Model
             'trial_ends_at' => 'datetime',
             'subscription_ends_at' => 'datetime',
             'suspended_at' => 'datetime',
+            'settings' => 'array',
         ];
     }
 
@@ -157,5 +158,21 @@ class School extends Model
         $emails = array_values(array_unique(array_filter([$this->principal_email, $this->email])));
 
         return $emails ?: array_filter([User::withoutGlobalScopes()->where('school_id', $this->id)->where('role', 'admin')->value('email')]);
+    }
+
+    /** Per-school option from the settings column (e.g. "fees.due_day"). */
+    public function setting(string $key, mixed $default = null): mixed
+    {
+        return data_get($this->settings ?? [], $key, $default);
+    }
+
+    /** Saves options into the settings column (merged with what is already there). */
+    public function putSettings(array $values): void
+    {
+        $settings = $this->settings ?? [];
+        foreach ($values as $key => $value) {
+            data_set($settings, $key, $value);
+        }
+        $this->forceFill(['settings' => $settings])->save();
     }
 }

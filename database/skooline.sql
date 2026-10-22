@@ -131,7 +131,7 @@ CREATE TABLE `cache` (
 
 /*!40000 ALTER TABLE `cache` DISABLE KEYS */;
 INSERT INTO `cache` VALUES
-('skooline-cache-platform-settings','a:0:{}',2108059049);
+('skooline-cache-platform-settings','a:0:{}',2108059352);
 /*!40000 ALTER TABLE `cache` ENABLE KEYS */;
 DROP TABLE IF EXISTS `cache_locks`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -286,6 +286,134 @@ CREATE TABLE `failed_jobs` (
 
 /*!40000 ALTER TABLE `failed_jobs` DISABLE KEYS */;
 /*!40000 ALTER TABLE `failed_jobs` ENABLE KEYS */;
+DROP TABLE IF EXISTS `fee_heads`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `fee_heads` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `school_id` bigint(20) unsigned NOT NULL,
+  `name` varchar(80) NOT NULL,
+  `frequency` varchar(10) NOT NULL DEFAULT 'monthly',
+  `sort_order` smallint(5) unsigned NOT NULL DEFAULT 0,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `fee_heads_school_id_name_unique` (`school_id`,`name`),
+  CONSTRAINT `fee_heads_school_id_foreign` FOREIGN KEY (`school_id`) REFERENCES `schools` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+/*!40000 ALTER TABLE `fee_heads` DISABLE KEYS */;
+/*!40000 ALTER TABLE `fee_heads` ENABLE KEYS */;
+DROP TABLE IF EXISTS `fee_invoice_items`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `fee_invoice_items` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `fee_invoice_id` bigint(20) unsigned NOT NULL,
+  `fee_head_id` bigint(20) unsigned DEFAULT NULL,
+  `description` varchar(120) NOT NULL,
+  `amount` decimal(12,2) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `fee_invoice_items_fee_invoice_id_foreign` (`fee_invoice_id`),
+  KEY `fee_invoice_items_fee_head_id_foreign` (`fee_head_id`),
+  CONSTRAINT `fee_invoice_items_fee_head_id_foreign` FOREIGN KEY (`fee_head_id`) REFERENCES `fee_heads` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `fee_invoice_items_fee_invoice_id_foreign` FOREIGN KEY (`fee_invoice_id`) REFERENCES `fee_invoices` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+/*!40000 ALTER TABLE `fee_invoice_items` DISABLE KEYS */;
+/*!40000 ALTER TABLE `fee_invoice_items` ENABLE KEYS */;
+DROP TABLE IF EXISTS `fee_invoices`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `fee_invoices` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `school_id` bigint(20) unsigned NOT NULL,
+  `invoice_no` varchar(30) NOT NULL,
+  `student_id` bigint(20) unsigned NOT NULL,
+  `month` date DEFAULT NULL,
+  `title` varchar(120) NOT NULL,
+  `issue_date` date NOT NULL,
+  `due_date` date NOT NULL,
+  `subtotal` decimal(12,2) NOT NULL,
+  `discount` decimal(12,2) NOT NULL DEFAULT 0.00,
+  `fine` decimal(12,2) NOT NULL DEFAULT 0.00,
+  `total` decimal(12,2) NOT NULL,
+  `paid` decimal(12,2) NOT NULL DEFAULT 0.00,
+  `status` varchar(10) NOT NULL DEFAULT 'unpaid',
+  `notes` varchar(255) DEFAULT NULL,
+  `created_by` bigint(20) unsigned DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `fee_invoices_school_id_invoice_no_unique` (`school_id`,`invoice_no`),
+  KEY `fee_invoices_student_id_foreign` (`student_id`),
+  KEY `fee_invoices_created_by_foreign` (`created_by`),
+  KEY `fee_invoices_school_id_status_due_date_index` (`school_id`,`status`,`due_date`),
+  KEY `fee_invoices_school_id_student_id_month_index` (`school_id`,`student_id`,`month`),
+  CONSTRAINT `fee_invoices_created_by_foreign` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `fee_invoices_school_id_foreign` FOREIGN KEY (`school_id`) REFERENCES `schools` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fee_invoices_student_id_foreign` FOREIGN KEY (`student_id`) REFERENCES `students` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+/*!40000 ALTER TABLE `fee_invoices` DISABLE KEYS */;
+/*!40000 ALTER TABLE `fee_invoices` ENABLE KEYS */;
+DROP TABLE IF EXISTS `fee_payments`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `fee_payments` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `school_id` bigint(20) unsigned NOT NULL,
+  `receipt_no` varchar(30) NOT NULL,
+  `fee_invoice_id` bigint(20) unsigned NOT NULL,
+  `student_id` bigint(20) unsigned NOT NULL,
+  `amount` decimal(12,2) NOT NULL,
+  `method` varchar(20) NOT NULL DEFAULT 'cash',
+  `reference` varchar(80) DEFAULT NULL,
+  `paid_on` date NOT NULL,
+  `received_by` bigint(20) unsigned DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `fee_payments_fee_invoice_id_foreign` (`fee_invoice_id`),
+  KEY `fee_payments_student_id_foreign` (`student_id`),
+  KEY `fee_payments_received_by_foreign` (`received_by`),
+  KEY `fee_payments_school_id_paid_on_index` (`school_id`,`paid_on`),
+  KEY `fee_payments_school_id_receipt_no_index` (`school_id`,`receipt_no`),
+  CONSTRAINT `fee_payments_fee_invoice_id_foreign` FOREIGN KEY (`fee_invoice_id`) REFERENCES `fee_invoices` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fee_payments_received_by_foreign` FOREIGN KEY (`received_by`) REFERENCES `users` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `fee_payments_school_id_foreign` FOREIGN KEY (`school_id`) REFERENCES `schools` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fee_payments_student_id_foreign` FOREIGN KEY (`student_id`) REFERENCES `students` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+/*!40000 ALTER TABLE `fee_payments` DISABLE KEYS */;
+/*!40000 ALTER TABLE `fee_payments` ENABLE KEYS */;
+DROP TABLE IF EXISTS `fee_structures`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `fee_structures` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `school_id` bigint(20) unsigned NOT NULL,
+  `class_id` bigint(20) unsigned NOT NULL,
+  `fee_head_id` bigint(20) unsigned NOT NULL,
+  `amount` decimal(12,2) NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `fee_structures_class_id_fee_head_id_unique` (`class_id`,`fee_head_id`),
+  KEY `fee_structures_school_id_foreign` (`school_id`),
+  KEY `fee_structures_fee_head_id_foreign` (`fee_head_id`),
+  CONSTRAINT `fee_structures_class_id_foreign` FOREIGN KEY (`class_id`) REFERENCES `classes` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fee_structures_fee_head_id_foreign` FOREIGN KEY (`fee_head_id`) REFERENCES `fee_heads` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fee_structures_school_id_foreign` FOREIGN KEY (`school_id`) REFERENCES `schools` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+/*!40000 ALTER TABLE `fee_structures` DISABLE KEYS */;
+/*!40000 ALTER TABLE `fee_structures` ENABLE KEYS */;
 DROP TABLE IF EXISTS `job_batches`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8mb4 */;
@@ -363,7 +491,7 @@ CREATE TABLE `migrations` (
   `migration` varchar(255) NOT NULL,
   `batch` int(11) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 /*!40000 ALTER TABLE `migrations` DISABLE KEYS */;
@@ -387,7 +515,8 @@ INSERT INTO `migrations` VALUES
 (17,'2026_08_01_000001_add_billing_extras',1),
 (18,'2026_09_01_000001_create_staff_table',1),
 (19,'2026_09_02_000001_create_students_and_enquiries',1),
-(20,'2026_09_03_000001_create_attendance_and_leave',1);
+(20,'2026_09_03_000001_create_attendance_and_leave',1),
+(21,'2026_09_04_000001_create_fees_tables',1);
 /*!40000 ALTER TABLE `migrations` ENABLE KEYS */;
 DROP TABLE IF EXISTS `password_reset_tokens`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -439,10 +568,10 @@ CREATE TABLE `plans` (
 
 /*!40000 ALTER TABLE `plans` DISABLE KEYS */;
 INSERT INTO `plans` VALUES
-(1,'Starter','starter','For small schools getting started',NULL,'monthly',4000.00,0.00,NULL,0.00,14,'trial',NULL,200,25,1,5,500,0,'[\"students\",\"admissions\",\"attendance\",\"fees\",\"exams\",\"communication\",\"certificates\",\"reports\"]',1,1,0,1,'2026-10-22 19:57:29','2026-10-22 19:57:29'),
-(2,'Standard','standard','Pay only for active students',NULL,'per_student',0.00,50.00,NULL,0.00,14,'trial',NULL,NULL,150,1,20,2000,0,'[\"students\",\"admissions\",\"attendance\",\"fees\",\"exams\",\"communication\",\"certificates\",\"reports\",\"timetable\",\"homework\",\"hr_payroll\",\"accounts\",\"library\",\"mobile_apps\"]',1,1,1,2,'2026-10-22 19:57:29','2026-10-22 19:57:29'),
-(3,'Premium','premium','Everything, for multi-campus schools',NULL,'yearly',150000.00,0.00,NULL,0.00,14,'trial',NULL,NULL,NULL,5,100,10000,0,'[\"students\",\"admissions\",\"attendance\",\"fees\",\"exams\",\"timetable\",\"homework\",\"lms\",\"communication\",\"hr_payroll\",\"accounts\",\"library\",\"transport\",\"hostel\",\"inventory\",\"certificates\",\"reports\",\"multi_branch\",\"mobile_apps\",\"ai\"]',1,1,0,3,'2026-10-22 19:57:29','2026-10-22 19:57:29'),
-(4,'Lifetime','lifetime','One-time license with yearly support',NULL,'lifetime',450000.00,0.00,NULL,0.00,14,'trial',NULL,NULL,NULL,3,50,0,0,'[\"students\",\"admissions\",\"attendance\",\"fees\",\"exams\",\"timetable\",\"homework\",\"lms\",\"communication\",\"hr_payroll\",\"accounts\",\"library\",\"transport\",\"hostel\",\"inventory\",\"certificates\",\"reports\",\"multi_branch\",\"mobile_apps\",\"ai\"]',1,0,0,4,'2026-10-22 19:57:29','2026-10-22 19:57:29');
+(1,'Starter','starter','For small schools getting started',NULL,'monthly',4000.00,0.00,NULL,0.00,14,'trial',NULL,200,25,1,5,500,0,'[\"students\",\"admissions\",\"attendance\",\"fees\",\"exams\",\"communication\",\"certificates\",\"reports\"]',1,1,0,1,'2026-10-22 20:02:32','2026-10-22 20:02:32'),
+(2,'Standard','standard','Pay only for active students',NULL,'per_student',0.00,50.00,NULL,0.00,14,'trial',NULL,NULL,150,1,20,2000,0,'[\"students\",\"admissions\",\"attendance\",\"fees\",\"exams\",\"communication\",\"certificates\",\"reports\",\"timetable\",\"homework\",\"hr_payroll\",\"accounts\",\"library\",\"mobile_apps\"]',1,1,1,2,'2026-10-22 20:02:32','2026-10-22 20:02:32'),
+(3,'Premium','premium','Everything, for multi-campus schools',NULL,'yearly',150000.00,0.00,NULL,0.00,14,'trial',NULL,NULL,NULL,5,100,10000,0,'[\"students\",\"admissions\",\"attendance\",\"fees\",\"exams\",\"timetable\",\"homework\",\"lms\",\"communication\",\"hr_payroll\",\"accounts\",\"library\",\"transport\",\"hostel\",\"inventory\",\"certificates\",\"reports\",\"multi_branch\",\"mobile_apps\",\"ai\"]',1,1,0,3,'2026-10-22 20:02:32','2026-10-22 20:02:32'),
+(4,'Lifetime','lifetime','One-time license with yearly support',NULL,'lifetime',450000.00,0.00,NULL,0.00,14,'trial',NULL,NULL,NULL,3,50,0,0,'[\"students\",\"admissions\",\"attendance\",\"fees\",\"exams\",\"timetable\",\"homework\",\"lms\",\"communication\",\"hr_payroll\",\"accounts\",\"library\",\"transport\",\"hostel\",\"inventory\",\"certificates\",\"reports\",\"multi_branch\",\"mobile_apps\",\"ai\"]',1,0,0,4,'2026-10-22 20:02:32','2026-10-22 20:02:32');
 /*!40000 ALTER TABLE `plans` ENABLE KEYS */;
 DROP TABLE IF EXISTS `platform_users`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -581,6 +710,7 @@ CREATE TABLE `schools` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `expiry_reminded_for` varchar(30) DEFAULT NULL,
+  `settings` json DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `schools_slug_unique` (`slug`),
   KEY `schools_plan_id_foreign` (`plan_id`),
