@@ -162,9 +162,10 @@ class SchoolRegistrationTest extends TestCase
         EnvFile::set(['STRIPE_SECRET' => 'sk_test_x']);
         $plan = Plan::factory()->create(['slug' => 'pro', 'billing_model' => 'monthly', 'price' => 8000, 'prices' => ['USD' => 29], 'cta_mode' => 'stripe', 'show_on_website' => true]);
 
+        // Stripe answers with the registration id we sent as client_reference_id (ids differ per database).
         Http::fake([
             'api.stripe.com/v1/checkout/sessions' => Http::response(['id' => 'cs_test_1', 'url' => 'https://checkout.stripe.com/pay/cs_test_1']),
-            'api.stripe.com/v1/checkout/sessions/cs_test_1' => Http::response(['id' => 'cs_test_1', 'payment_status' => 'paid', 'client_reference_id' => '1']),
+            'api.stripe.com/v1/checkout/sessions/cs_test_1' => fn () => Http::response(['id' => 'cs_test_1', 'payment_status' => 'paid', 'client_reference_id' => (string) SchoolRegistration::value('id')]),
         ]);
 
         $this->post(route('register.store'), $this->form(['plan_id' => $plan->id]))->assertRedirect('https://checkout.stripe.com/pay/cs_test_1');
