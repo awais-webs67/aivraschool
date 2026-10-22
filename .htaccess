@@ -1,0 +1,14 @@
+# Used only when the web server's document root is the project folder itself
+# (e.g. the repo cloned straight into Hostinger's public_html). Everything is
+# served from /public, so app code, .env and vendor are never reachable.
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    RewriteCond %{REQUEST_URI} !^/public/
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>
+
+# Extra safety in case mod_rewrite is unavailable
+<FilesMatch "^\.">
+    Require all denied
+</FilesMatch>

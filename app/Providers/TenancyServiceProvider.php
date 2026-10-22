@@ -103,6 +103,10 @@ class TenancyServiceProvider extends ServiceProvider
         $this->bootEvents();
         $this->mapRoutes();
 
+        // An address that doesn't belong to any school shows a plain 404 page.
+        Middleware\InitializeTenancyByDomain::$onFail = fn () => abort(404);
+        Middleware\InitializeTenancyBySubdomain::$onFail = fn () => abort(404);
+
         $this->makeTenancyMiddlewareHighestPriority();
     }
 

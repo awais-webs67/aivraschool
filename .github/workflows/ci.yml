@@ -33,6 +33,10 @@ jobs:
           npm ci
           npm run build
 
+      # Built assets are committed so hosting without Node.js works; make sure they're current.
+      - name: Check committed assets are up to date
+        run: git diff --exit-code -- public/build || (echo "Run 'npm run build' and commit public/build" && exit 1)
+
       - name: Prepare environment
         run: |
           cp .env.example .env

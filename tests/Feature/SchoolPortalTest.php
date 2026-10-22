@@ -6,7 +6,6 @@ use App\Enums\SchoolStatus;
 use App\Models\School;
 use App\Models\School\User as SchoolUser;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Stancl\Tenancy\Exceptions\TenantCouldNotBeIdentifiedOnDomainException;
 use Tests\TestCase;
 
 class SchoolPortalTest extends TestCase
@@ -47,10 +46,7 @@ class SchoolPortalTest extends TestCase
 
     public function test_unknown_subdomain_is_not_found(): void
     {
-        $this->withoutExceptionHandling();
-        $this->expectException(TenantCouldNotBeIdentifiedOnDomainException::class);
-
-        $this->get($this->schoolUrl('nope', 'login'));
+        $this->get($this->schoolUrl('nope', 'login'))->assertNotFound();
     }
 
     public function test_school_routes_are_not_served_on_the_central_domain(): void
