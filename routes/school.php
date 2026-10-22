@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\School;
+use App\Http\Controllers\School\Academics;
 use App\Http\Controllers\School\Daily;
 use App\Http\Controllers\School\Money;
 use App\Http\Controllers\School\People;
@@ -68,6 +69,20 @@ Route::prefix('{school}')
                 Route::post('support', [School\SupportController::class, 'store'])->name('support.store');
                 Route::get('support/{ticket}', [School\SupportController::class, 'show'])->name('support.show');
                 Route::post('support/{ticket}/reply', [School\SupportController::class, 'reply'])->name('support.reply');
+            });
+
+            // Step 6: timetable and substitution
+            Route::get('timetable', [Academics\TimetableController::class, 'index'])->middleware('school.can:timetable.view')->name('timetable.index');
+            Route::prefix('timetable')->name('timetable.')->middleware('school.can:timetable.manage')->group(function () {
+                Route::get('periods', [Academics\TimetableController::class, 'periods'])->name('periods');
+                Route::post('periods', [Academics\TimetableController::class, 'storePeriod'])->name('periods.store');
+                Route::post('periods/standard', [Academics\TimetableController::class, 'standardPeriods'])->name('periods.standard');
+                Route::put('days', [Academics\TimetableController::class, 'saveDays'])->name('days');
+                Route::delete('periods/{period}', [Academics\TimetableController::class, 'destroyPeriod'])->name('periods.destroy');
+                Route::get('sections/{section}/edit', [Academics\TimetableController::class, 'edit'])->name('edit');
+                Route::put('sections/{section}', [Academics\TimetableController::class, 'update'])->name('update');
+                Route::get('substitutions', [Academics\SubstitutionController::class, 'index'])->name('substitutions');
+                Route::post('substitutions', [Academics\SubstitutionController::class, 'store'])->name('substitutions.store');
             });
 
             // Step 5: fees

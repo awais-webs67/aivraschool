@@ -10,7 +10,6 @@ use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Support\Facades\Schema;
 
 /**
  * A person using one school's portal (admin, principal, staff, teacher...).
@@ -81,12 +80,9 @@ class User extends Authenticatable
             return [];
         }
 
-        $ids = Section::query()->where('class_teacher_id', $staffId)->pluck('id');
-        if (class_exists(TimetableEntry::class) && Schema::hasTable('timetable_entries')) {
-            $ids = $ids->merge(TimetableEntry::query()->where('staff_id', $staffId)->pluck('section_id'));
-        }
-
-        return $ids->unique()->values()->all();
+        return Section::query()->where('class_teacher_id', $staffId)->pluck('id')
+            ->merge(TimetableEntry::query()->where('staff_id', $staffId)->pluck('section_id'))
+            ->unique()->values()->all();
     }
 
     public function roleLabel(): string
