@@ -20,7 +20,7 @@ class SchoolAccess
         'setup' => ['roles' => self::LEADERS, 'module' => null],
         'staff.manage' => ['roles' => self::LEADERS, 'module' => null],
         'approvals' => ['roles' => self::LEADERS, 'module' => null],
-        'reports' => ['roles' => [...self::ACADEMIC, 'accountant'], 'module' => null],
+        'reports' => ['roles' => [...self::ACADEMIC, 'accountant'], 'module' => 'reports'],
 
         'students.view' => ['roles' => [...self::ACADEMIC, 'teacher', 'accountant', 'receptionist'], 'module' => 'students'],
         'students.manage' => ['roles' => [...self::LEADERS, 'receptionist'], 'module' => 'students'],

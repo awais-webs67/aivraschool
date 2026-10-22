@@ -2,6 +2,7 @@
 
 namespace App\Support;
 
+use App\Http\Controllers\School\ApprovalController;
 use App\Models\School;
 use App\Models\User;
 use Illuminate\Support\Facades\Route;
@@ -65,7 +66,8 @@ class SchoolMenu
                     && ($route !== 'school.ai.index' || $school->aiMonthlyLimit() > 0);
 
                 if ($visible) {
-                    $menu[$section][] = compact('route', 'active', 'icon', 'label');
+                    $count = $route === 'school.approvals' ? ApprovalController::waiting() : 0;
+                    $menu[$section][] = compact('route', 'active', 'icon', 'label', 'count');
                 }
             }
         }

@@ -72,6 +72,13 @@ Route::prefix('{school}')
                 Route::post('support/{ticket}/reply', [School\SupportController::class, 'reply'])->name('support.reply');
             });
 
+            // Step 10: approvals inbox and reports
+            Route::get('approvals', School\ApprovalController::class)->middleware('school.can:approvals')->name('approvals');
+            Route::middleware('school.can:reports')->group(function () {
+                Route::get('reports', [School\ReportController::class, 'index'])->name('reports.index');
+                Route::get('reports/{report}', [School\ReportController::class, 'show'])->name('reports.show');
+            });
+
             // Step 9: discipline, observations, certificates & ID cards, front office
             Route::middleware('school.can:discipline')->group(function () {
                 Route::get('discipline', [Office\DisciplineController::class, 'index'])->name('discipline.index');

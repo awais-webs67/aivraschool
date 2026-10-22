@@ -6,6 +6,7 @@ use App\Support\Tenancy\BelongsToSchool;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /** A lesson in the weekly timetable. */
 #[Fillable(['section_id', 'day', 'period_id', 'subject_id', 'staff_id', 'room'])]
@@ -36,6 +37,11 @@ class TimetableEntry extends Model
     public function subject(): BelongsTo
     {
         return $this->belongsTo(Subject::class);
+    }
+
+    public function substitutions(): HasMany
+    {
+        return $this->hasMany(Substitution::class);
     }
 
     public function staff(): BelongsTo

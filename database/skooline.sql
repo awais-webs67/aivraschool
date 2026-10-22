@@ -131,7 +131,7 @@ CREATE TABLE `cache` (
 
 /*!40000 ALTER TABLE `cache` DISABLE KEYS */;
 INSERT INTO `cache` VALUES
-('skooline-cache-platform-settings','a:0:{}',2108060188);
+('skooline-cache-platform-settings','a:0:{}',2108060395);
 /*!40000 ALTER TABLE `cache` ENABLE KEYS */;
 DROP TABLE IF EXISTS `cache_locks`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -853,10 +853,10 @@ CREATE TABLE `plans` (
 
 /*!40000 ALTER TABLE `plans` DISABLE KEYS */;
 INSERT INTO `plans` VALUES
-(1,'Starter','starter','For small schools getting started',NULL,'monthly',4000.00,0.00,NULL,0.00,14,'trial',NULL,200,25,1,5,500,0,'[\"students\",\"admissions\",\"attendance\",\"fees\",\"exams\",\"communication\",\"certificates\",\"reports\"]',1,1,0,1,'2026-10-22 20:16:28','2026-10-22 20:16:28'),
-(2,'Standard','standard','Pay only for active students',NULL,'per_student',0.00,50.00,NULL,0.00,14,'trial',NULL,NULL,150,1,20,2000,0,'[\"students\",\"admissions\",\"attendance\",\"fees\",\"exams\",\"communication\",\"certificates\",\"reports\",\"timetable\",\"homework\",\"hr_payroll\",\"accounts\",\"library\",\"mobile_apps\"]',1,1,1,2,'2026-10-22 20:16:28','2026-10-22 20:16:28'),
-(3,'Premium','premium','Everything, for multi-campus schools',NULL,'yearly',150000.00,0.00,NULL,0.00,14,'trial',NULL,NULL,NULL,5,100,10000,0,'[\"students\",\"admissions\",\"attendance\",\"fees\",\"exams\",\"timetable\",\"homework\",\"lms\",\"communication\",\"hr_payroll\",\"accounts\",\"library\",\"transport\",\"hostel\",\"inventory\",\"certificates\",\"reports\",\"multi_branch\",\"mobile_apps\",\"ai\"]',1,1,0,3,'2026-10-22 20:16:28','2026-10-22 20:16:28'),
-(4,'Lifetime','lifetime','One-time license with yearly support',NULL,'lifetime',450000.00,0.00,NULL,0.00,14,'trial',NULL,NULL,NULL,3,50,0,0,'[\"students\",\"admissions\",\"attendance\",\"fees\",\"exams\",\"timetable\",\"homework\",\"lms\",\"communication\",\"hr_payroll\",\"accounts\",\"library\",\"transport\",\"hostel\",\"inventory\",\"certificates\",\"reports\",\"multi_branch\",\"mobile_apps\",\"ai\"]',1,0,0,4,'2026-10-22 20:16:28','2026-10-22 20:16:28');
+(1,'Starter','starter','For small schools getting started',NULL,'monthly',4000.00,0.00,NULL,0.00,14,'trial',NULL,200,25,1,5,500,0,'[\"students\",\"admissions\",\"attendance\",\"fees\",\"exams\",\"communication\",\"certificates\",\"reports\"]',1,1,0,1,'2026-10-22 20:19:55','2026-10-22 20:19:55'),
+(2,'Standard','standard','Pay only for active students',NULL,'per_student',0.00,50.00,NULL,0.00,14,'trial',NULL,NULL,150,1,20,2000,0,'[\"students\",\"admissions\",\"attendance\",\"fees\",\"exams\",\"communication\",\"certificates\",\"reports\",\"timetable\",\"homework\",\"hr_payroll\",\"accounts\",\"library\",\"mobile_apps\"]',1,1,1,2,'2026-10-22 20:19:55','2026-10-22 20:19:55'),
+(3,'Premium','premium','Everything, for multi-campus schools',NULL,'yearly',150000.00,0.00,NULL,0.00,14,'trial',NULL,NULL,NULL,5,100,10000,0,'[\"students\",\"admissions\",\"attendance\",\"fees\",\"exams\",\"timetable\",\"homework\",\"lms\",\"communication\",\"hr_payroll\",\"accounts\",\"library\",\"transport\",\"hostel\",\"inventory\",\"certificates\",\"reports\",\"multi_branch\",\"mobile_apps\",\"ai\"]',1,1,0,3,'2026-10-22 20:19:55','2026-10-22 20:19:55'),
+(4,'Lifetime','lifetime','One-time license with yearly support',NULL,'lifetime',450000.00,0.00,NULL,0.00,14,'trial',NULL,NULL,NULL,3,50,0,0,'[\"students\",\"admissions\",\"attendance\",\"fees\",\"exams\",\"timetable\",\"homework\",\"lms\",\"communication\",\"hr_payroll\",\"accounts\",\"library\",\"transport\",\"hostel\",\"inventory\",\"certificates\",\"reports\",\"multi_branch\",\"mobile_apps\",\"ai\"]',1,0,0,4,'2026-10-22 20:19:55','2026-10-22 20:19:55');
 /*!40000 ALTER TABLE `plans` ENABLE KEYS */;
 DROP TABLE IF EXISTS `platform_users`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;

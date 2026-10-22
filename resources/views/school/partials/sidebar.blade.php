@@ -12,6 +12,7 @@
             @foreach ($items as $item)
                 <a href="{{ route($item['route']) }}" class="nav-link" @if (request()->routeIs($item['active'])) aria-current="page" @endif>
                     <x-icon :name="$item['icon']" /> <span class="truncate">{{ $item['label'] }}</span>
+                    @if ($item['count'])<span class="ml-auto rounded-full bg-brand px-1.5 text-[10px] leading-5 font-bold text-white">{{ $item['count'] }}</span>@endif
                     @if ($item['route'] === 'school.ai.index')<span class="ml-auto rounded-full bg-brand/90 px-1.5 text-[10px] leading-5 font-bold text-white">AI</span>@endif
                 </a>
             @endforeach
